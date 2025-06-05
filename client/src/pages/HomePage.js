@@ -45,7 +45,7 @@ const HomePage = () => {
                 Express your unique style with our high-quality t-shirts and personalized designs.
               </p>
               <div className="flex flex-wrap gap-4">
-                <Link to="/products" className="btn-primary">
+                <Link to="/products" className="bg-white text-gray-900 px-6 py-3 rounded-md font-medium hover:bg-gray-100 transition-colors">
                   Shop Collection
                 </Link>
                 <Link to="/custom-design" className="btn-accent">
