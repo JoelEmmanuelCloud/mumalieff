@@ -56,9 +56,15 @@ export const getWishlist = async () => {
   return response.data;
 };
 
-// Admin: Get all users
-export const getUsers = async (pageNumber = 1) => {
-  const response = await api.get(`/users?pageNumber=${pageNumber}`);
+// Admin: Get all users with search support
+export const getUsers = async (pageNumber = 1, keyword = '') => {
+  let url = `/users?pageNumber=${pageNumber}`;
+  
+  if (keyword) {
+    url += `&keyword=${keyword}`;
+  }
+  
+  const response = await api.get(url);
   return response.data;
 };
 

@@ -52,7 +52,6 @@ app.use('/api/admin', adminRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
-// Add this temporary code to your server.js or index.js (main Express file)
 // This will help diagnose route registration issues
 
 // At the end of your route registrations, but before app.listen():
