@@ -37,10 +37,14 @@ const userSchema = mongoose.Schema(
       required: true,
       default: false,
     },
+    isActive: {
+      type: Boolean,
+      default: true, // Add this field
+    },
     requirePasswordChange: {
-        type: Boolean,
-        default: false,
-      },
+      type: Boolean,
+      default: false,
+    },
     shippingAddresses: [
       {
         address: { type: String, required: true },

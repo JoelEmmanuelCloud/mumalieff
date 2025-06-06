@@ -39,72 +39,117 @@ const AdminPasswordChangePage = lazy(() => import('./pages/admin/AdminPasswordCh
 function App() {
   const location = useLocation();
 
-  // Scroll to top on route change
+  // Scroll to top on route change - but only for non-admin pages
   useEffect(() => {
-    window.scrollTo(0, 0);
+    if (!location.pathname.startsWith('/admin')) {
+      window.scrollTo(0, 0);
+    }
   }, [location.pathname]);
 
   // Determine if current page is admin page
   const isAdminPage = location.pathname.startsWith('/admin');
-  const isAdminPasswordChange = location.pathname === '/users/change-password';
 
   return (
-    <div className="flex flex-col min-h-screen antialiased bg-gray-50 dark:bg-dark-bg">
-      {/* Don't show header on admin pages */}
-      {!isAdminPage && <Header />}
-      
-      <main className="flex-grow">
-        <Suspense fallback={<Loader />}>
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<HomePage />} />
-            <Route path="/products" element={<ProductListPage />} />
-            <Route path="/products/category/:category" element={<ProductListPage />} />
-            <Route path="/products/search/:keyword" element={<ProductListPage />} />
-            <Route path="/product/:id" element={<ProductDetailPage />} />
-            <Route path="/cart" element={<CartPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/custom-design" element={<CustomDesignPage />} />
-            
-            {/* Protected Routes */}
-            <Route element={<ProtectedRoute />}>
-              <Route path="/profile" element={<ProfilePage />} />
-              <Route path="/shipping" element={<ShippingPage />} />
-              <Route path="/payment" element={<PaymentPage />} />
-              <Route path="/placeorder" element={<PlaceOrderPage />} />
-              <Route path="/order/:id" element={<OrderPage />} />
-              <Route path="/orders" element={<OrderHistoryPage />} />
-              <Route path="/wishlist" element={<WishlistPage />} />
-            </Route>
-            
-            {/* Special Admin Password Change Route 
-                This is outside AdminRoute to avoid redirect loops */}
-            <Route path="/admin/change-password" element={<AdminPasswordChangePage />} />
-            
-            {/* Admin Routes */}
-            <Route element={<AdminRoute />}>
-              <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
-              <Route path="/admin/products" element={<AdminProductListPage />} />
-              <Route path="/admin/product/:id/edit" element={<AdminProductEditPage />} />
-              <Route path="/admin/orders" element={<AdminOrderListPage />} />
-              <Route path="/admin/users" element={<AdminUserListPage />} />
-            </Route>
-            
-            {/* 404 Page */}
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
-        </Suspense>
-      </main>
-      
-      {!isAdminPage && (
-        <>
-          <Footer />
-          <MobileNavigation />
-        </>
-      )}
-      
-      <ToastContainer position="top-right" autoClose={5000} />
+    <div className="antialiased">
+      {/* Main App Container */}
+      <div className={`${isAdminPage ? '' : 'flex flex-col min-h-screen bg-gray-50 dark:bg-dark-bg'}`}>
+        {/* Don't show header on admin pages */}
+        {!isAdminPage && <Header />}
+        
+        <main className={isAdminPage ? '' : 'flex-grow'}>
+          <Suspense 
+            fallback={
+              <div className={`${isAdminPage ? 'min-h-screen' : ''} flex items-center justify-center ${isAdminPage ? 'bg-gray-50 dark:bg-dark-bg' : ''}`}>
+                <Loader />
+              </div>
+            }
+          >
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/" element={<HomePage />} />
+              <Route path="/products" element={<ProductListPage />} />
+              <Route path="/products/category/:category" element={<ProductListPage />} />
+              <Route path="/products/search/:keyword" element={<ProductListPage />} />
+              <Route path="/product/:id" element={<ProductDetailPage />} />
+              <Route path="/cart" element={<CartPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/custom-design" element={<CustomDesignPage />} />
+              
+              {/* Protected Routes */}
+              <Route element={<ProtectedRoute />}>
+                <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/shipping" element={<ShippingPage />} />
+                <Route path="/payment" element={<PaymentPage />} />
+                <Route path="/placeorder" element={<PlaceOrderPage />} />
+                <Route path="/order/:id" element={<OrderPage />} />
+                <Route path="/orders" element={<OrderHistoryPage />} />
+                <Route path="/wishlist" element={<WishlistPage />} />
+              </Route>
+              
+              {/* Special Admin Password Change Route 
+                  This is outside AdminRoute to avoid redirect loops */}
+              <Route 
+                path="/admin/change-password" 
+                element={
+                  <div className="min-h-screen bg-gray-50 dark:bg-dark-bg">
+                    <AdminPasswordChangePage />
+                  </div>
+                } 
+              />
+              
+              {/* Admin Routes */}
+              <Route element={<AdminRoute />}>
+                <Route path="/admin" element={<AdminDashboardPage />} />
+                <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+                <Route path="/admin/products" element={<AdminProductListPage />} />
+                <Route path="/admin/product/:id/edit" element={<AdminProductEditPage />} />
+                <Route path="/admin/orders" element={<AdminOrderListPage />} />
+                <Route path="/admin/users" element={<AdminUserListPage />} />
+              </Route>
+              
+              {/* 404 Page */}
+              <Route 
+                path="*" 
+                element={
+                  isAdminPage ? (
+                    <div className="min-h-screen bg-gray-50 dark:bg-dark-bg flex items-center justify-center">
+                      <div className="text-center">
+                        <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">404</h1>
+                        <p className="text-gray-600 dark:text-gray-400">Admin page not found</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <NotFoundPage />
+                  )
+                } 
+              />
+            </Routes>
+          </Suspense>
+        </main>
+        
+        {!isAdminPage && (
+          <>
+            <Footer />
+            <MobileNavigation />
+          </>
+        )}
+        
+        {/* Toast Container */}
+        <ToastContainer 
+          position="top-right" 
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme={isAdminPage ? "light" : "colored"}
+          className={isAdminPage ? "mt-16" : ""}
+        />
+      </div>
     </div>
   );
 }

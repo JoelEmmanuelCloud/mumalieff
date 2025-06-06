@@ -12,13 +12,22 @@ const {
 } = require('../controllers/orderController');
 const { protect, admin } = require('../middleware/authMiddleware');
 
-// Protected routes
-router.route('/')
-  .post(protect, createOrder);
+// IMPORTANT: Put specific routes BEFORE general ones
 
+// Stats route - must come before the general '/' route
+router.route('/stats')
+  .get(protect, admin, getOrderStats);
+
+// My orders route - specific route
 router.route('/myorders')
   .get(protect, getMyOrders);
 
+// General routes for creating and listing orders
+router.route('/')
+  .post(protect, createOrder)
+  .get(protect, admin, getOrders);
+
+// Specific order by ID routes
 router.route('/:id')
   .get(protect, getOrderById);
 
@@ -27,13 +36,6 @@ router.route('/:id/pay')
 
 router.route('/:id/cancel')
   .put(protect, cancelOrder);
-
-// Admin routes
-router.route('/')
-  .get(protect, admin, getOrders);
-
-router.route('/stats')
-  .get(protect, admin, getOrderStats);
 
 router.route('/:id/status')
   .put(protect, admin, updateOrderStatus);

@@ -286,28 +286,7 @@ const updateShippingAddress = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * @desc    Get all users
- * @route   GET /api/users
- * @access  Private/Admin
- */
-const getUsers = asyncHandler(async (req, res) => {
-  const pageSize = 10;
-  const page = Number(req.query.pageNumber) || 1;
 
-  const count = await User.countDocuments({});
-  const users = await User.find({})
-    .sort({ createdAt: -1 })
-    .limit(pageSize)
-    .skip(pageSize * (page - 1));
-
-  res.json({
-    users,
-    page,
-    pages: Math.ceil(count / pageSize),
-    totalUsers: count,
-  });
-});
 
 /**
  * @desc    Delete user
@@ -348,7 +327,65 @@ const getUserById = asyncHandler(async (req, res) => {
 });
 
 /**
- * @desc    Update user (Admin)
+ * @desc    Get all users with search and order count
+ * @route   GET /api/users
+ * @access  Private/Admin
+ */
+const getUsers = asyncHandler(async (req, res) => {
+  const pageSize = 10;
+  const page = Number(req.query.pageNumber) || 1;
+  const keyword = req.query.keyword;
+
+  // Build search query
+  let query = {};
+  if (keyword) {
+    query = {
+      $or: [
+        { name: { $regex: keyword, $options: 'i' } },
+        { email: { $regex: keyword, $options: 'i' } }
+      ]
+    };
+  }
+
+  const count = await User.countDocuments(query);
+  
+  // Get users with order count aggregation
+  const users = await User.aggregate([
+    { $match: query },
+    {
+      $lookup: {
+        from: 'orders',
+        localField: '_id',
+        foreignField: 'user',
+        as: 'orders'
+      }
+    },
+    {
+      $addFields: {
+        orderCount: { $size: '$orders' }
+      }
+    },
+    {
+      $project: {
+        password: 0,
+        orders: 0 // Don't include the full orders array
+      }
+    },
+    { $sort: { createdAt: -1 } },
+    { $skip: pageSize * (page - 1) },
+    { $limit: pageSize }
+  ]);
+
+  res.json({
+    users,
+    page,
+    pages: Math.ceil(count / pageSize),
+    totalUsers: count,
+  });
+});
+
+/**
+ * @desc    Update user (Admin) - Enhanced with isActive field
  * @route   PUT /api/users/:id
  * @access  Private/Admin
  */
@@ -360,6 +397,7 @@ const updateUser = asyncHandler(async (req, res) => {
     user.email = req.body.email || user.email;
     user.phone = req.body.phone || user.phone;
     user.isAdmin = req.body.isAdmin !== undefined ? req.body.isAdmin : user.isAdmin;
+    user.isActive = req.body.isActive !== undefined ? req.body.isActive : user.isActive;
 
     const updatedUser = await user.save();
 
@@ -369,6 +407,7 @@ const updateUser = asyncHandler(async (req, res) => {
       email: updatedUser.email,
       phone: updatedUser.phone,
       isAdmin: updatedUser.isAdmin,
+      isActive: updatedUser.isActive,
     });
   } else {
     res.status(404);
@@ -452,6 +491,8 @@ const getWishlist = asyncHandler(async (req, res) => {
     throw new Error('User not found');
   }
 });
+
+
 
 module.exports = {
   registerUser,

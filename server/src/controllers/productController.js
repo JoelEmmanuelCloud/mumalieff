@@ -123,6 +123,38 @@ const getProductById = asyncHandler(async (req, res) => {
  * @access  Private/Admin
  */
 const createProduct = asyncHandler(async (req, res) => {
+  // Create a sample/default product that can be edited later
+  const product = new Product({
+    name: 'Sample Product',
+    price: 0,
+    user: req.user._id, // Admin who created the product
+    description: 'Sample description - please edit this product',
+    category: 'Plain Tees', // Default to one of the enum values
+    countInStock: 0,
+    images: [],
+    sizes: [
+      { name: 'S', inStock: false, stockCount: 0 },
+      { name: 'M', inStock: false, stockCount: 0 },
+      { name: 'L', inStock: false, stockCount: 0 }
+    ],
+    colors: [],
+    material: 'Cotton',
+    allowCustomization: false,
+    featured: false,
+    isSale: false,
+    isActive: true,
+    rating: 0,
+    numReviews: 0,
+    views: 0,
+    soldCount: 0
+  });
+
+  const createdProduct = await product.save();
+  res.status(201).json(createdProduct);
+});
+
+// Alternative approach - if you want to accept data from the request body:
+const createProductWithData = asyncHandler(async (req, res) => {
   const {
     name,
     price,
@@ -139,21 +171,43 @@ const createProduct = asyncHandler(async (req, res) => {
     salePrice,
   } = req.body;
 
+  // Validate required fields
+  if (!name || !price || !description || !category) {
+    res.status(400);
+    throw new Error('Please provide name, price, description, and category');
+  }
+
+  // Validate category is one of the allowed enum values
+  const allowedCategories = ['Graphic Tees', 'Plain Tees', 'Custom Prints'];
+  if (!allowedCategories.includes(category)) {
+    res.status(400);
+    throw new Error('Invalid category. Must be one of: Graphic Tees, Plain Tees, Custom Prints');
+  }
+
   const product = new Product({
     name,
-    price,
-    user: req.user._id, // Admin who created the product
+    price: Number(price),
+    user: req.user._id,
     images: images || [],
     category,
     description,
-    sizes: sizes || [],
+    sizes: sizes || [
+      { name: 'S', inStock: true, stockCount: countInStock || 0 },
+      { name: 'M', inStock: true, stockCount: countInStock || 0 },
+      { name: 'L', inStock: true, stockCount: countInStock || 0 }
+    ],
     colors: colors || [],
-    countInStock,
-    material,
+    countInStock: Number(countInStock) || 0,
+    material: material || 'Cotton',
     allowCustomization: allowCustomization || false,
     featured: featured || false,
     isSale: isSale || false,
-    salePrice,
+    salePrice: salePrice ? Number(salePrice) : undefined,
+    isActive: true,
+    rating: 0,
+    numReviews: 0,
+    views: 0,
+    soldCount: 0
   });
 
   const createdProduct = await product.save();

@@ -177,7 +177,7 @@ const getMyOrders = asyncHandler(async (req, res) => {
 });
 
 /**
- * @desc    Get all orders
+ * @desc    Get all orders with enhanced filtering
  * @route   GET /api/orders
  * @access  Private/Admin
  */
@@ -187,6 +187,11 @@ const getOrders = asyncHandler(async (req, res) => {
   
   // Build query based on filters
   const query = {};
+  
+  // Filter by user ID (for the user-specific orders link)
+  if (req.query.userId) {
+    query.user = req.query.userId;
+  }
   
   // Filter by status
   if (req.query.status) {
@@ -218,7 +223,7 @@ const getOrders = asyncHandler(async (req, res) => {
   const count = await Order.countDocuments(query);
   
   const orders = await Order.find(query)
-    .populate('user', 'id name')
+    .populate('user', 'id name email')
     .sort({ createdAt: -1 })
     .limit(pageSize)
     .skip(pageSize * (page - 1));
@@ -281,58 +286,79 @@ const cancelOrder = asyncHandler(async (req, res) => {
  * @access  Private/Admin
  */
 const getOrderStats = asyncHandler(async (req, res) => {
-  // Total orders count
-  const totalOrders = await Order.countDocuments({});
-  
-  // Total sales
-  const totalSales = await Order.aggregate([
-    {
-      $group: {
-        _id: null,
-        total: { $sum: '$totalPrice' },
+  try {
+    // Total orders count
+    const totalOrders = await Order.countDocuments({});
+    
+    // Total sales - handle empty result
+    const totalSalesResult = await Order.aggregate([
+      {
+        $match: {
+          isPaid: true // Only count paid orders for sales
+        }
       },
-    },
-  ]);
-  
-  // Orders by status
-  const ordersByStatus = await Order.aggregate([
-    {
-      $group: {
-        _id: '$status',
-        count: { $sum: 1 },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: '$totalPrice' },
+        },
       },
-    },
-  ]);
-  
-  // Last 7 days sales
-  const lastWeekStart = new Date();
-  lastWeekStart.setDate(lastWeekStart.getDate() - 7);
-  
-  const salesLastWeek = await Order.aggregate([
-    {
-      $match: {
-        createdAt: { $gte: lastWeekStart },
-        isPaid: true,
+    ]);
+    
+    const totalSales = totalSalesResult.length > 0 ? totalSalesResult[0].total : 0;
+    
+    // Orders by status
+    const ordersByStatus = await Order.aggregate([
+      {
+        $group: {
+          _id: '$status',
+          count: { $sum: 1 },
+        },
       },
-    },
-    {
-      $group: {
-        _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
-        sales: { $sum: '$totalPrice' },
-        orders: { $sum: 1 },
+      {
+        $sort: { count: -1 } // Sort by count descending
+      }
+    ]);
+    
+    // Last 7 days sales
+    const lastWeekStart = new Date();
+    lastWeekStart.setDate(lastWeekStart.getDate() - 7);
+    lastWeekStart.setHours(0, 0, 0, 0); // Start of day
+    
+    const salesLastWeek = await Order.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: lastWeekStart },
+          isPaid: true,
+        },
       },
-    },
-    {
-      $sort: { _id: 1 },
-    },
-  ]);
-  
-  res.json({
-    totalOrders,
-    totalSales: totalSales.length > 0 ? totalSales[0].total : 0,
-    ordersByStatus,
-    salesLastWeek,
-  });
+      {
+        $group: {
+          _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+          sales: { $sum: '$totalPrice' },
+          orders: { $sum: 1 },
+        },
+      },
+      {
+        $sort: { _id: 1 },
+      },
+    ]);
+    
+    // Ensure we have default values if no data exists
+    const stats = {
+      totalOrders: totalOrders || 0,
+      totalSales: totalSales || 0,
+      ordersByStatus: ordersByStatus || [],
+      salesLastWeek: salesLastWeek || [],
+    };
+    
+    res.json(stats);
+    
+  } catch (error) {
+    console.error('Error in getOrderStats:', error);
+    res.status(500);
+    throw new Error('Failed to fetch order statistics');
+  }
 });
 
 module.exports = {

@@ -13,7 +13,11 @@ const AdminRoute = () => {
 
   // Show loader while authentication is being checked
   if (loading) {
-    return <Loader size="large" />;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-dark-bg">
+        <Loader size="large" />
+      </div>
+    );
   }
 
   // If not authenticated or not admin, redirect to login page

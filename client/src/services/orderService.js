@@ -30,7 +30,7 @@ export const getMyOrders = async (pageNumber = 1) => {
   return response.data;
 };
 
-// Admin: Get all orders
+// Admin: Get all orders with enhanced filtering
 export const getOrders = async (params = {}) => {
   const { 
     pageNumber = 1, 
@@ -38,7 +38,8 @@ export const getOrders = async (params = {}) => {
     isPaid, 
     isDelivered, 
     startDate, 
-    endDate 
+    endDate,
+    userId // Add userId parameter
   } = params;
   
   let url = `/orders?pageNumber=${pageNumber}`;
@@ -48,6 +49,7 @@ export const getOrders = async (params = {}) => {
   if (isDelivered !== undefined) url += `&isDelivered=${isDelivered}`;
   if (startDate) url += `&startDate=${startDate}`;
   if (endDate) url += `&endDate=${endDate}`;
+  if (userId) url += `&userId=${userId}`; // Add userId to URL
   
   const response = await api.get(url);
   return response.data;
