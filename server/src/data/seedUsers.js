@@ -13,14 +13,7 @@ mongoose.connect(process.env.MONGO_URI)
 
 // Sample user data with Nigerian context
 const sampleUsers = [
-  {
-    name: 'Admin User',
-    email: 'admin@mumalieff.com',
-    password: 'admin123',
-    phone: '+2348012345678',
-    isAdmin: true,
-    requirePasswordChange: true
-  },
+
   {
     name: 'John Doe',
     email: 'john@example.com',
@@ -203,9 +196,7 @@ const sampleUsers = [
 
 const seedUsers = async () => {
   try {
-    // Clear existing users
-    await User.deleteMany({});
-    console.log('Users cleared');
+
 
     // Create users
     const createdUsers = await User.create(sampleUsers);

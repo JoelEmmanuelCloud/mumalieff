@@ -1,76 +1,65 @@
 /**
- * Master Seed Script - Populates the database with mock data
+ * Simple Master Seeder Script
+ * Works with your existing user data
  * 
- * Usage: node data/seedAll.js
- * This will run all seed scripts in the correct order
+ * Usage: node data/seedAllSimple.js
  */
-const mongoose = require('mongoose');
 const { exec } = require('child_process');
 const path = require('path');
-require('dotenv').config();
 
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('MongoDB connected'))
-  .catch(err => {
-    console.error('MongoDB connection error:', err);
-    process.exit(1);
-  });
+// Load environment variables
+require('dotenv').config({ path: path.join(__dirname, '../../.env') });
 
-console.log('Starting database seeding process...');
-
-const runScript = (scriptName) => {
+const runSeeder = (scriptName) => {
   return new Promise((resolve, reject) => {
     const scriptPath = path.join(__dirname, scriptName);
-    console.log(`Running ${scriptName}...`);
+    console.log(`\n🌱 Running ${scriptName}...`);
     
-    exec(`node ${scriptPath}`, (error, stdout, stderr) => {
+    exec(`node "${scriptPath}"`, (error, stdout, stderr) => {
       if (error) {
-        console.error(`Error executing ${scriptName}: ${error.message}`);
-        return reject(error);
+        console.error(`❌ Error in ${scriptName}:`, error.message);
+        reject(error);
+        return;
       }
+      
       if (stderr) {
-        console.error(`${scriptName} stderr: ${stderr}`);
+        console.error(`⚠️  Warning in ${scriptName}:`, stderr);
       }
+      
+      console.log(`✅ ${scriptName} completed:`);
       console.log(stdout);
       resolve();
     });
   });
 };
 
-const seedDatabase = async () => {
+const seedAll = async () => {
   try {
-    // Run seed scripts in order
-    await runScript('seedUsers.js');
-    console.log('✓ Users seeded successfully\n');
+    console.log('🚀 Starting database seeding process...');
+    console.log('📝 Note: Using your existing users, will only seed products, reviews, and orders\n');
     
-    // Add a delay to ensure users are properly saved
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Run seeders in the correct order (skip user seeders since you have existing users)
+    await runSeeder('seedProducts.js');
+    await runSeeder('seedReviews.js');
+    await runSeeder('seedOrders.js');
     
-    await runScript('seedProducts.js');
-    console.log('✓ Products seeded successfully\n');
-    
-    await runScript('seedReviews.js');
-    console.log('✓ Reviews seeded successfully\n');
-    
-    await runScript('seedOrders.js');
-    console.log('✓ Orders seeded successfully\n');
-    
-    console.log('='.repeat(50));
-    console.log('🎉 Database seeding completed successfully! 🎉');
-    console.log('='.repeat(50));
-    console.log('\nAdmin login credentials:');
+    console.log('\n🎉 All seeders completed successfully!');
+    console.log('\n📋 Summary:');
+    console.log('✅ Used existing users (including admin)');
+    console.log('✅ Created sample products with categories');
+    console.log('✅ Added product reviews from existing users');
+    console.log('✅ Generated sample orders for existing users');
+    console.log('\n🔑 Your Admin Credentials:');
     console.log('Email: admin@mumalieff.com');
     console.log('Password: admin123');
-    console.log('\nRegular user credentials:');
+    console.log('\n🛍️ Sample user for testing:');
     console.log('Email: john@example.com');
     console.log('Password: password123');
-    console.log('='.repeat(50));
     
-    process.exit(0);
   } catch (error) {
-    console.error('Error during database seeding:', error);
+    console.error('\n💥 Seeding process failed:', error.message);
     process.exit(1);
   }
 };
 
-seedDatabase();
+seedAll();
