@@ -287,77 +287,106 @@ const cancelOrder = asyncHandler(async (req, res) => {
  */
 const getOrderStats = asyncHandler(async (req, res) => {
   try {
+    
     // Total orders count
     const totalOrders = await Order.countDocuments({});
+  
+    // Total sales - handle empty result with better error handling
+    let totalSales = 0;
+    try {
+      const totalSalesResult = await Order.aggregate([
+        {
+          $match: {
+            isPaid: true // Only count paid orders for sales
+          }
+        },
+        {
+          $group: {
+            _id: null,
+            total: { $sum: '$totalPrice' },
+          },
+        },
+      ]);
+      
+      totalSales = totalSalesResult.length > 0 ? Number(totalSalesResult[0].total) || 0 : 0;
+ 
+    } catch (salesError) {
+      console.error('Error calculating total sales:', salesError);
+      totalSales = 0;
+    }
     
-    // Total sales - handle empty result
-    const totalSalesResult = await Order.aggregate([
-      {
-        $match: {
-          isPaid: true // Only count paid orders for sales
+    // Orders by status with better error handling
+    let ordersByStatus = [];
+    try {
+      ordersByStatus = await Order.aggregate([
+        {
+          $group: {
+            _id: '$status',
+            count: { $sum: 1 },
+          },
+        },
+        {
+          $sort: { count: -1 } // Sort by count descending
         }
-      },
-      {
-        $group: {
-          _id: null,
-          total: { $sum: '$totalPrice' },
-        },
-      },
-    ]);
+      ]);
     
-    const totalSales = totalSalesResult.length > 0 ? totalSalesResult[0].total : 0;
+    } catch (statusError) {
+      console.error('Error calculating orders by status:', statusError);
+      ordersByStatus = [];
+    }
     
-    // Orders by status
-    const ordersByStatus = await Order.aggregate([
-      {
-        $group: {
-          _id: '$status',
-          count: { $sum: 1 },
+    // Last 7 days sales with improved date handling
+    let salesLastWeek = [];
+    try {
+      const lastWeekStart = new Date();
+      lastWeekStart.setDate(lastWeekStart.getDate() - 7);
+      lastWeekStart.setHours(0, 0, 0, 0); // Start of day
+      
+      
+      salesLastWeek = await Order.aggregate([
+        {
+          $match: {
+            createdAt: { $gte: lastWeekStart },
+            isPaid: true,
+          },
         },
-      },
-      {
-        $sort: { count: -1 } // Sort by count descending
-      }
-    ]);
+        {
+          $group: {
+            _id: { 
+              $dateToString: { 
+                format: '%Y-%m-%d', 
+                date: '$createdAt' 
+              } 
+            },
+            sales: { $sum: '$totalPrice' },
+            orders: { $sum: 1 },
+          },
+        },
+        {
+          $sort: { _id: 1 },
+        },
+      ]);
     
-    // Last 7 days sales
-    const lastWeekStart = new Date();
-    lastWeekStart.setDate(lastWeekStart.getDate() - 7);
-    lastWeekStart.setHours(0, 0, 0, 0); // Start of day
-    
-    const salesLastWeek = await Order.aggregate([
-      {
-        $match: {
-          createdAt: { $gte: lastWeekStart },
-          isPaid: true,
-        },
-      },
-      {
-        $group: {
-          _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
-          sales: { $sum: '$totalPrice' },
-          orders: { $sum: 1 },
-        },
-      },
-      {
-        $sort: { _id: 1 },
-      },
-    ]);
+    } catch (weekError) {
+      console.error('Error calculating weekly sales:', weekError);
+      salesLastWeek = [];
+    }
     
     // Ensure we have default values if no data exists
     const stats = {
-      totalOrders: totalOrders || 0,
-      totalSales: totalSales || 0,
-      ordersByStatus: ordersByStatus || [],
-      salesLastWeek: salesLastWeek || [],
+      totalOrders: Number(totalOrders) || 0,
+      totalSales: Number(totalSales) || 0,
+      ordersByStatus: Array.isArray(ordersByStatus) ? ordersByStatus : [],
+      salesLastWeek: Array.isArray(salesLastWeek) ? salesLastWeek : [],
     };
     
     res.json(stats);
     
   } catch (error) {
     console.error('Error in getOrderStats:', error);
+    console.error('Error stack:', error.stack);
     res.status(500);
-    throw new Error('Failed to fetch order statistics');
+    throw new Error(`Failed to fetch order statistics: ${error.message}`);
   }
 });
 
@@ -374,8 +403,9 @@ const getDailySales = asyncHandler(async (req, res) => {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
     startDate.setHours(0, 0, 0, 0); // Start of day
+
     
-    // Get daily sales data
+    // Get daily sales data with improved error handling
     const dailySalesData = await Order.aggregate([
       {
         $match: {
@@ -388,8 +418,8 @@ const getDailySales = asyncHandler(async (req, res) => {
           _id: { 
             $dateToString: { 
               format: '%Y-%m-%d', 
-              date: '$createdAt',
-              timezone: 'UTC'
+              date: '$createdAt'
+              // Remove timezone specification to use local time
             } 
           },
           sales: { $sum: '$totalPrice' },
@@ -400,6 +430,7 @@ const getDailySales = asyncHandler(async (req, res) => {
         $sort: { _id: 1 },
       },
     ]);
+    
     
     // Create a complete array with all days, filling in missing days with 0 values
     const completeSalesData = [];
@@ -412,13 +443,13 @@ const getDailySales = asyncHandler(async (req, res) => {
       // Format day name for display
       const dayName = days <= 7 
         ? currentDate.toLocaleDateString('en-US', { weekday: 'short' })
-        : `Week ${Math.ceil((i + 1) / 7)}`;
+        : currentDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
       
       completeSalesData.push({
         day: dayName,
         date: dateString,
-        sales: existingData ? existingData.sales : 0,
-        orders: existingData ? existingData.orders : 0,
+        sales: existingData ? Number(existingData.sales) || 0 : 0,
+        orders: existingData ? Number(existingData.orders) || 0 : 0,
       });
       
       currentDate.setDate(currentDate.getDate() + 1);
@@ -427,30 +458,33 @@ const getDailySales = asyncHandler(async (req, res) => {
     // If requesting more than 7 days, group by weeks
     if (days > 7) {
       const weeklyData = [];
-      let currentWeek = { day: 'Week 1', sales: 0, orders: 0 };
-      let weekIndex = 1;
+      const weekSize = 7;
       
-      completeSalesData.forEach((dayData, index) => {
-        currentWeek.sales += dayData.sales;
-        currentWeek.orders += dayData.orders;
+      for (let i = 0; i < completeSalesData.length; i += weekSize) {
+        const weekData = completeSalesData.slice(i, i + weekSize);
+        const weekNumber = Math.floor(i / weekSize) + 1;
         
-        // Every 7 days or at the end, push the week data
-        if ((index + 1) % 7 === 0 || index === completeSalesData.length - 1) {
-          weeklyData.push({ ...currentWeek });
-          weekIndex++;
-          currentWeek = { day: `Week ${weekIndex}`, sales: 0, orders: 0 };
-        }
-      });
+        const weekSummary = {
+          day: `Week ${weekNumber}`,
+          sales: weekData.reduce((sum, day) => sum + day.sales, 0),
+          orders: weekData.reduce((sum, day) => sum + day.orders, 0),
+        };
+        
+        weeklyData.push(weekSummary);
+      }
+      
       
       return res.json(weeklyData);
     }
+    
     
     res.json(completeSalesData);
     
   } catch (error) {
     console.error('Error in getDailySales:', error);
+    console.error('Error stack:', error.stack);
     res.status(500);
-    throw new Error('Failed to fetch daily sales data');
+    throw new Error(`Failed to fetch daily sales data: ${error.message}`);
   }
 });
 

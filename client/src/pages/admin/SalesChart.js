@@ -15,15 +15,25 @@ const SalesChart = ({ orderStats, getDailySalesData }) => {
         setChartLoading(true);
         setChartError(null);
         try {
+          console.log(`Fetching sales data for ${timeRange} days`);
           const data = await getDailySalesData(parseInt(timeRange));
-          setChartData(data || []);
+          console.log('Received sales data:', data);
+          
+          // Ensure data is an array
+          const validData = Array.isArray(data) ? data : [];
+          setChartData(validData);
         } catch (err) {
           console.error('Error fetching sales data:', err);
-          setChartError('Failed to load sales data');
+          const errorMessage = err.response?.data?.message || err.message || 'Failed to load sales data';
+          setChartError(errorMessage);
           setChartData([]);
         } finally {
           setChartLoading(false);
         }
+      } else {
+        // If no getDailySalesData function, show placeholder data
+        setChartData([]);
+        setChartError('Sales data service not available');
       }
     };
 
@@ -34,6 +44,9 @@ const SalesChart = ({ orderStats, getDailySalesData }) => {
   const data = chartData;
 
   const formatCurrency = (value) => {
+    if (typeof value !== 'number' || isNaN(value)) {
+      return '₦0';
+    }
     return `₦${value.toLocaleString()}`;
   };
 
@@ -61,9 +74,16 @@ const SalesChart = ({ orderStats, getDailySalesData }) => {
   };
 
   // Safe calculations with default values
-  const totalSales = data.length > 0 ? data.reduce((sum, item) => sum + (item.sales || 0), 0) : 0;
-  const totalOrders = data.length > 0 ? data.reduce((sum, item) => sum + (item.orders || 0), 0) : 0;
+  const totalSales = data.length > 0 ? data.reduce((sum, item) => sum + (Number(item.sales) || 0), 0) : 0;
+  const totalOrders = data.length > 0 ? data.reduce((sum, item) => sum + (Number(item.orders) || 0), 0) : 0;
   const avgDailySales = data.length > 0 ? totalSales / data.length : 0;
+
+  const handleRetry = () => {
+    // Force refetch by changing time range to current value
+    const currentRange = timeRange;
+    setTimeRange('');
+    setTimeout(() => setTimeRange(currentRange), 100);
+  };
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
@@ -159,10 +179,10 @@ const SalesChart = ({ orderStats, getDailySalesData }) => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <p className="text-red-500 dark:text-red-400 text-sm">{chartError}</p>
+              <p className="text-red-500 dark:text-red-400 text-sm mb-2">{chartError}</p>
               <button 
-                onClick={() => setTimeRange(timeRange)} 
-                className="mt-2 text-xs text-blue-600 hover:text-blue-500 dark:text-blue-400"
+                onClick={handleRetry}
+                className="mt-2 px-4 py-2 text-xs bg-blue-600 text-white rounded-md hover:bg-blue-500 transition-colors"
               >
                 Try again
               </button>
@@ -177,7 +197,7 @@ const SalesChart = ({ orderStats, getDailySalesData }) => {
                 </svg>
               </div>
               <p className="text-gray-500 dark:text-gray-400">No sales data available</p>
-              <p className="text-gray-400 dark:text-gray-500 text-xs mt-1">Data will appear once you have orders</p>
+              <p className="text-gray-400 dark:text-gray-500 text-xs mt-1">Data will appear once you have paid orders</p>
             </div>
           </div>
         ) : (
@@ -239,15 +259,15 @@ const SalesChart = ({ orderStats, getDailySalesData }) => {
         <div className="flex items-center justify-between text-sm">
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+              <div className={`w-3 h-3 rounded-full ${chartError ? 'bg-red-500' : 'bg-green-500'}`}></div>
               <span className="text-gray-600 dark:text-gray-400">
-                Real-time data
+                {chartError ? 'Data unavailable' : 'Real-time data'}
               </span>
             </div>
             <div className="flex items-center space-x-2">
               <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
               <span className="text-gray-600 dark:text-gray-400">
-                {timeRange === '7' ? 'Daily view' : 'Weekly view'}
+                {timeRange === '7' ? 'Daily view' : timeRange === '30' ? 'Weekly view' : 'Custom view'}
               </span>
             </div>
           </div>

@@ -9,21 +9,21 @@ const {
   getOrders,
   cancelOrder,
   getOrderStats,
-  getDailySales, // Add the new import
+  getDailySales,
 } = require('../controllers/orderController');
 const { protect, admin } = require('../middleware/authMiddleware');
 
-// IMPORTANT: Put specific routes BEFORE general ones
+// CRITICAL: Put ALL specific routes BEFORE parameterized routes like /:id
 
-// Stats route - must come before the general '/' route
+// Stats route - must come before /:id
 router.route('/stats')
   .get(protect, admin, getOrderStats);
 
-// Daily sales route - must come before the general '/' route
+// Daily sales route - must come before /:id
 router.route('/daily-sales')
   .get(protect, admin, getDailySales);
 
-// My orders route - specific route
+// My orders route - must come before /:id
 router.route('/myorders')
   .get(protect, getMyOrders);
 
@@ -32,6 +32,7 @@ router.route('/')
   .post(protect, createOrder)
   .get(protect, admin, getOrders);
 
+// IMPORTANT: All parameterized routes (/:id) must come AFTER specific routes
 // Specific order by ID routes
 router.route('/:id')
   .get(protect, getOrderById);
