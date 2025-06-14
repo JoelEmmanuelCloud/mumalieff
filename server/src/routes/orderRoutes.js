@@ -9,6 +9,7 @@ const {
   getOrders,
   cancelOrder,
   getOrderStats,
+  getDailySales, // Add the new import
 } = require('../controllers/orderController');
 const { protect, admin } = require('../middleware/authMiddleware');
 
@@ -17,6 +18,10 @@ const { protect, admin } = require('../middleware/authMiddleware');
 // Stats route - must come before the general '/' route
 router.route('/stats')
   .get(protect, admin, getOrderStats);
+
+// Daily sales route - must come before the general '/' route
+router.route('/daily-sales')
+  .get(protect, admin, getDailySales);
 
 // My orders route - specific route
 router.route('/myorders')

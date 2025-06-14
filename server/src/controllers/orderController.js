@@ -361,6 +361,99 @@ const getOrderStats = asyncHandler(async (req, res) => {
   }
 });
 
+/**
+ * @desc    Get daily sales data
+ * @route   GET /api/orders/daily-sales
+ * @access  Private/Admin
+ */
+const getDailySales = asyncHandler(async (req, res) => {
+  try {
+    const days = Number(req.query.days) || 7;
+    
+    // Calculate the start date based on the number of days requested
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+    startDate.setHours(0, 0, 0, 0); // Start of day
+    
+    // Get daily sales data
+    const dailySalesData = await Order.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startDate },
+          isPaid: true, // Only count paid orders for sales
+        },
+      },
+      {
+        $group: {
+          _id: { 
+            $dateToString: { 
+              format: '%Y-%m-%d', 
+              date: '$createdAt',
+              timezone: 'UTC'
+            } 
+          },
+          sales: { $sum: '$totalPrice' },
+          orders: { $sum: 1 },
+        },
+      },
+      {
+        $sort: { _id: 1 },
+      },
+    ]);
+    
+    // Create a complete array with all days, filling in missing days with 0 values
+    const completeSalesData = [];
+    const currentDate = new Date(startDate);
+    
+    for (let i = 0; i < days; i++) {
+      const dateString = currentDate.toISOString().split('T')[0];
+      const existingData = dailySalesData.find(item => item._id === dateString);
+      
+      // Format day name for display
+      const dayName = days <= 7 
+        ? currentDate.toLocaleDateString('en-US', { weekday: 'short' })
+        : `Week ${Math.ceil((i + 1) / 7)}`;
+      
+      completeSalesData.push({
+        day: dayName,
+        date: dateString,
+        sales: existingData ? existingData.sales : 0,
+        orders: existingData ? existingData.orders : 0,
+      });
+      
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    
+    // If requesting more than 7 days, group by weeks
+    if (days > 7) {
+      const weeklyData = [];
+      let currentWeek = { day: 'Week 1', sales: 0, orders: 0 };
+      let weekIndex = 1;
+      
+      completeSalesData.forEach((dayData, index) => {
+        currentWeek.sales += dayData.sales;
+        currentWeek.orders += dayData.orders;
+        
+        // Every 7 days or at the end, push the week data
+        if ((index + 1) % 7 === 0 || index === completeSalesData.length - 1) {
+          weeklyData.push({ ...currentWeek });
+          weekIndex++;
+          currentWeek = { day: `Week ${weekIndex}`, sales: 0, orders: 0 };
+        }
+      });
+      
+      return res.json(weeklyData);
+    }
+    
+    res.json(completeSalesData);
+    
+  } catch (error) {
+    console.error('Error in getDailySales:', error);
+    res.status(500);
+    throw new Error('Failed to fetch daily sales data');
+  }
+});
+
 module.exports = {
   createOrder,
   getOrderById,
@@ -370,4 +463,5 @@ module.exports = {
   getOrders,
   cancelOrder,
   getOrderStats,
+  getDailySales, 
 };

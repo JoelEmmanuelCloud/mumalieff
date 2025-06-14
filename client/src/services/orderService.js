@@ -66,3 +66,9 @@ export const getOrderStats = async () => {
   const response = await api.get('/orders/stats');
   return response.data;
 };
+
+// Admin: Get daily sales data
+export const getDailySales = async (days = 7) => {
+  const response = await api.get(`/orders/daily-sales?days=${days}`);
+  return response.data;
+};
