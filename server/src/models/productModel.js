@@ -185,7 +185,6 @@ productSchema.index({ featured: 1, isActive: 1 });
 productSchema.index({ isSale: 1, isActive: 1 });
 productSchema.index({ rating: -1 });
 productSchema.index({ createdAt: -1 });
-productSchema.index({ slug: 1 });
 productSchema.index({ price: 1 });
 
 // Virtual for discount percentage
