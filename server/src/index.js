@@ -35,6 +35,10 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
+// Important: For webhook routes, use raw body parser
+app.use('/api/payments/paystack/webhook', express.raw({ type: 'application/json' }));
+
+
 // Welcome route
 app.get('/', (req, res) => {
   res.send('Mumalieff API is running...');

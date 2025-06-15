@@ -59,13 +59,10 @@ const Footer = () => {
                 <Link to="/products" className="hover:text-accent-gold">All Products</Link>
               </li>
               <li>
-                <Link to="/products/category/Graphic Tees" className="hover:text-accent-gold">Graphic Tees</Link>
+                <Link to="/products/category/Wear Your Conviction" className="hover:text-accent-gold">  Wear Your Conviction</Link>
               </li>
               <li>
-                <Link to="/products/category/Plain Tees" className="hover:text-accent-gold">Plain Tees</Link>
-              </li>
-              <li>
-                <Link to="/custom-design" className="hover:text-accent-gold">Custom Prints</Link>
+                <Link to="/products/category/Customize Your Prints" className="hover:text-accent-gold">Customize Your Prints</Link>
               </li>
               <li>
                 <Link to="/products?onSale=true" className="hover:text-accent-gold">Sale Items</Link>
