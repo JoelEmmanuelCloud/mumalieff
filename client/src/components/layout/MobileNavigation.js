@@ -1,3 +1,5 @@
+//Component/layout/Mobile mobile navigation bar with links to Home, Shop, Custom Design, Cart, and Account/Login.
+// It includes icons, active state styling, and cart item count.
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';

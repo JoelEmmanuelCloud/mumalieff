@@ -1,3 +1,4 @@
+//component/product/productCard to display product card with wishlist and quick add to cart functionality
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';

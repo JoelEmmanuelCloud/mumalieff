@@ -1,3 +1,4 @@
+//Component/page/admin/ProductEditPage to edit product details in an e-commerce application
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from 'react-query';
@@ -266,9 +267,8 @@ const ProductEditPage = () => {
                   required
                 >
                   <option value="">Select Category</option>
-                  <option value="Graphic Tees">Graphic Tees</option>
-                  <option value="Plain Tees">Plain Tees</option>
-                  <option value="Custom Prints">Custom Prints</option>
+                  <option value="Wear Your Conviction">Wear Your Conviction</option>
+                  <option value="Customize Your Prints">Customize Your Prints</option>
                 </select>
               </div>
               

@@ -40,15 +40,15 @@ const HomePage = () => {
         <div className="bg-gradient-to-r from-primary to-black text-white py-16 md:py-24 relative overflow-hidden">
           <div className="container-custom relative z-10">
             <div className="max-w-xl">
-              <h1 className="text-4xl md:text-5xl font-bold mb-4">Premium T-shirts & Custom Prints</h1>
+              <h1 className="text-4xl md:text-5xl font-bold mb-4">Wear Your Convictions</h1>
               <p className="text-lg mb-8 text-gray-200">
-                Express your unique style with our high-quality t-shirts and personalized designs.
+                Design personalized, high-quality t-shirts that reflect your beliefs and inspire others.
               </p>
               <div className="flex flex-wrap gap-4">
-                <Link to="/products" className="bg-white text-gray-900 px-6 py-3 rounded-md font-medium hover:bg-gray-100 transition-colors">
-                  Shop Collection
+                <Link to="/products/category/Wear Your Conviction" className="bg-white text-gray-900 px-6 py-3 rounded-md font-medium hover:bg-gray-100 transition-colors">
+                  Shop Collections
                 </Link>
-                <Link to="/custom-design" className="btn-accent">
+                <Link to="/products/category/Customize Your Prints" className="btn-accent">
                   Create Custom Design
                 </Link>
               </div>
@@ -93,62 +93,85 @@ const HomePage = () => {
         <div className="container-custom">
           <h2 className="section-heading mb-8">Shop by Category</h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Graphic Tees Category */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            {/* Wear Your Conviction Category */}
             <div className="relative rounded-lg overflow-hidden bg-white shadow-md dark:bg-dark-bg">
               <img 
-                src="/images/category-graphic-tees.jpg" 
-                alt="Graphic Tees"
+                src="/images/category-wear-conviction.jpg" 
+                alt="Wear Your Conviction"
                 className="w-full h-60 object-cover"
               />
               <div className="p-4">
-                <h3 className="text-xl font-semibold mb-2 dark:text-white">Graphic Tees</h3>
-                <p className="text-gray-600 mb-4 dark:text-gray-300">Express yourself with our collection of unique graphic designs.</p>
+                <h3 className="text-xl font-semibold mb-2 dark:text-white">Wear Your Conviction</h3>
+                <p className="text-gray-600 mb-4 dark:text-gray-300">Express your faith and find motivation with our meaningful designs.</p>
                 <Link 
-                  to="/products/category/Graphic Tees" 
+                  to="/products/category/Wear Your Conviction" 
                   className="inline-block text-primary font-medium hover:text-primary-light dark:text-white dark:hover:text-gray-300"
                 >
-                  Shop Graphic Tees →
+                  Shop Convictions →
                 </Link>
               </div>
             </div>
             
-            {/* Plain Tees Category */}
-            <div className="relative rounded-lg overflow-hidden bg-white shadow-md dark:bg-dark-bg">
-              <img 
-                src="/images/category-plain-tees.jpg" 
-                alt="Plain Tees"
-                className="w-full h-60 object-cover"
-              />
-              <div className="p-4">
-                <h3 className="text-xl font-semibold mb-2 dark:text-white">Plain Tees</h3>
-                <p className="text-gray-600 mb-4 dark:text-gray-300">Premium quality essentials in a variety of colors and fits.</p>
-                <Link 
-                  to="/products/category/Plain Tees" 
-                  className="inline-block text-primary font-medium hover:text-primary-light dark:text-white dark:hover:text-gray-300"
-                >
-                  Shop Plain Tees →
-                </Link>
-              </div>
-            </div>
-            
-            {/* Custom Prints Category */}
+            {/* Customize Your Prints Category */}
             <div className="relative rounded-lg overflow-hidden bg-white shadow-md dark:bg-dark-bg">
               <img 
                 src="/images/category-custom-prints.jpg" 
-                alt="Custom Prints"
+                alt="Customize Your Prints"
                 className="w-full h-60 object-cover"
               />
               <div className="p-4">
-                <h3 className="text-xl font-semibold mb-2 dark:text-white">Custom Prints</h3>
+                <h3 className="text-xl font-semibold mb-2 dark:text-white">Customize Your Prints</h3>
                 <p className="text-gray-600 mb-4 dark:text-gray-300">Design your own unique t-shirt with our custom printing service.</p>
                 <Link 
-                  to="/custom-design" 
+                  to="/products/category/Customize Your Prints" 
                   className="inline-block text-accent-gold font-medium hover:text-accent-gold-dark dark:text-accent-gold-light dark:hover:text-accent-gold"
                 >
                   Create Your Design →
                 </Link>
               </div>
+            </div>
+          </div>
+          
+          {/* Design Collections */}
+          <div className="mt-12">
+            <h3 className="text-xl font-semibold mb-6 text-center dark:text-white">Design Collections</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+              <Link
+                to="/products/design-style/Religious%2FSpiritual"
+                className="bg-white dark:bg-dark-bg border border-gray-200 dark:border-gray-700 p-8 rounded-lg hover:shadow-lg transition-shadow duration-300 text-center group"
+              >
+                <div className="w-16 h-16 mx-auto bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center mb-6">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                  </svg>
+                </div>
+                <h4 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">Religious & Spiritual</h4>
+                <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
+                  Faith-inspired designs and meaningful spiritual messages for everyday wear
+                </p>
+                <div className="mt-4 text-blue-600 dark:text-blue-400 font-medium text-sm group-hover:text-blue-700 dark:group-hover:text-blue-300">
+                  Explore Collection →
+                </div>
+              </Link>
+              
+              <Link
+                to="/products/design-style/Motivational"
+                className="bg-white dark:bg-dark-bg border border-gray-200 dark:border-gray-700 p-8 rounded-lg hover:shadow-lg transition-shadow duration-300 text-center group"
+              >
+                <div className="w-16 h-16 mx-auto bg-green-50 dark:bg-green-900/20 rounded-full flex items-center justify-center mb-6">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </div>
+                <h4 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">Motivational & Inspiring</h4>
+                <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
+                  Uplifting quotes and empowering messages to inspire and motivate
+                </p>
+                <div className="mt-4 text-green-600 dark:text-green-400 font-medium text-sm group-hover:text-green-700 dark:group-hover:text-green-300">
+                  Explore Collection →
+                </div>
+              </Link>
             </div>
           </div>
         </div>

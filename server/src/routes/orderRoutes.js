@@ -1,49 +1,23 @@
 const express = require('express');
 const router = express.Router();
 const {
-  createOrder,
-  getOrderById,
-  updateOrderToPaid,
-  updateOrderStatus,
-  getMyOrders,
-  getOrders,
-  cancelOrder,
-  getOrderStats,
-  getDailySales,
-} = require('../controllers/orderController');
+  initializePaystack,
+  verifyPaystack,
+  paystackWebhook,
+  getPaymentHistory,
+  getOrderPayments,
+  getPaymentAnalytics,
+} = require('../controllers/paymentController');
 const { protect, admin } = require('../middleware/authMiddleware');
 
-// CRITICAL: Put ALL specific routes BEFORE parameterized routes like /:id
+// Paystack routes
+router.route('/paystack/initialize').post(protect, initializePaystack);
+router.route('/paystack/verify/:reference').get(protect, verifyPaystack);
+router.route('/paystack/webhook').post(paystackWebhook);
 
-// Stats route - must come before /:id
-router.route('/stats')
-  .get(protect, admin, getOrderStats);
-
-// Daily sales route - must come before /:id
-router.route('/daily-sales')
-  .get(protect, admin, getDailySales);
-
-// My orders route - must come before /:id
-router.route('/myorders')
-  .get(protect, getMyOrders);
-
-// General routes for creating and listing orders
-router.route('/')
-  .post(protect, createOrder)
-  .get(protect, admin, getOrders);
-
-// IMPORTANT: All parameterized routes (/:id) must come AFTER specific routes
-// Specific order by ID routes
-router.route('/:id')
-  .get(protect, getOrderById);
-
-router.route('/:id/pay')
-  .put(protect, updateOrderToPaid);
-
-router.route('/:id/cancel')
-  .put(protect, cancelOrder);
-
-router.route('/:id/status')
-  .put(protect, admin, updateOrderStatus);
+// Payment history and analytics
+router.route('/history').get(protect, getPaymentHistory);
+router.route('/order/:orderId').get(protect, getOrderPayments);
+router.route('/analytics').get(protect, admin, getPaymentAnalytics);
 
 module.exports = router;

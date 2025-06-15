@@ -1,3 +1,4 @@
+// Component/layout/Header component with responsive navigation, search, and user menu
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -99,14 +100,11 @@ const Header = () => {
             <Link to="/products" className="font-medium text-gray-700 hover:text-primary dark:text-gray-300 dark:hover:text-white transition-colors">
               All Products
             </Link>
-            <Link to="/products/category/Graphic Tees" className="font-medium text-gray-700 hover:text-primary dark:text-gray-300 dark:hover:text-white transition-colors">
-              Graphic Tees
+            <Link to="/products/category/Wear Your Conviction" className="font-medium text-gray-700 hover:text-primary dark:text-gray-300 dark:hover:text-white transition-colors">
+              Wear Your Conviction
             </Link>
-            <Link to="/products/category/Plain Tees" className="font-medium text-gray-700 hover:text-primary dark:text-gray-300 dark:hover:text-white transition-colors">
-              Plain Tees
-            </Link>
-            <Link to="/custom-design" className="font-medium text-accent-gold hover:text-accent-gold-dark dark:text-accent-gold-light dark:hover:text-accent-gold transition-colors">
-              Custom Prints
+            <Link to="/products/category/Customize Your Prints" className="font-medium text-accent-gold hover:text-accent-gold-dark dark:text-accent-gold-light dark:hover:text-accent-gold transition-colors">
+              Customize Your Prints
             </Link>
           </nav>
           
@@ -327,25 +325,18 @@ const Header = () => {
               All Products
             </Link>
             <Link 
-              to="/products/category/Graphic Tees" 
+              to="/products/category/Wear Your Conviction" 
               className="block py-3 px-4 font-medium text-gray-700 hover:text-primary hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-dark-bg rounded-md transition-colors"
               onClick={() => setIsMenuOpen(false)}
             >
-              Graphic Tees
+              Wear Your Conviction
             </Link>
             <Link 
-              to="/products/category/Plain Tees" 
-              className="block py-3 px-4 font-medium text-gray-700 hover:text-primary hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-dark-bg rounded-md transition-colors"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Plain Tees
-            </Link>
-            <Link 
-              to="/custom-design" 
+              to="/products/category/Customize Your Prints" 
               className="block py-3 px-4 font-medium text-accent-gold hover:text-accent-gold-dark hover:bg-gray-100 dark:text-accent-gold-light dark:hover:text-accent-gold dark:hover:bg-dark-bg rounded-md transition-colors"
               onClick={() => setIsMenuOpen(false)}
             >
-              Custom Prints
+              Customize Your Prints
             </Link>
             <Link 
               to="/wishlist" 

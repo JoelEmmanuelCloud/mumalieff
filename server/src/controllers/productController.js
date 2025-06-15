@@ -1,8 +1,9 @@
 const asyncHandler = require('express-async-handler');
 const Product = require('../models/productModel');
+const CustomOrder = require('../models/customOrderModel'); // New model for custom orders
 
 /**
- * @desc    Fetch all products
+ * @desc    Fetch all products with updated filtering
  * @route   GET /api/products
  * @access  Public
  */
@@ -11,19 +12,26 @@ const getProducts = asyncHandler(async (req, res) => {
   const page = Number(req.query.pageNumber) || 1;
 
   // Build query based on filters
-  const query = {};
+  const query = { isActive: true };
 
   // Search functionality
   if (req.query.keyword) {
-    query.name = {
-      $regex: req.query.keyword,
-      $options: 'i', // case-insensitive
-    };
+    query.$or = [
+      { name: { $regex: req.query.keyword, $options: 'i' } },
+      { description: { $regex: req.query.keyword, $options: 'i' } },
+      { convictionMessage: { $regex: req.query.keyword, $options: 'i' } },
+      { tags: { $in: [new RegExp(req.query.keyword, 'i')] } }
+    ];
   }
 
-  // Category filter
+  // Category filter (main categories)
   if (req.query.category) {
     query.category = req.query.category;
+  }
+
+  // Design style filter (for Wear Your Conviction)
+  if (req.query.designStyle) {
+    query.designStyle = req.query.designStyle;
   }
 
   // Price range filter
@@ -60,6 +68,16 @@ const getProducts = asyncHandler(async (req, res) => {
     query.isSale = true;
   }
 
+  // Filter by customization capability
+  if (req.query.allowCustomization === 'true') {
+    query.allowCustomization = true;
+  }
+
+  // Filter base products only
+  if (req.query.baseProducts === 'true') {
+    query.isBaseProduct = true;
+  }
+
   // Count total matching products
   const count = await Product.countDocuments(query);
 
@@ -79,11 +97,13 @@ const getProducts = asyncHandler(async (req, res) => {
       case 'rating':
         sortOption = { rating: -1 };
         break;
+      case 'popular':
+        sortOption = { soldCount: -1, views: -1 };
+        break;
       default:
         sortOption = { createdAt: -1 };
     }
   } else {
-    // Default sort by newest
     sortOption = { createdAt: -1 };
   }
 
@@ -102,6 +122,113 @@ const getProducts = asyncHandler(async (req, res) => {
 });
 
 /**
+ * @desc    Get base products for customization
+ * @route   GET /api/products/base-for-customization
+ * @access  Public
+ */
+const getBaseProductsForCustomization = asyncHandler(async (req, res) => {
+  const limit = Number(req.query.limit) || 10;
+  
+  const products = await Product.find({
+    category: 'Customize Your Prints',
+    isBaseProduct: true,
+    isActive: true
+  })
+  .sort({ createdAt: -1 })
+  .limit(limit);
+
+  res.json(products);
+});
+
+/**
+ * @desc    Get products by design style
+ * @route   GET /api/products/design-style/:style
+ * @access  Public
+ */
+const getProductsByDesignStyle = asyncHandler(async (req, res) => {
+  const { style } = req.params;
+  const limit = Number(req.query.limit) || 20;
+  const page = Number(req.query.pageNumber) || 1;
+  const pageSize = 12;
+
+  const query = {
+    category: 'Wear Your Conviction',
+    designStyle: style,
+    isActive: true
+  };
+
+  const count = await Product.countDocuments(query);
+  
+  const products = await Product.find(query)
+    .sort({ rating: -1, createdAt: -1 })
+    .limit(pageSize)
+    .skip(pageSize * (page - 1));
+
+  res.json({
+    products,
+    page,
+    pages: Math.ceil(count / pageSize),
+    totalProducts: count,
+    designStyle: style
+  });
+});
+
+/**
+ * @desc    Submit custom design order
+ * @route   POST /api/products/custom-order
+ * @access  Private
+ */
+const submitCustomDesignOrder = asyncHandler(async (req, res) => {
+  const {
+    baseProductId,
+    customDesign,
+    quantity,
+    size,
+    color,
+    specialInstructions,
+    contactPreferences
+  } = req.body;
+
+  // Validate base product
+  const baseProduct = await Product.findById(baseProductId);
+  if (!baseProduct || baseProduct.category !== 'Customize Your Prints') {
+    res.status(404);
+    throw new Error('Base product not found or not customizable');
+  }
+
+  // Create custom order (you'll need to create this model)
+  const customOrder = new CustomOrder({
+    user: req.user._id,
+    baseProduct: baseProductId,
+    customDesign: {
+      designUrl: customDesign.designUrl,
+      designPublicId: customDesign.designPublicId,
+      placement: customDesign.placement,
+      size: customDesign.size,
+      printMethod: customDesign.printMethod || 'Digital Print'
+    },
+    quantity,
+    size,
+    color,
+    basePrice: baseProduct.price,
+    customizationPrice: baseProduct.customizationOptions.customizationPrice || 0,
+    totalPrice: (baseProduct.price + (baseProduct.customizationOptions.customizationPrice || 0)) * quantity,
+    specialInstructions,
+    contactPreferences,
+    status: 'pending',
+    estimatedCompletionDays: 3-5
+  });
+
+  const savedOrder = await customOrder.save();
+  
+  res.status(201).json({
+    message: 'Custom design order submitted successfully',
+    orderId: savedOrder._id,
+    estimatedCompletion: '3-5 business days'
+  });
+});
+
+/**
  * @desc    Fetch single product
  * @route   GET /api/products/:id
  * @access  Public
@@ -109,7 +236,9 @@ const getProducts = asyncHandler(async (req, res) => {
 const getProductById = asyncHandler(async (req, res) => {
   const product = await Product.findById(req.params.id);
 
-  if (product) {
+  if (product && product.isActive) {
+    // Increment view count
+    await product.incrementViews();
     res.json(product);
   } else {
     res.status(404);
@@ -123,74 +252,48 @@ const getProductById = asyncHandler(async (req, res) => {
  * @access  Private/Admin
  */
 const createProduct = asyncHandler(async (req, res) => {
-  // Create a sample/default product that can be edited later
-  const product = new Product({
-    name: 'Sample Product',
-    price: 0,
-    user: req.user._id, // Admin who created the product
-    description: 'Sample description - please edit this product',
-    category: 'Plain Tees', // Default to one of the enum values
-    countInStock: 0,
-    images: [],
-    sizes: [
-      { name: 'S', inStock: false, stockCount: 0 },
-      { name: 'M', inStock: false, stockCount: 0 },
-      { name: 'L', inStock: false, stockCount: 0 }
-    ],
-    colors: [],
-    material: 'Cotton',
-    allowCustomization: false,
-    featured: false,
-    isSale: false,
-    isActive: true,
-    rating: 0,
-    numReviews: 0,
-    views: 0,
-    soldCount: 0
-  });
-
-  const createdProduct = await product.save();
-  res.status(201).json(createdProduct);
-});
-
-// Alternative approach - if you want to accept data from the request body:
-const createProductWithData = asyncHandler(async (req, res) => {
   const {
     name,
+    category,
+    designStyle,
     price,
     description,
+    convictionMessage,
     images,
-    category,
     sizes,
     colors,
     countInStock,
     material,
-    allowCustomization,
-    featured,
-    isSale,
-    salePrice,
+    designInspiration,
+    designerCredit
   } = req.body;
 
-  // Validate required fields
+  // Validate required fields based on category
   if (!name || !price || !description || !category) {
     res.status(400);
     throw new Error('Please provide name, price, description, and category');
   }
 
-  // Validate category is one of the allowed enum values
-  const allowedCategories = ['Graphic Tees', 'Plain Tees', 'Custom Prints'];
+  // Validate category
+  const allowedCategories = ['Customize Your Prints', 'Wear Your Conviction'];
   if (!allowedCategories.includes(category)) {
     res.status(400);
-    throw new Error('Invalid category. Must be one of: Graphic Tees, Plain Tees, Custom Prints');
+    throw new Error('Invalid category. Must be either "Customize Your Prints" or "Wear Your Conviction"');
   }
 
-  const product = new Product({
+  // Validate design style for Wear Your Conviction
+  if (category === 'Wear Your Conviction' && !designStyle) {
+    res.status(400);
+    throw new Error('Design style is required for "Wear Your Conviction" products');
+  }
+
+  const productData = {
     name,
     price: Number(price),
     user: req.user._id,
-    images: images || [],
     category,
     description,
+    images: images || [],
     sizes: sizes || [
       { name: 'S', inStock: true, stockCount: countInStock || 0 },
       { name: 'M', inStock: true, stockCount: countInStock || 0 },
@@ -199,18 +302,36 @@ const createProductWithData = asyncHandler(async (req, res) => {
     colors: colors || [],
     countInStock: Number(countInStock) || 0,
     material: material || 'Cotton',
-    allowCustomization: allowCustomization || false,
-    featured: featured || false,
-    isSale: isSale || false,
-    salePrice: salePrice ? Number(salePrice) : undefined,
     isActive: true,
     rating: 0,
     numReviews: 0,
     views: 0,
     soldCount: 0
-  });
+  };
 
+  // Add category-specific fields
+  if (category === 'Wear Your Conviction') {
+    productData.designStyle = designStyle;
+    productData.convictionMessage = convictionMessage;
+    productData.designInspiration = designInspiration;
+    productData.designerCredit = designerCredit;
+    productData.allowCustomization = false;
+    productData.isBaseProduct = false;
+  } else {
+    productData.allowCustomization = true;
+    productData.isBaseProduct = true;
+    productData.customizationOptions = {
+      allowText: true,
+      allowImages: true,
+      allowLogoUpload: true,
+      printAreas: ['Front', 'Back'],
+      availablePrintMethods: ['Screen Print', 'Digital Print']
+    };
+  }
+
+  const product = new Product(productData);
   const createdProduct = await product.save();
+  
   res.status(201).json(createdProduct);
 });
 
@@ -220,38 +341,31 @@ const createProductWithData = asyncHandler(async (req, res) => {
  * @access  Private/Admin
  */
 const updateProduct = asyncHandler(async (req, res) => {
-  const {
-    name,
-    price,
-    description,
-    images,
-    category,
-    sizes,
-    colors,
-    countInStock,
-    material,
-    allowCustomization,
-    featured,
-    isSale,
-    salePrice,
-  } = req.body;
-
   const product = await Product.findById(req.params.id);
 
   if (product) {
-    product.name = name || product.name;
-    product.price = price || product.price;
-    product.description = description || product.description;
-    product.images = images || product.images;
-    product.category = category || product.category;
-    product.sizes = sizes || product.sizes;
-    product.colors = colors || product.colors;
-    product.countInStock = countInStock !== undefined ? countInStock : product.countInStock;
-    product.material = material || product.material;
-    product.allowCustomization = allowCustomization !== undefined ? allowCustomization : product.allowCustomization;
-    product.featured = featured !== undefined ? featured : product.featured;
-    product.isSale = isSale !== undefined ? isSale : product.isSale;
-    product.salePrice = salePrice !== undefined ? salePrice : product.salePrice;
+    // Update common fields
+    product.name = req.body.name || product.name;
+    product.price = req.body.price || product.price;
+    product.description = req.body.description || product.description;
+    product.images = req.body.images || product.images;
+    product.sizes = req.body.sizes || product.sizes;
+    product.colors = req.body.colors || product.colors;
+    product.countInStock = req.body.countInStock !== undefined ? req.body.countInStock : product.countInStock;
+    product.material = req.body.material || product.material;
+    product.featured = req.body.featured !== undefined ? req.body.featured : product.featured;
+    product.isSale = req.body.isSale !== undefined ? req.body.isSale : product.isSale;
+    product.salePrice = req.body.salePrice !== undefined ? req.body.salePrice : product.salePrice;
+
+    // Update category-specific fields
+    if (product.category === 'Wear Your Conviction') {
+      product.designStyle = req.body.designStyle || product.designStyle;
+      product.convictionMessage = req.body.convictionMessage || product.convictionMessage;
+      product.designInspiration = req.body.designInspiration || product.designInspiration;
+      product.designerCredit = req.body.designerCredit || product.designerCredit;
+    } else if (product.category === 'Customize Your Prints') {
+      product.customizationOptions = req.body.customizationOptions || product.customizationOptions;
+    }
 
     const updatedProduct = await product.save();
     res.json(updatedProduct);
@@ -329,8 +443,14 @@ const createProductReview = asyncHandler(async (req, res) => {
  */
 const getTopProducts = asyncHandler(async (req, res) => {
   const limit = Number(req.query.limit) || 5;
+  const category = req.query.category;
   
-  const products = await Product.find({})
+  const query = { isActive: true };
+  if (category) {
+    query.category = category;
+  }
+  
+  const products = await Product.find(query)
     .sort({ rating: -1 })
     .limit(limit);
 
@@ -344,8 +464,14 @@ const getTopProducts = asyncHandler(async (req, res) => {
  */
 const getFeaturedProducts = asyncHandler(async (req, res) => {
   const limit = Number(req.query.limit) || 6;
+  const category = req.query.category;
   
-  const products = await Product.find({ featured: true })
+  const query = { featured: true, isActive: true };
+  if (category) {
+    query.category = category;
+  }
+  
+  const products = await Product.find(query)
     .sort({ createdAt: -1 })
     .limit(limit);
 
@@ -359,17 +485,118 @@ const getFeaturedProducts = asyncHandler(async (req, res) => {
  */
 const getSaleProducts = asyncHandler(async (req, res) => {
   const limit = Number(req.query.limit) || 6;
+  const category = req.query.category;
   
-  const products = await Product.find({ isSale: true })
+  const query = { isSale: true, isActive: true };
+  if (category) {
+    query.category = category;
+  }
+  
+  const products = await Product.find(query)
     .sort({ createdAt: -1 })
     .limit(limit);
 
   res.json(products);
 });
 
+/**
+ * @desc    Get design styles for Wear Your Conviction category
+ * @route   GET /api/products/design-styles
+ * @access  Public
+ */
+const getDesignStyles = asyncHandler(async (req, res) => {
+  const designStyles = [
+    'Religious/Spiritual', 
+    'Motivational'
+  ];
+
+  // Get count for each design style
+  const stylesWithCount = await Promise.all(
+    designStyles.map(async (style) => {
+      const count = await Product.countDocuments({
+        category: 'Wear Your Conviction',
+        designStyle: style,
+        isActive: true
+      });
+      return { style, count };
+    })
+  );
+
+  res.json(stylesWithCount);
+});
+
+/**
+ * @desc    Get custom design orders (Admin)
+ * @route   GET /api/admin/custom-orders
+ * @access  Private/Admin
+ */
+const getCustomDesignOrders = asyncHandler(async (req, res) => {
+  const pageSize = 20;
+  const page = Number(req.query.pageNumber) || 1;
+  const status = req.query.status;
+  const dateFrom = req.query.dateFrom;
+  const dateTo = req.query.dateTo;
+
+  const query = {};
+  
+  if (status) {
+    query.status = status;
+  }
+  
+  if (dateFrom || dateTo) {
+    query.createdAt = {};
+    if (dateFrom) query.createdAt.$gte = new Date(dateFrom);
+    if (dateTo) query.createdAt.$lte = new Date(dateTo);
+  }
+
+  const count = await CustomOrder.countDocuments(query);
+  
+  const orders = await CustomOrder.find(query)
+    .populate('user', 'name email')
+    .populate('baseProduct', 'name price')
+    .sort({ createdAt: -1 })
+    .limit(pageSize)
+    .skip(pageSize * (page - 1));
+
+  res.json({
+    orders,
+    page,
+    pages: Math.ceil(count / pageSize),
+    totalOrders: count,
+  });
+});
+
+/**
+ * @desc    Update custom order status (Admin)
+ * @route   PUT /api/admin/custom-orders/:id/status
+ * @access  Private/Admin
+ */
+const updateCustomOrderStatus = asyncHandler(async (req, res) => {
+  const { status, notes } = req.body;
+  
+  const order = await CustomOrder.findById(req.params.id);
+  
+  if (order) {
+    order.status = status;
+    if (notes) {
+      order.adminNotes = notes;
+    }
+    order.updatedAt = new Date();
+    
+    const updatedOrder = await order.save();
+    res.json(updatedOrder);
+  } else {
+    res.status(404);
+    throw new Error('Custom order not found');
+  }
+});
+
 module.exports = {
   getProducts,
   getProductById,
+  getBaseProductsForCustomization,
+  getProductsByDesignStyle,
+  submitCustomDesignOrder,
   createProduct,
   updateProduct,
   deleteProduct,
@@ -377,4 +604,7 @@ module.exports = {
   getTopProducts,
   getFeaturedProducts,
   getSaleProducts,
+  getDesignStyles,
+  getCustomDesignOrders,
+  updateCustomOrderStatus,
 };

@@ -47,7 +47,7 @@ const orderSchema = mongoose.Schema(
     paymentMethod: {
       type: String,
       required: true,
-      enum: ['paystack-card', 'paystack-transfer'],
+      enum: ['paystack-card', 'paystack-transfer', 'paystack-ussd'],
     },
     paymentResult: {
       id: { type: String },
