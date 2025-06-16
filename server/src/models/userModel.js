@@ -4,9 +4,14 @@ const validator = require('validator');
 
 const userSchema = mongoose.Schema(
   {
-    name: {
+    firstName: {
       type: String,
-      required: [true, 'Please add a name'],
+      required: [true, 'Please add a first name'],
+      trim: true,
+    },
+    lastName: {
+      type: String,
+      required: [true, 'Please add a last name'],
       trim: true,
     },
     email: {
@@ -39,7 +44,7 @@ const userSchema = mongoose.Schema(
     },
     isActive: {
       type: Boolean,
-      default: true, // Add this field
+      default: true,
     },
     requirePasswordChange: {
       type: Boolean,
@@ -66,6 +71,15 @@ const userSchema = mongoose.Schema(
     timestamps: true,
   }
 );
+
+// Virtual for full name
+userSchema.virtual('fullName').get(function() {
+  return `${this.firstName} ${this.lastName}`;
+});
+
+// Ensure virtual fields are serialized
+userSchema.set('toJSON', { virtuals: true });
+userSchema.set('toObject', { virtuals: true });
 
 // Method to check if password matches
 userSchema.methods.matchPassword = async function (enteredPassword) {

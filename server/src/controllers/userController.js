@@ -15,7 +15,7 @@ const generateToken = (id) => {
  * @access  Public
  */
 const registerUser = asyncHandler(async (req, res) => {
-  const { name, email, password, phone } = req.body;
+  const { firstName, lastName, email, password, phone } = req.body;
 
   // Check if user already exists
   const userExists = await User.findOne({ email });
@@ -27,7 +27,8 @@ const registerUser = asyncHandler(async (req, res) => {
 
   // Create new user
   const user = await User.create({
-    name,
+    firstName,
+    lastName,
     email,
     password,
     phone,
@@ -39,7 +40,9 @@ const registerUser = asyncHandler(async (req, res) => {
 
     res.status(201).json({
       _id: user._id,
-      name: user.name,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      fullName: user.fullName,
       email: user.email,
       phone: user.phone,
       isAdmin: user.isAdmin,
@@ -74,7 +77,9 @@ const authUser = asyncHandler(async (req, res) => {
 
     res.json({
       _id: user._id,
-      name: user.name,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      fullName: user.fullName,
       email: user.email,
       phone: user.phone,
       isAdmin: user.isAdmin,
@@ -98,7 +103,9 @@ const getUserProfile = asyncHandler(async (req, res) => {
   if (user) {
     res.json({
       _id: user._id,
-      name: user.name,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      fullName: user.fullName,
       email: user.email,
       phone: user.phone,
       isAdmin: user.isAdmin,
@@ -120,7 +127,8 @@ const updateUserProfile = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
 
   if (user) {
-    user.name = req.body.name || user.name;
+    user.firstName = req.body.firstName || user.firstName;
+    user.lastName = req.body.lastName || user.lastName;
     user.email = req.body.email || user.email;
     user.phone = req.body.phone || user.phone;
     
@@ -136,7 +144,9 @@ const updateUserProfile = asyncHandler(async (req, res) => {
 
     res.json({
       _id: updatedUser._id,
-      name: updatedUser.name,
+      firstName: updatedUser.firstName,
+      lastName: updatedUser.lastName,
+      fullName: updatedUser.fullName,
       email: updatedUser.email,
       phone: updatedUser.phone,
       isAdmin: updatedUser.isAdmin,
@@ -224,7 +234,9 @@ const changeAdminPassword = asyncHandler(async (req, res) => {
     
     res.json({
       _id: user._id,
-      name: user.name,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      fullName: user.fullName,
       email: user.email,
       phone: user.phone,
       isAdmin: user.isAdmin,
@@ -286,8 +298,6 @@ const updateShippingAddress = asyncHandler(async (req, res) => {
   }
 });
 
-
-
 /**
  * @desc    Delete user
  * @route   DELETE /api/users/:id
@@ -341,7 +351,8 @@ const getUsers = asyncHandler(async (req, res) => {
   if (keyword) {
     query = {
       $or: [
-        { name: { $regex: keyword, $options: 'i' } },
+        { firstName: { $regex: keyword, $options: 'i' } },
+        { lastName: { $regex: keyword, $options: 'i' } },
         { email: { $regex: keyword, $options: 'i' } }
       ]
     };
@@ -362,7 +373,8 @@ const getUsers = asyncHandler(async (req, res) => {
     },
     {
       $addFields: {
-        orderCount: { $size: '$orders' }
+        orderCount: { $size: '$orders' },
+        fullName: { $concat: ['$firstName', ' ', '$lastName'] }
       }
     },
     {
@@ -393,7 +405,8 @@ const updateUser = asyncHandler(async (req, res) => {
   const user = await User.findById(req.params.id);
 
   if (user) {
-    user.name = req.body.name || user.name;
+    user.firstName = req.body.firstName || user.firstName;
+    user.lastName = req.body.lastName || user.lastName;
     user.email = req.body.email || user.email;
     user.phone = req.body.phone || user.phone;
     user.isAdmin = req.body.isAdmin !== undefined ? req.body.isAdmin : user.isAdmin;
@@ -403,7 +416,9 @@ const updateUser = asyncHandler(async (req, res) => {
 
     res.json({
       _id: updatedUser._id,
-      name: updatedUser.name,
+      firstName: updatedUser.firstName,
+      lastName: updatedUser.lastName,
+      fullName: updatedUser.fullName,
       email: updatedUser.email,
       phone: updatedUser.phone,
       isAdmin: updatedUser.isAdmin,
@@ -491,8 +506,6 @@ const getWishlist = asyncHandler(async (req, res) => {
     throw new Error('User not found');
   }
 });
-
-
 
 module.exports = {
   registerUser,

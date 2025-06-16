@@ -13,7 +13,8 @@ const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState('profile');
   
   // Profile form state
-  const [name, setName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
@@ -89,7 +90,8 @@ const ProfilePage = () => {
   // Set initial form values
   useEffect(() => {
     if (profileData) {
-      setName(profileData.name || '');
+      setFirstName(profileData.firstName || '');
+      setLastName(profileData.lastName || '');
       setEmail(profileData.email || '');
       setPhone(profileData.phone || '');
     }
@@ -130,7 +132,8 @@ const ProfilePage = () => {
     }
     
     const userData = {
-      name,
+      firstName,
+      lastName,
       email,
       phone,
     };
@@ -215,12 +218,24 @@ const ProfilePage = () => {
                     {errorMsg && <Message variant="error" className="mb-4">{errorMsg}</Message>}
                     
                     <div className="mb-4">
-                      <label htmlFor="name" className="form-label">Full Name</label>
+                      <label htmlFor="firstName" className="form-label">First Name</label>
                       <input
                         type="text"
-                        id="name"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
+                        id="firstName"
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        className="form-input"
+                        required
+                      />
+                    </div>
+                    
+                    <div className="mb-4">
+                      <label htmlFor="lastName" className="form-label">Last Name</label>
+                      <input
+                        type="text"
+                        id="lastName"
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
                         className="form-input"
                         required
                       />

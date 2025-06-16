@@ -9,7 +9,8 @@ import Message from '../components/common/Message';
 const RegisterPage = () => {
   // Form data state
   const [formData, setFormData] = useState({
-    name: '',
+    firstName: '',
+    lastName: '',
     email: '',
     phone: '',
     password: '',
@@ -62,9 +63,9 @@ const RegisterPage = () => {
     setError('');
     
     // Validate form
-    const { name, email, password, confirmPassword, phone } = formData;
+    const { firstName, lastName, email, password, confirmPassword, phone } = formData;
     
-    if (!name || !email || !password || !confirmPassword) {
+    if (!firstName || !lastName || !email || !password || !confirmPassword) {
       setError('Please fill in all required fields');
       return;
     }
@@ -83,7 +84,8 @@ const RegisterPage = () => {
     
     try {
       await sendRegistrationOTP({
-        name,
+        firstName,
+        lastName,
         email,
         password,
         phone,
@@ -156,15 +158,29 @@ const RegisterPage = () => {
               
               <form onSubmit={handleFormSubmit}>
                 <div className="mb-4">
-                  <label htmlFor="name" className="form-label">Full Name*</label>
+                  <label htmlFor="firstName" className="form-label">First Name*</label>
                   <input
                     type="text"
-                    id="name"
-                    name="name"
-                    value={formData.name}
+                    id="firstName"
+                    name="firstName"
+                    value={formData.firstName}
                     onChange={handleInputChange}
                     className="form-input"
-                    placeholder="Enter your full name"
+                    placeholder="Enter your first name"
+                    required
+                  />
+                </div>
+                
+                <div className="mb-4">
+                  <label htmlFor="lastName" className="form-label">Last Name*</label>
+                  <input
+                    type="text"
+                    id="lastName"
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={handleInputChange}
+                    className="form-input"
+                    placeholder="Enter your last name"
                     required
                   />
                 </div>

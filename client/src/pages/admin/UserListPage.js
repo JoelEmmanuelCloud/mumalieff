@@ -145,10 +145,21 @@ const UserListPage = () => {
   };
   
   // Get user initials
-  const getUserInitials = (name) => {
-    return name
-      ? name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
-      : 'U';
+  const getUserInitials = (user) => {
+    if (user.firstName && user.lastName) {
+      return (user.firstName[0] + user.lastName[0]).toUpperCase();
+    } else if (user.fullName) {
+      return user.fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    }
+    return 'U';
+  };
+
+  // Get user display name
+  const getUserDisplayName = (user) => {
+    if (user.fullName) {
+      return user.fullName;
+    }
+    return `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Unknown User';
   };
   
   return (
@@ -262,14 +273,14 @@ const UserListPage = () => {
                     <div className="flex-shrink-0">
                       <div className="h-12 w-12 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
                         <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
-                          {getUserInitials(user.name)}
+                          {getUserInitials(user)}
                         </span>
                       </div>
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1">
                         <h3 className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                          {user.name}
+                          {getUserDisplayName(user)}
                         </h3>
                         <div className="flex space-x-1">
                           <button
@@ -323,7 +334,7 @@ const UserListPage = () => {
                         </Link>
                         {!user.isAdmin && (
                           <button
-                            onClick={() => handleDeleteUser(user._id, user.name)}
+                            onClick={() => handleDeleteUser(user._id, getUserDisplayName(user))}
                             className="text-red-600 hover:text-red-500 dark:text-red-400 dark:hover:text-red-300 text-sm font-medium"
                             disabled={deleteUserMutation.isLoading}
                           >
@@ -374,13 +385,13 @@ const UserListPage = () => {
                         <div className="flex-shrink-0 h-10 w-10">
                           <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
                             <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
-                              {getUserInitials(user.name)}
+                              {getUserInitials(user)}
                             </span>
                           </div>
                         </div>
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900 dark:text-white">
-                            {user.name}
+                            {getUserDisplayName(user)}
                           </div>
                           <div className="text-sm text-gray-500 dark:text-gray-400">
                             ID: {user._id.substring(0, 8)}...
@@ -452,7 +463,7 @@ const UserListPage = () => {
                         </Link>
                         {!user.isAdmin && (
                           <button
-                            onClick={() => handleDeleteUser(user._id, user.name)}
+                            onClick={() => handleDeleteUser(user._id, getUserDisplayName(user))}
                             className="text-red-600 hover:text-red-500 dark:text-red-400 dark:hover:text-red-300"
                             disabled={deleteUserMutation.isLoading}
                           >
@@ -606,13 +617,13 @@ const UserListPage = () => {
                   <div className="flex-shrink-0 h-16 w-16">
                     <div className="h-16 w-16 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
                       <span className="text-xl font-medium text-blue-600 dark:text-blue-400">
-                        {getUserInitials(selectedUser.name)}
+                        {getUserInitials(selectedUser)}
                       </span>
                     </div>
                   </div>
                   <div className="ml-4">
                     <h4 className="text-lg font-medium text-gray-900 dark:text-white">
-                      {selectedUser.name}
+                      {getUserDisplayName(selectedUser)}
                     </h4>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
                       {selectedUser.email}
@@ -628,6 +639,24 @@ const UserListPage = () => {
                         {selectedUser._id}
                       </dd>
                     </div>
+                    
+                    {selectedUser.firstName && (
+                      <div>
+                        <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">First Name</dt>
+                        <dd className="text-sm text-gray-900 dark:text-white">
+                          {selectedUser.firstName}
+                        </dd>
+                      </div>
+                    )}
+                    
+                    {selectedUser.lastName && (
+                      <div>
+                        <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Last Name</dt>
+                        <dd className="text-sm text-gray-900 dark:text-white">
+                          {selectedUser.lastName}
+                        </dd>
+                      </div>
+                    )}
                     
                     <div>
                       <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Role</dt>
