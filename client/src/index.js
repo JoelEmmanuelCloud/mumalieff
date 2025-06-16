@@ -37,7 +37,7 @@ root.render(
             </CartProvider>
           </AuthProvider>
         </ThemeProvider>
-        {process.env.NODE_ENV === 'development' && <ReactQueryDevtools />}
+        {process.env.NODE_ENV === 'production' && <ReactQueryDevtools />}
       </QueryClientProvider>
     </BrowserRouter>
   </React.StrictMode>

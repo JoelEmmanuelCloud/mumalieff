@@ -250,7 +250,6 @@ paymentSchema.index({ 'paymentGatewayResponse.channel': 1 });
 paymentSchema.index({ customerEmail: 1 });
 paymentSchema.index({ paidAt: 1 });
 paymentSchema.index({ createdAt: 1 });
-paymentSchema.index({ transactionReference: 1 });
 
 // Compound indexes
 paymentSchema.index({ user: 1, status: 1 });

@@ -1,6 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const Product = require('../models/productModel');
-const CustomOrder = require('../models/customOrderModel'); // New model for custom orders
+const CustomOrder = require('../models/customOrderModel'); 
+const mongoose = require('mongoose');
 
 /**
  * @desc    Fetch all products with updated filtering
@@ -234,11 +235,19 @@ const submitCustomDesignOrder = asyncHandler(async (req, res) => {
  * @access  Public
  */
 const getProductById = asyncHandler(async (req, res) => {
-  const product = await Product.findById(req.params.id);
+  const { id } = req.params;
+  
+  // Validate ObjectId
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    res.status(400);
+    throw new Error('Invalid product ID');
+  }
+
+  const product = await Product.findById(id);
 
   if (product && product.isActive) {
-    // Increment view count
-    await product.incrementViews();
+    // Use findByIdAndUpdate instead of incrementViews()
+    await Product.findByIdAndUpdate(id, { $inc: { views: 1 } });
     res.json(product);
   } else {
     res.status(404);
