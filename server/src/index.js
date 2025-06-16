@@ -13,6 +13,7 @@ const orderRoutes = require('./routes/orderRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const otpRoutes = require('./routes/otpRoutes'); 
 
 // Initialize Express
 const app = express();
@@ -45,12 +46,14 @@ app.get('/', (req, res) => {
 });
 
 // API routes
+app.use('/api/auth', otpRoutes)
 app.use('/api/products', productRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/admin', adminRoutes);
+
 
 // Error handling middleware
 app.use(notFound);

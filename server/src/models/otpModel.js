@@ -44,7 +44,7 @@ const otpSchema = mongoose.Schema(
 );
 
 // Index for automatic cleanup
-otpSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+// otpSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 const OTP = mongoose.model('OTP', otpSchema);
 

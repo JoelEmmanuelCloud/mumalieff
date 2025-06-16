@@ -24,6 +24,7 @@
         "vercel": "^25.2.0"
     },
     "dependencies": {
+        "@sendgrid/mail": "^8.1.5",
         "crypto": "^1.0.1",
         "debug": "^4.4.0",
         "glob": "^11.0.1",
