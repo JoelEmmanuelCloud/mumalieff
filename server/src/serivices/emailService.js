@@ -7,10 +7,10 @@ const FROM_EMAIL = "notification@mumalieff.com";
 
 // SendGrid Template IDs - Replace these with your actual template IDs from SendGrid
 const TEMPLATES = {
-    REGISTRATION_OTP: 'd-your-registration-template-id',
-    LOGIN_OTP: 'd-your-login-template-id',
-    FORGOT_PASSWORD_OTP: 'd-your-forgot-password-template-id',
-    WELCOME_EMAIL: 'd-your-welcome-template-id',
+    REGISTRATION_OTP: 'd-5055e47f4abb4bb9be622d8ef9656e76',
+    LOGIN_OTP: 'd-cbe45c030f094f82a3bb1a36fcf2f83d',
+    FORGOT_PASSWORD_OTP: 'd-110a651213894c7695fb3057360c62b0',
+    WELCOME_EMAIL: 'd-8e6df1c30633437a8ad82fca203b24c5',
 };
 
 /**
@@ -166,6 +166,8 @@ const sendForgotPasswordOTP = async (email, otp, name = 'User', req = null) => {
  */
 const sendWelcomeEmail = async (email, name = 'User') => {
     try {
+        const baseUrl = process.env.FRONTEND_URL || 'https://mumalieff.com';
+        
         const msg = {
             to: email,
             from: {
@@ -176,13 +178,25 @@ const sendWelcomeEmail = async (email, name = 'User') => {
             dynamicTemplateData: {
                 firstName: name,
                 currentYear: new Date().getFullYear(),
-                shopUrl: `${process.env.FRONTEND_URL || 'https://mumalieff.com'}/shop`,
-                profileUrl: `${process.env.FRONTEND_URL || 'https://mumalieff.com'}/profile`,
+                
+                // Product category URLs
+                customizeUrl: `${baseUrl}/products?category=customize-your-prints`,
+                convictionUrl: `${baseUrl}/products?category=wear-your-conviction`,
+                shopUrl: `${baseUrl}/products`,
+                profileUrl: `${baseUrl}/profile`,
+                
+                // Support
                 supportEmail: process.env.SUPPORT_EMAIL || 'support@mumalieff.com',
+                
+                // Social Media - Your actual accounts
+                instagramUrl: 'https://www.instagram.com/mumalieff?igsh=MTFqZTQ0eXBvNWk1ZA==',
+                tiktokUrl: 'https://www.tiktok.com/@mumalieff?_t=ZM-8xDuUhGR3Zt&_r=1',
                 facebookUrl: 'https://facebook.com/mumalieff',
-                instagramUrl: 'https://instagram.com/mumalieff',
                 twitterUrl: 'https://twitter.com/mumalieff',
-                linkedinUrl: 'https://linkedin.com/company/mumalieff',
+                
+                // Additional URLs for product discovery
+                religiousUrl: `${baseUrl}/products?category=wear-your-conviction&style=religious-spiritual`,
+                motivationalUrl: `${baseUrl}/products?category=wear-your-conviction&style=motivational`,
             },
         };
         

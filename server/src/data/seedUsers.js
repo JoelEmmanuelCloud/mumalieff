@@ -15,7 +15,8 @@ mongoose.connect('mongodb+srv://newuser:Pampersbaby@cluster0.olifzgj.mongodb.net
 const sampleUsers = [
   // Admin User
   {
-    name: 'Admin User',
+    firstName: 'Admin',
+    lastName: 'User',
     email: 'admin@mumalieff.com',
     password: 'admin123456',
     phone: '+2348000000000',
@@ -33,7 +34,8 @@ const sampleUsers = [
   },
   // Regular Users
   {
-    name: 'John Doe',
+    firstName: 'John',
+    lastName: 'Doe',
     email: 'john@example.com',
     password: 'password123',
     phone: '+2348023456789',
@@ -50,7 +52,8 @@ const sampleUsers = [
     ]
   },
   {
-    name: 'Amina Ibrahim',
+    firstName: 'Amina',
+    lastName: 'Ibrahim',
     email: 'amina@example.com',
     password: 'password123',
     phone: '+2348034567890',
@@ -67,7 +70,8 @@ const sampleUsers = [
     ]
   },
   {
-    name: 'Chukwu Emeka',
+    firstName: 'Chukwu',
+    lastName: 'Emeka',
     email: 'emeka@example.com',
     password: 'password123',
     phone: '+2348045678901',
@@ -84,7 +88,8 @@ const sampleUsers = [
     ]
   },
   {
-    name: 'Blessing Okonkwo',
+    firstName: 'Blessing',
+    lastName: 'Okonkwo',
     email: 'blessing@example.com',
     password: 'password123',
     phone: '+2348056789012',
@@ -101,7 +106,8 @@ const sampleUsers = [
     ]
   },
   {
-    name: 'Yusuf Mohammed',
+    firstName: 'Yusuf',
+    lastName: 'Mohammed',
     email: 'yusuf@example.com',
     password: 'password123',
     phone: '+2348067890123',
@@ -118,7 +124,8 @@ const sampleUsers = [
     ]
   },
   {
-    name: 'Folake Adeyemi',
+    firstName: 'Folake',
+    lastName: 'Adeyemi',
     email: 'folake@example.com',
     password: 'password123',
     phone: '+2348078901234',
@@ -135,7 +142,8 @@ const sampleUsers = [
     ]
   },
   {
-    name: 'Obinna Nwachukwu',
+    firstName: 'Obinna',
+    lastName: 'Nwachukwu',
     email: 'obinna@example.com',
     password: 'password123',
     phone: '+2348089012345',
@@ -152,7 +160,8 @@ const sampleUsers = [
     ]
   },
   {
-    name: 'Fatima Abubakar',
+    firstName: 'Fatima',
+    lastName: 'Abubakar',
     email: 'fatima@example.com',
     password: 'password123',
     phone: '+2348090123456',
@@ -169,7 +178,8 @@ const sampleUsers = [
     ]
   },
   {
-    name: 'David Okafor',
+    firstName: 'David',
+    lastName: 'Okafor',
     email: 'david@example.com',
     password: 'password123',
     phone: '+2349012345678',
@@ -194,7 +204,8 @@ const sampleUsers = [
     ]
   },
   {
-    name: 'Sarah Johnson',
+    firstName: 'Sarah',
+    lastName: 'Johnson',
     email: 'sarah@example.com',
     password: 'password123',
     phone: '+2349023456789',
@@ -211,7 +222,8 @@ const sampleUsers = [
     ]
   },
   {
-    name: 'Michael Adeleke',
+    firstName: 'Michael',
+    lastName: 'Adeleke',
     email: 'michael@example.com',
     password: 'password123',
     phone: '+2349034567890',
@@ -228,7 +240,8 @@ const sampleUsers = [
     ]
   },
   {
-    name: 'Grace Okechukwu',
+    firstName: 'Grace',
+    lastName: 'Okechukwu',
     email: 'grace@example.com',
     password: 'password123',
     phone: '+2349045678901',
@@ -245,7 +258,8 @@ const sampleUsers = [
     ]
   },
   {
-    name: 'Ahmad Hassan',
+    firstName: 'Ahmad',
+    lastName: 'Hassan',
     email: 'ahmad@example.com',
     password: 'password123',
     phone: '+2349056789012',
@@ -256,6 +270,115 @@ const sampleUsers = [
         city: 'Kaduna',
         state: 'Kaduna',
         postalCode: '800287',
+        country: 'Nigeria',
+        isDefault: true
+      }
+    ]
+  },
+  // Additional users for testing
+  {
+    firstName: 'Kemi',
+    lastName: 'Ogundimu',
+    email: 'kemi@example.com',
+    password: 'password123',
+    phone: '+2349067890123',
+    isAdmin: false,
+    shippingAddresses: [
+      {
+        address: '89 Allen Avenue',
+        city: 'Ikeja',
+        state: 'Lagos',
+        postalCode: '100001',
+        country: 'Nigeria',
+        isDefault: true
+      }
+    ]
+  },
+  {
+    firstName: 'Usman',
+    lastName: 'Bello',
+    email: 'usman@example.com',
+    password: 'password123',
+    phone: '+2349078901234',
+    isAdmin: false,
+    shippingAddresses: [
+      {
+        address: '45 Constitution Avenue',
+        city: 'Abuja',
+        state: 'FCT',
+        postalCode: '900001',
+        country: 'Nigeria',
+        isDefault: true
+      }
+    ]
+  },
+  {
+    firstName: 'Chioma',
+    lastName: 'Ugwu',
+    email: 'chioma@example.com',
+    password: 'password123',
+    phone: '+2349089012345',
+    isAdmin: false,
+    shippingAddresses: [
+      {
+        address: '67 Zik Avenue',
+        city: 'Awka',
+        state: 'Anambra',
+        postalCode: '420211',
+        country: 'Nigeria',
+        isDefault: true
+      }
+    ]
+  },
+  {
+    firstName: 'Ibrahim',
+    lastName: 'Musa',
+    email: 'ibrahim@example.com',
+    password: 'password123',
+    phone: '+2349090123456',
+    isAdmin: false,
+    shippingAddresses: [
+      {
+        address: '78 Yakubu Gowon Way',
+        city: 'Jos',
+        state: 'Plateau',
+        postalCode: '930001',
+        country: 'Nigeria',
+        isDefault: true
+      }
+    ]
+  },
+  {
+    firstName: 'Ngozi',
+    lastName: 'Anyanwu',
+    email: 'ngozi@example.com',
+    password: 'password123',
+    phone: '+2349012346789',
+    isAdmin: false,
+    shippingAddresses: [
+      {
+        address: '34 Hospital Road',
+        city: 'Owerri',
+        state: 'Imo',
+        postalCode: '460001',
+        country: 'Nigeria',
+        isDefault: true
+      }
+    ]
+  },
+  {
+    firstName: 'Tunde',
+    lastName: 'Bakare',
+    email: 'tunde@example.com',
+    password: 'password123',
+    phone: '+2349023457890',
+    isAdmin: false,
+    shippingAddresses: [
+      {
+        address: '56 Adebayo Doherty Road',
+        city: 'Lekki',
+        state: 'Lagos',
+        postalCode: '106104',
         country: 'Nigeria',
         isDefault: true
       }
@@ -279,22 +402,50 @@ const seedUsers = async () => {
     
     console.log('\n👑 Admin Users Created:');
     adminUsers.forEach(user => {
+      console.log(`   Name: ${user.firstName} ${user.lastName}`);
       console.log(`   Email: ${user.email}`);
-      console.log(`   Password: admin123`);
+      console.log(`   Password: admin123456`);
     });
     
     console.log('\n👥 Regular Users Created:');
     console.log(`   Total: ${regularUsers.length} users`);
     console.log('   Password for all: password123');
     
+    // Show some sample users
+    console.log('\n📝 Sample Regular Users:');
+    regularUsers.slice(0, 5).forEach(user => {
+      console.log(`   ${user.firstName} ${user.lastName} - ${user.email}`);
+    });
+    if (regularUsers.length > 5) {
+      console.log(`   ... and ${regularUsers.length - 5} more users`);
+    }
+    
     console.log('\n📊 User Summary:');
     console.log(`   Total users: ${createdUsers.length}`);
     console.log(`   Admin users: ${adminUsers.length}`);
     console.log(`   Regular users: ${regularUsers.length}`);
     
+    // Show distribution by states
+    const stateDistribution = {};
+    createdUsers.forEach(user => {
+      if (user.shippingAddresses && user.shippingAddresses.length > 0) {
+        const state = user.shippingAddresses[0].state;
+        stateDistribution[state] = (stateDistribution[state] || 0) + 1;
+      }
+    });
+    
+    console.log('\n🌍 Geographic Distribution:');
+    Object.entries(stateDistribution)
+      .sort(([,a], [,b]) => b - a)
+      .forEach(([state, count]) => {
+        console.log(`   ${state}: ${count} user${count > 1 ? 's' : ''}`);
+      });
+    
+    console.log('\n✅ User seeding completed successfully!');
     process.exit();
   } catch (error) {
-    console.error(`Error seeding users: ${error.message}`);
+    console.error(`❌ Error seeding users: ${error.message}`);
+    console.error(error.stack);
     process.exit(1);
   }
 };
