@@ -1,15 +1,26 @@
+// src/context/AuthContext.js
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useMutation } from 'react-query';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
-import { loginUser, registerUser, updateUserProfile } from '../services/authService';
+import { updateUserProfile } from '../services/authService';
+import { 
+  sendRegistrationOTP, 
+  verifyRegistrationOTP,
+  sendLoginOTP,
+  verifyLoginOTP,
+  sendForgotPasswordOTP,
+  verifyForgotPasswordOTP,
+  resetPassword,
+  resendOTP
+} from '../services/otpService';
 
 const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
 
-// Add this function to authService.js
+// Change admin password function
 const changeAdminPassword = async ({ currentPassword, newPassword }) => {
   const config = {
     headers: {
@@ -46,36 +57,113 @@ export const AuthProvider = ({ children }) => {
     }
   }, [navigate]);
 
-  // Login mutation
-  const loginMutation = useMutation(loginUser, {
+  // Registration OTP mutations
+  const sendRegistrationOTPMutation = useMutation(sendRegistrationOTP, {
     onSuccess: (data) => {
-      setUser(data);
-      localStorage.setItem('user', JSON.stringify(data));
-      toast.success('Successfully logged in!');
-      
-      // Redirect admin to password change if required
-      if (data.isAdmin && data.requirePasswordChange) {
-        navigate('/admin/change-password');
-      } else if (data.isAdmin) {
-        navigate('/admin/dashboard');
-      }
+      toast.success('Verification code sent to your email!');
     },
     onError: (error) => {
-      toast.error(error.response?.data?.message || 'Login failed');
+      toast.error(error.response?.data?.message || 'Failed to send verification code');
     },
   });
 
-  // Register mutation
-  const registerMutation = useMutation(registerUser, {
+  const verifyRegistrationOTPMutation = useMutation(
+    ({ email, otp }) => verifyRegistrationOTP(email, otp),
+    {
+      onSuccess: (data) => {
+        setUser(data);
+        localStorage.setItem('user', JSON.stringify(data));
+        toast.success('Registration successful! Welcome!');
+      },
+      onError: (error) => {
+        toast.error(error.response?.data?.message || 'Verification failed');
+      },
+    }
+  );
+
+  // Login OTP mutations
+  const sendLoginOTPMutation = useMutation(
+    ({ email, password }) => sendLoginOTP(email, password),
+    {
+      onSuccess: (data) => {
+        toast.success('Verification code sent to your email!');
+      },
+      onError: (error) => {
+        toast.error(error.response?.data?.message || 'Login failed');
+      },
+    }
+  );
+
+  const verifyLoginOTPMutation = useMutation(
+    ({ email, otp }) => verifyLoginOTP(email, otp),
+    {
+      onSuccess: (data) => {
+        setUser(data);
+        localStorage.setItem('user', JSON.stringify(data));
+        toast.success('Successfully logged in!');
+        
+        // Redirect admin to password change if required
+        if (data.isAdmin && data.requirePasswordChange) {
+          navigate('/admin/change-password');
+        } else if (data.isAdmin) {
+          navigate('/admin/dashboard');
+        }
+      },
+      onError: (error) => {
+        toast.error(error.response?.data?.message || 'Verification failed');
+      },
+    }
+  );
+
+  // Forgot password OTP mutations
+  const sendForgotPasswordOTPMutation = useMutation(sendForgotPasswordOTP, {
     onSuccess: (data) => {
-      setUser(data);
-      localStorage.setItem('user', JSON.stringify(data));
-      toast.success('Registration successful!');
+      toast.success('Reset code sent to your email!');
     },
     onError: (error) => {
-      toast.error(error.response?.data?.message || 'Registration failed');
+      toast.error(error.response?.data?.message || 'Failed to send reset code');
     },
   });
+
+  const verifyForgotPasswordOTPMutation = useMutation(
+    ({ email, otp }) => verifyForgotPasswordOTP(email, otp),
+    {
+      onSuccess: (data) => {
+        toast.success('Code verified! Please set your new password.');
+      },
+      onError: (error) => {
+        toast.error(error.response?.data?.message || 'Verification failed');
+      },
+    }
+  );
+
+  const resetPasswordMutation = useMutation(
+    ({ email, otp, newPassword }) => resetPassword(email, otp, newPassword),
+    {
+      onSuccess: (data) => {
+        setUser(data);
+        localStorage.setItem('user', JSON.stringify(data));
+        toast.success('Password reset successful!');
+        navigate('/');
+      },
+      onError: (error) => {
+        toast.error(error.response?.data?.message || 'Password reset failed');
+      },
+    }
+  );
+
+  // Resend OTP mutation
+  const resendOTPMutation = useMutation(
+    ({ email, type }) => resendOTP(email, type),
+    {
+      onSuccess: (data) => {
+        toast.success('Verification code resent!');
+      },
+      onError: (error) => {
+        toast.error(error.response?.data?.message || 'Failed to resend code');
+      },
+    }
+  );
 
   // Update profile mutation
   const updateProfileMutation = useMutation(updateUserProfile, {
@@ -110,14 +198,37 @@ export const AuthProvider = ({ children }) => {
     },
   });
 
-  // Login function
-  const login = async (email, password) => {
-    return loginMutation.mutateAsync({ email, password });
+  // Auth functions
+  const sendRegistrationOTPFunc = async (userData) => {
+    return sendRegistrationOTPMutation.mutateAsync(userData);
   };
 
-  // Register function
-  const register = async (name, email, password, phone) => {
-    return registerMutation.mutateAsync({ name, email, password, phone });
+  const verifyRegistrationOTPFunc = async (email, otp) => {
+    return verifyRegistrationOTPMutation.mutateAsync({ email, otp });
+  };
+
+  const sendLoginOTPFunc = async (email, password) => {
+    return sendLoginOTPMutation.mutateAsync({ email, password });
+  };
+
+  const verifyLoginOTPFunc = async (email, otp) => {
+    return verifyLoginOTPMutation.mutateAsync({ email, otp });
+  };
+
+  const sendForgotPasswordOTPFunc = async (email) => {
+    return sendForgotPasswordOTPMutation.mutateAsync(email);
+  };
+
+  const verifyForgotPasswordOTPFunc = async (email, otp) => {
+    return verifyForgotPasswordOTPMutation.mutateAsync({ email, otp });
+  };
+
+  const resetPasswordFunc = async (email, otp, newPassword) => {
+    return resetPasswordMutation.mutateAsync({ email, otp, newPassword });
+  };
+
+  const resendOTPFunc = async (email, type) => {
+    return resendOTPMutation.mutateAsync({ email, type });
   };
 
   // Update profile function
@@ -141,17 +252,40 @@ export const AuthProvider = ({ children }) => {
     <AuthContext.Provider
       value={{
         user,
+        setUser,
         isAuthenticated: !!user,
         isAdmin: user?.isAdmin || false,
         requirePasswordChange: user?.isAdmin ? (user?.requirePasswordChange || false) : false,
         loading,
-        login,
-        register,
+        
+        // Registration with OTP
+        sendRegistrationOTP: sendRegistrationOTPFunc,
+        verifyRegistrationOTP: verifyRegistrationOTPFunc,
+        sendRegistrationOTPLoading: sendRegistrationOTPMutation.isLoading,
+        verifyRegistrationOTPLoading: verifyRegistrationOTPMutation.isLoading,
+        
+        // Login with OTP
+        sendLoginOTP: sendLoginOTPFunc,
+        verifyLoginOTP: verifyLoginOTPFunc,
+        sendLoginOTPLoading: sendLoginOTPMutation.isLoading,
+        verifyLoginOTPLoading: verifyLoginOTPMutation.isLoading,
+        
+        // Forgot password with OTP
+        sendForgotPasswordOTP: sendForgotPasswordOTPFunc,
+        verifyForgotPasswordOTP: verifyForgotPasswordOTPFunc,
+        resetPassword: resetPasswordFunc,
+        sendForgotPasswordOTPLoading: sendForgotPasswordOTPMutation.isLoading,
+        verifyForgotPasswordOTPLoading: verifyForgotPasswordOTPMutation.isLoading,
+        resetPasswordLoading: resetPasswordMutation.isLoading,
+        
+        // Resend OTP
+        resendOTP: resendOTPFunc,
+        resendOTPLoading: resendOTPMutation.isLoading,
+        
+        // Other functions
         logout,
         updateProfile,
         changePassword,
-        loginLoading: loginMutation.isLoading,
-        registerLoading: registerMutation.isLoading,
         updateProfileLoading: updateProfileMutation.isLoading,
         changePasswordLoading: changePasswordMutation.isLoading,
       }}
