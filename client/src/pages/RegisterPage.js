@@ -29,8 +29,10 @@ const RegisterPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Get redirect URL from query params
-  const redirect = location.search ? location.search.split('=')[1] : '/';
+  // Get redirect URL from query params - FIXED
+  const redirect = location.search && location.search.includes('=') 
+    ? location.search.split('=')[1] 
+    : '/';
   
   // Redirect if already authenticated
   useEffect(() => {
@@ -319,7 +321,7 @@ const RegisterPage = () => {
             <p className="text-gray-600 dark:text-gray-300">
               Already have an account?{' '}
               <Link 
-                to={redirect ? `/login?redirect=${redirect}` : '/login'}
+                to={redirect !== '/' ? `/login?redirect=${redirect}` : '/login'}
                 className="text-primary hover:text-primary-light dark:text-accent-blue-light dark:hover:text-accent-blue font-medium"
               >
                 Sign In

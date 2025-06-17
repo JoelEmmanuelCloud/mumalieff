@@ -187,7 +187,7 @@ const Header = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
                 <span className="hidden lg:inline-block ml-2 font-medium">
-                  {isAuthenticated ? user.name.split(' ')[0] : 'Account'}
+                  {isAuthenticated ? user.firstName.split(' ')[0] : 'Account'}
                 </span>
               </button>
               
@@ -351,7 +351,7 @@ const Header = () => {
               {isAuthenticated ? (
                 <>
                   <div className="px-4 py-2 text-sm text-gray-500 dark:text-gray-400 font-medium">
-                    Hi, {user.name.split(' ')[0]}!
+                    Hi, {user.firstName.split(' ')[0]}!
                   </div>
                   <Link
                     to="/profile"

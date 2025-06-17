@@ -59,17 +59,13 @@ const sendRegistrationOTP = asyncHandler(async (req, res) => {
     throw new Error('User already exists with this email');
   }
   
-  // Hash password
-  const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash(password, salt);
-  
   // Generate OTP
   const otp = generateOTP();
   
   // Delete any existing OTP for this email and type
   await OTP.deleteMany({ email, type: 'registration' });
   
-  // Save OTP to database
+  // Save OTP to database - Store PLAIN password, let User model hash it
   await OTP.create({
     email,
     otp,
@@ -77,7 +73,7 @@ const sendRegistrationOTP = asyncHandler(async (req, res) => {
     userData: {
       firstName,
       lastName,
-      password: hashedPassword,
+      password, // Store plain password here
       phone,
     },
   });
