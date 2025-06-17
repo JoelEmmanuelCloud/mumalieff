@@ -26,7 +26,7 @@ const generateToken = (id) => {
  * @access  Public
  */
 const sendRegistrationOTP = asyncHandler(async (req, res) => {
-  const { name, email, password, phone } = req.body;
+  const { firstName, lastName, email, password, phone } = req.body;
   
   // Rate limiting
   const rateLimit = checkRateLimit(`reg_${email}`, 3, 15 * 60 * 1000);
@@ -36,9 +36,9 @@ const sendRegistrationOTP = asyncHandler(async (req, res) => {
   }
   
   // Validate input
-  if (!name || !email || !password) {
+  if (!firstName || !lastName || !email || !password) {
     res.status(400);
-    throw new Error('Please provide name, email, and password');
+    throw new Error('Please provide first name, last name, email, and password');
   }
   
   if (!validateEmail(email)) {
@@ -75,15 +75,16 @@ const sendRegistrationOTP = asyncHandler(async (req, res) => {
     otp,
     type: 'registration',
     userData: {
-      name,
+      firstName,
+      lastName,
       password: hashedPassword,
       phone,
     },
   });
   
-  // Send OTP email
+  // Send OTP email (using firstName for personalization)
   try {
-    await sendOTPEmail(email, otp, 'registration', name);
+    await sendOTPEmail(email, otp, 'registration', firstName);
     
     res.status(200).json({
       message: 'Registration OTP sent to your email',
@@ -145,7 +146,8 @@ const verifyRegistrationOTP = asyncHandler(async (req, res) => {
   
   // Create user
   const user = await User.create({
-    name: otpRecord.userData.name,
+    firstName: otpRecord.userData.firstName,
+    lastName: otpRecord.userData.lastName,
     email: otpRecord.email,
     password: otpRecord.userData.password,
     phone: otpRecord.userData.phone,
@@ -154,15 +156,16 @@ const verifyRegistrationOTP = asyncHandler(async (req, res) => {
   // Mark OTP as verified and clean up
   await OTP.deleteMany({ email, type: 'registration' });
   
-  // Send welcome email (non-blocking)
-  sendWelcomeEmail(email, user.name).catch(console.error);
+  // Send welcome email (non-blocking) - using firstName for personalization
+  sendWelcomeEmail(email, user.firstName).catch(console.error);
   
   // Generate JWT token
   const token = generateToken(user._id);
   
   res.status(201).json({
     _id: user._id,
-    name: user.name,
+    firstName: user.firstName,
+    lastName: user.lastName,
     email: user.email,
     phone: user.phone,
     isAdmin: user.isAdmin,
@@ -217,8 +220,8 @@ const sendLoginOTP = asyncHandler(async (req, res) => {
     type: 'login',
   });
   
-  // Send OTP email
-  await sendOTPEmail(email, otp, 'login', user.name);
+  // Send OTP email using firstName for personalization
+  await sendOTPEmail(email, otp, 'login', user.firstName);
   
   res.status(200).json({
     message: 'Login OTP sent to your email',
@@ -293,7 +296,8 @@ const verifyLoginOTP = asyncHandler(async (req, res) => {
   
   res.json({
     _id: user._id,
-    name: user.name,
+    firstName: user.firstName,
+    lastName: user.lastName,
     email: user.email,
     phone: user.phone,
     isAdmin: user.isAdmin,
@@ -358,8 +362,8 @@ const sendForgotPasswordOTP = asyncHandler(async (req, res) => {
     type: 'forgot_password',
   });
   
-  // Send OTP email
-  await sendOTPEmail(email, otp, 'forgot_password', user.name);
+  // Send OTP email using firstName for personalization
+  await sendOTPEmail(email, otp, 'forgot_password', user.firstName);
   
   res.status(200).json({
     message: 'Password reset OTP sent to your email',
@@ -479,7 +483,8 @@ const resetPassword = asyncHandler(async (req, res) => {
   res.json({
     message: 'Password reset successful',
     _id: user._id,
-    name: user.name,
+    firstName: user.firstName,
+    lastName: user.lastName,
     email: user.email,
     phone: user.phone,
     isAdmin: user.isAdmin,
@@ -550,10 +555,10 @@ const resendOTP = asyncHandler(async (req, res) => {
   // Get user name for email
   let userName = 'User';
   if (type === 'registration') {
-    userName = existingOTP.userData.name;
+    userName = existingOTP.userData.firstName;
   } else {
     const user = await User.findOne({ email });
-    userName = user ? user.name : 'User';
+    userName = user ? user.firstName : 'User';
   }
   
   // Send OTP email

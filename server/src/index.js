@@ -54,6 +54,9 @@ app.use('/api/upload', uploadRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/admin', adminRoutes);
 
+// In your server.js, replace this line:
+app.use('/api/auth', otpRoutes)
+
 
 // Error handling middleware
 app.use(notFound);

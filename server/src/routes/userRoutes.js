@@ -1,8 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const {
-  registerUser,
-  authUser,
   getUserProfile,
   updateUserProfile,
   addShippingAddress,
@@ -18,9 +16,6 @@ const {
 } = require('../controllers/userController');
 const { protect, admin } = require('../middleware/authMiddleware');
 
-// Public routes
-router.route('/').post(registerUser);
-router.route('/login').post(authUser);
 
 // Protected routes
 router.route('/profile')

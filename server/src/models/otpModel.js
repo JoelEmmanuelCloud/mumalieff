@@ -19,7 +19,8 @@ const otpSchema = mongoose.Schema(
     },
     userData: {
       // Store registration data temporarily
-      name: String,
+      firstName: String,
+      lastName: String,
       password: String,
       phone: String,
     },

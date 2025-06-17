@@ -1,96 +1,5 @@
 const asyncHandler = require('express-async-handler');
-const jwt = require('jsonwebtoken');
 const User = require('../models/userModel');
-
-// Helper function to generate JWT
-const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN,
-  });
-};
-
-/**
- * @desc    Register a new user
- * @route   POST /api/users
- * @access  Public
- */
-const registerUser = asyncHandler(async (req, res) => {
-  const { firstName, lastName, email, password, phone } = req.body;
-
-  // Check if user already exists
-  const userExists = await User.findOne({ email });
-
-  if (userExists) {
-    res.status(400);
-    throw new Error('User already exists');
-  }
-
-  // Create new user
-  const user = await User.create({
-    firstName,
-    lastName,
-    email,
-    password,
-    phone,
-  });
-
-  if (user) {
-    // Create JWT token
-    const token = generateToken(user._id);
-
-    res.status(201).json({
-      _id: user._id,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      fullName: user.fullName,
-      email: user.email,
-      phone: user.phone,
-      isAdmin: user.isAdmin,
-      token,
-    });
-  } else {
-    res.status(400);
-    throw new Error('Invalid user data');
-  }
-});
-
-/**
- * @desc    Auth user & get token (Login)
- * @route   POST /api/users/login
- * @access  Public
- */
-const authUser = asyncHandler(async (req, res) => {
-  const { email, password } = req.body;
-
-  // Find user by email
-  const user = await User.findOne({ email }).select('+password');
-
-  // Check if user exists and password matches
-  if (user && (await user.matchPassword(password))) {
-    // Create JWT token
-    const token = generateToken(user._id);
-
-    // Only include requirePasswordChange for admin users
-    // For regular users, we'll just default to false
-    const requirePasswordChange = user.isAdmin ? 
-    (user.requirePasswordChange || false) : false;
-
-    res.json({
-      _id: user._id,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      fullName: user.fullName,
-      email: user.email,
-      phone: user.phone,
-      isAdmin: user.isAdmin,
-      requirePasswordChange: requirePasswordChange,
-      token,
-    });
-  } else {
-    res.status(401);
-    throw new Error('Invalid email or password');
-  }
-});
 
 /**
  * @desc    Get user profile
@@ -508,8 +417,6 @@ const getWishlist = asyncHandler(async (req, res) => {
 });
 
 module.exports = {
-  registerUser,
-  authUser,
   getUserProfile,
   updateUserProfile,
   addShippingAddress,
