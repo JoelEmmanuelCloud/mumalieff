@@ -10,10 +10,77 @@ const reviewSchema = mongoose.Schema(
     name: { type: String, required: true },
     rating: { type: Number, required: true, min: 1, max: 5 },
     comment: { type: String, required: true },
-    verified: { type: Boolean, default: false },
+    verified: { 
+      type: Boolean, 
+      default: false,
+      index: true // Index for filtering verified reviews
+    },
+    // Reference to the order that enables this review
+    order: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Order',
+      required: true
+    },
+    purchaseDate: { 
+      type: Date, 
+      required: true,
+      index: true
+    },
+    // Helpful votes (for future enhancement)
+    helpfulVotes: {
+      type: Number,
+      default: 0
+    },
+    // Users who found this review helpful
+    helpfulUsers: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    }]
   },
-  { timestamps: true }
+  { 
+    timestamps: true,
+    // Add indexes for better query performance
+    indexes: [
+      { user: 1, createdAt: -1 },
+      { rating: -1 },
+      { verified: 1 }
+    ]
+  }
 );
+
+// Pre-save middleware to ensure purchase verification
+reviewSchema.pre('save', async function(next) {
+  if (this.isNew && !this.order) {
+    return next(new Error('Order reference is required for reviews'));
+  }
+  next();
+});
+
+// Instance method to check if review can be edited
+reviewSchema.methods.canBeEditedBy = function(userId) {
+  return this.user.toString() === userId.toString();
+};
+
+// Instance method to mark review as helpful
+reviewSchema.methods.markHelpful = function(userId) {
+  if (!this.helpfulUsers.includes(userId)) {
+    this.helpfulUsers.push(userId);
+    this.helpfulVotes = this.helpfulUsers.length;
+    return true;
+  }
+  return false;
+};
+
+// Instance method to unmark review as helpful
+reviewSchema.methods.unmarkHelpful = function(userId) {
+  const index = this.helpfulUsers.indexOf(userId);
+  if (index > -1) {
+    this.helpfulUsers.splice(index, 1);
+    this.helpfulVotes = this.helpfulUsers.length;
+    return true;
+  }
+  return false;
+};
 
 const productSchema = mongoose.Schema(
   {
@@ -150,7 +217,7 @@ const productSchema = mongoose.Schema(
       }
     },
     tags: [{ type: String, lowercase: true }],
-    reviews: [reviewSchema],
+    reviews: [reviewSchema], // Enhanced review schema
     rating: {
       type: Number,
       required: true,
@@ -163,6 +230,18 @@ const productSchema = mongoose.Schema(
       required: true,
       default: 0,
       min: 0,
+    },
+    // Review statistics for better performance
+    verifiedReviewsCount: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
+    averageVerifiedRating: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 5
     },
     featured: {
       type: Boolean,
@@ -227,6 +306,7 @@ productSchema.index({ isBaseProduct: 1, isActive: 1 });
 productSchema.index({ rating: -1 });
 productSchema.index({ createdAt: -1 });
 productSchema.index({ price: 1 });
+productSchema.index({ verifiedReviewsCount: -1 });
 
 // Virtual for discount percentage
 productSchema.virtual('discountPercentage').get(function() {
@@ -254,6 +334,11 @@ productSchema.virtual('primaryImage').get(function() {
   return primary || this.images[0] || null;
 });
 
+// Virtual for verified reviews percentage
+productSchema.virtual('verifiedReviewsPercentage').get(function() {
+  return this.numReviews > 0 ? Math.round((this.verifiedReviewsCount / this.numReviews) * 100) : 0;
+});
+
 // Pre-save middleware to generate slug
 productSchema.pre('save', function(next) {
   if (this.isModified('name') || this.isNew) {
@@ -266,6 +351,22 @@ productSchema.pre('save', function(next) {
     
     if (this._id) {
       this.slug = `${this.slug}-${this._id.toString().slice(-6)}`;
+    }
+  }
+  next();
+});
+
+// Pre-save middleware to calculate review statistics
+productSchema.pre('save', function(next) {
+  if (this.isModified('reviews')) {
+    // Calculate verified reviews count and average
+    const verifiedReviews = this.reviews.filter(review => review.verified);
+    this.verifiedReviewsCount = verifiedReviews.length;
+    
+    if (verifiedReviews.length > 0) {
+      this.averageVerifiedRating = verifiedReviews.reduce((sum, review) => sum + review.rating, 0) / verifiedReviews.length;
+    } else {
+      this.averageVerifiedRating = 0;
     }
   }
   next();
@@ -365,6 +466,44 @@ productSchema.statics.search = function(searchTerm, options = {}) {
     .sort(options.sort || { rating: -1, createdAt: -1 })
     .limit(options.limit || 20)
     .skip(options.skip || 0);
+};
+
+// Instance method to check if user can review this product
+productSchema.methods.canUserReview = async function(userId) {
+  // Check if user already reviewed
+  const hasReviewed = this.reviews.some(review => review.user.toString() === userId.toString());
+  if (hasReviewed) return { canReview: false, reason: 'Already reviewed' };
+  
+  // Check if user has purchased and received this product
+  const Order = mongoose.model('Order');
+  const hasPurchased = await Order.findOne({
+    user: userId,
+    'orderItems.product': this._id,
+    isPaid: true,
+    isDelivered: true,
+    status: 'Delivered'
+  });
+  
+  if (!hasPurchased) return { canReview: false, reason: 'Must purchase and receive product first' };
+  
+  return { canReview: true, orderId: hasPurchased._id };
+};
+
+// Instance method to get review summary
+productSchema.methods.getReviewSummary = function() {
+  const summary = {
+    total: this.numReviews,
+    verified: this.verifiedReviewsCount,
+    average: this.rating,
+    verifiedAverage: this.averageVerifiedRating,
+    distribution: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
+  };
+  
+  this.reviews.forEach(review => {
+    summary.distribution[review.rating]++;
+  });
+  
+  return summary;
 };
 
 // Set virtuals to true when converting to JSON

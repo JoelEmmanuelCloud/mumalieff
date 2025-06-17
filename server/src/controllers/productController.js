@@ -1,5 +1,6 @@
 const asyncHandler = require('express-async-handler');
 const Product = require('../models/productModel');
+const Order = require('../models/orderModel');
 const CustomOrder = require('../models/customOrderModel'); 
 const mongoose = require('mongoose');
 
@@ -217,7 +218,7 @@ const submitCustomDesignOrder = asyncHandler(async (req, res) => {
     specialInstructions,
     contactPreferences,
     status: 'pending',
-    estimatedCompletionDays: 3-5
+    estimatedCompletionDays: '3-5'
   });
 
   const savedOrder = await customOrder.save();
@@ -402,47 +403,461 @@ const deleteProduct = asyncHandler(async (req, res) => {
 });
 
 /**
- * @desc    Create new review
+ * @desc    Create new review (with purchase verification)
  * @route   POST /api/products/:id/reviews
  * @access  Private
  */
 const createProductReview = asyncHandler(async (req, res) => {
   const { rating, comment } = req.body;
+  const productId = req.params.id;
+  const userId = req.user._id;
 
-  const product = await Product.findById(req.params.id);
+  // Validate input
+  if (!rating || !comment) {
+    res.status(400);
+    throw new Error('Please provide both rating and comment');
+  }
 
-  if (product) {
-    // Check if user already reviewed this product
-    const alreadyReviewed = product.reviews.find(
-      (r) => r.user.toString() === req.user._id.toString()
-    );
-
-    if (alreadyReviewed) {
-      res.status(400);
-      throw new Error('Product already reviewed');
-    }
-
-    const review = {
-      name: req.user.name,
-      rating: Number(rating),
-      comment,
-      user: req.user._id,
-    };
-
-    product.reviews.push(review);
-    product.numReviews = product.reviews.length;
-    
-    // Calculate average rating
-    product.rating =
-      product.reviews.reduce((acc, item) => item.rating + acc, 0) /
-      product.reviews.length;
-
-    await product.save();
-    res.status(201).json({ message: 'Review added' });
-  } else {
+  // Find the product
+  const product = await Product.findById(productId);
+  if (!product) {
     res.status(404);
     throw new Error('Product not found');
   }
+
+  // Check if user already reviewed this product
+  const alreadyReviewed = product.reviews.find(
+    (review) => review.user.toString() === userId.toString()
+  );
+
+  if (alreadyReviewed) {
+    res.status(400);
+    throw new Error('You have already reviewed this product');
+  }
+
+  // Verify user has purchased this product
+  const purchaseVerification = await verifyUserPurchase(userId, productId);
+  
+  if (!purchaseVerification.hasPurchased) {
+    res.status(403);
+    throw new Error('You can only review products you have purchased and received');
+  }
+
+  // Create the review
+  const review = {
+    name: req.user.firstName + ' ' + req.user.lastName || req.user.firstName,
+    rating: Number(rating),
+    comment,
+    user: userId,
+    verified: purchaseVerification.isVerified,
+    order: purchaseVerification.orderId,
+    purchaseDate: purchaseVerification.purchaseDate,
+  };
+
+  product.reviews.push(review);
+  product.numReviews = product.reviews.length;
+  
+  // Recalculate average rating
+  product.rating =
+    product.reviews.reduce((acc, item) => item.rating + acc, 0) /
+    product.reviews.length;
+
+  await product.save();
+
+  res.status(201).json({ 
+    message: 'Review added successfully',
+    review: product.reviews[product.reviews.length - 1] // Return the newly added review
+  });
+});
+
+/**
+ * @desc    Update a review (only by review author)
+ * @route   PUT /api/products/:productId/reviews/:reviewId
+ * @access  Private
+ */
+const updateProductReview = asyncHandler(async (req, res) => {
+  const { productId, reviewId } = req.params;
+  const { rating, comment } = req.body;
+  const userId = req.user._id;
+
+  const product = await Product.findById(productId);
+  if (!product) {
+    res.status(404);
+    throw new Error('Product not found');
+  }
+
+  const review = product.reviews.id(reviewId);
+  if (!review) {
+    res.status(404);
+    throw new Error('Review not found');
+  }
+
+  // Check if user owns this review
+  if (review.user.toString() !== userId.toString()) {
+    res.status(403);
+    throw new Error('You can only update your own reviews');
+  }
+
+  // Update review
+  review.rating = Number(rating) || review.rating;
+  review.comment = comment || review.comment;
+  review.updatedAt = new Date();
+
+  // Recalculate average rating
+  product.rating =
+    product.reviews.reduce((acc, item) => item.rating + acc, 0) /
+    product.reviews.length;
+
+  await product.save();
+
+  res.json({ 
+    message: 'Review updated successfully',
+    review 
+  });
+});
+
+/**
+ * @desc    Delete a review (only by review author or admin)
+ * @route   DELETE /api/products/:productId/reviews/:reviewId
+ * @access  Private
+ */
+const deleteProductReview = asyncHandler(async (req, res) => {
+  const { productId, reviewId } = req.params;
+  const userId = req.user._id;
+  const isAdmin = req.user.isAdmin;
+
+  const product = await Product.findById(productId);
+  if (!product) {
+    res.status(404);
+    throw new Error('Product not found');
+  }
+
+  const review = product.reviews.id(reviewId);
+  if (!review) {
+    res.status(404);
+    throw new Error('Review not found');
+  }
+
+  // Check if user owns this review or is admin
+  if (review.user.toString() !== userId.toString() && !isAdmin) {
+    res.status(403);
+    throw new Error('You can only delete your own reviews');
+  }
+
+  // Remove review
+  product.reviews.pull(reviewId);
+  product.numReviews = product.reviews.length;
+
+  // Recalculate average rating
+  if (product.reviews.length > 0) {
+    product.rating =
+      product.reviews.reduce((acc, item) => item.rating + acc, 0) /
+      product.reviews.length;
+  } else {
+    product.rating = 0;
+  }
+
+  await product.save();
+
+  res.json({ message: 'Review deleted successfully' });
+});
+
+/**
+ * @desc    Get reviews for a product with pagination
+ * @route   GET /api/products/:id/reviews
+ * @access  Public
+ */
+const getProductReviews = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const page = Number(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 10;
+  const sortBy = req.query.sortBy || 'newest'; // newest, oldest, highest, lowest
+
+  const product = await Product.findById(id);
+  if (!product) {
+    res.status(404);
+    throw new Error('Product not found');
+  }
+
+  let reviews = [...product.reviews];
+
+  // Sort reviews
+  switch (sortBy) {
+    case 'oldest':
+      reviews.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+      break;
+    case 'highest':
+      reviews.sort((a, b) => b.rating - a.rating);
+      break;
+    case 'lowest':
+      reviews.sort((a, b) => a.rating - b.rating);
+      break;
+    case 'newest':
+    default:
+      reviews.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  }
+
+  // Pagination
+  const startIndex = (page - 1) * limit;
+  const endIndex = page * limit;
+  const paginatedReviews = reviews.slice(startIndex, endIndex);
+
+  // Calculate statistics
+  const ratingCounts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+  reviews.forEach(review => {
+    ratingCounts[review.rating]++;
+  });
+
+  const verifiedCount = reviews.filter(review => review.verified).length;
+
+  res.json({
+    reviews: paginatedReviews,
+    pagination: {
+      page,
+      limit,
+      total: reviews.length,
+      pages: Math.ceil(reviews.length / limit)
+    },
+    statistics: {
+      averageRating: product.rating,
+      totalReviews: product.numReviews,
+      ratingCounts,
+      verifiedCount,
+      verifiedPercentage: reviews.length > 0 ? Math.round((verifiedCount / reviews.length) * 100) : 0
+    }
+  });
+});
+
+/**
+ * @desc    Get user's review eligibility for products
+ * @route   GET /api/products/review-eligibility
+ * @access  Private
+ */
+const getReviewEligibility = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  
+  // Get all delivered orders for the user
+  const orders = await Order.find({
+    user: userId,
+    isPaid: true,
+    isDelivered: true,
+    status: 'Delivered'
+  }).populate('orderItems.product', 'name images');
+
+  // Get all products user has purchased
+  const purchasedProducts = [];
+  const productReviewStatus = new Map();
+
+  orders.forEach(order => {
+    order.orderItems.forEach(item => {
+      if (item.product) {
+        const productId = item.product._id.toString();
+        
+        if (!productReviewStatus.has(productId)) {
+          purchasedProducts.push({
+            productId: item.product._id,
+            productName: item.product.name,
+            productImage: item.product.images[0]?.url,
+            purchaseDate: order.deliveredAt,
+            orderId: order._id
+          });
+          productReviewStatus.set(productId, true);
+        }
+      }
+    });
+  });
+
+  // Check which products user has already reviewed
+  const reviewedProductIds = [];
+  for (const product of purchasedProducts) {
+    const productDoc = await Product.findById(product.productId, 'reviews');
+    const hasReviewed = productDoc.reviews.some(
+      review => review.user.toString() === userId.toString()
+    );
+    
+    if (hasReviewed) {
+      reviewedProductIds.push(product.productId.toString());
+    }
+  }
+
+  // Filter out already reviewed products
+  const eligibleForReview = purchasedProducts.filter(
+    product => !reviewedProductIds.includes(product.productId.toString())
+  );
+
+  res.json({
+    eligibleForReview,
+    totalPurchased: purchasedProducts.length,
+    totalReviewed: reviewedProductIds.length
+  });
+});
+
+/**
+ * @desc    Verify if user has purchased a product
+ * @param   {String} userId 
+ * @param   {String} productId 
+ * @returns {Object} verification result
+ */
+const verifyUserPurchase = async (userId, productId) => {
+  try {
+    // Check regular orders
+    const order = await Order.findOne({
+      user: userId,
+      'orderItems.product': productId,
+      isPaid: true,
+      isDelivered: true, // Only allow reviews after delivery
+      status: 'Delivered'
+    }).sort({ deliveredAt: -1 }); // Get most recent delivery
+
+    if (order) {
+      return {
+        hasPurchased: true,
+        isVerified: true,
+        orderId: order._id,
+        purchaseDate: order.deliveredAt || order.createdAt
+      };
+    }
+
+    // Check custom orders (if applicable)
+    const customOrder = await CustomOrder.findOne({
+      user: userId,
+      baseProduct: productId,
+      status: 'completed' // Assuming completed means delivered
+    }).sort({ updatedAt: -1 });
+
+    if (customOrder) {
+      return {
+        hasPurchased: true,
+        isVerified: true,
+        orderId: customOrder._id,
+        purchaseDate: customOrder.updatedAt
+      };
+    }
+
+    return {
+      hasPurchased: false,
+      isVerified: false,
+      orderId: null,
+      purchaseDate: null
+    };
+
+  } catch (error) {
+    console.error('Error verifying purchase:', error);
+    return {
+      hasPurchased: false,
+      isVerified: false,
+      orderId: null,
+      purchaseDate: null
+    };
+  }
+};
+
+/**
+ * @desc    Verify if user purchased a specific product
+ * @route   GET /api/products/:id/verify-purchase
+ * @access  Private
+ */
+const verifyProductPurchase = asyncHandler(async (req, res) => {
+  const productId = req.params.id;
+  const userId = req.user._id;
+
+  const verification = await verifyUserPurchase(userId, productId);
+  
+  // Check if user has already reviewed this product
+  const product = await Product.findById(productId, 'reviews');
+  const hasReviewed = product ? product.reviews.some(
+    review => review.user.toString() === userId.toString()
+  ) : false;
+  
+  res.json({
+    productId,
+    hasPurchased: verification.hasPurchased,
+    isVerified: verification.isVerified,
+    canReview: verification.hasPurchased && !hasReviewed,
+    hasReviewed,
+    purchaseDate: verification.purchaseDate
+  });
+});
+
+/**
+ * @desc    Mark review as helpful
+ * @route   POST /api/products/:productId/reviews/:reviewId/helpful
+ * @access  Private
+ */
+const markReviewHelpful = asyncHandler(async (req, res) => {
+  const { productId, reviewId } = req.params;
+  const userId = req.user._id;
+
+  const product = await Product.findById(productId);
+  if (!product) {
+    res.status(404);
+    throw new Error('Product not found');
+  }
+
+  const review = product.reviews.id(reviewId);
+  if (!review) {
+    res.status(404);
+    throw new Error('Review not found');
+  }
+
+  // Prevent users from marking their own reviews as helpful
+  if (review.user.toString() === userId.toString()) {
+    res.status(400);
+    throw new Error('You cannot mark your own review as helpful');
+  }
+
+  // Check if user already marked this review as helpful
+  if (review.helpfulUsers && review.helpfulUsers.includes(userId)) {
+    res.status(400);
+    throw new Error('You have already marked this review as helpful');
+  }
+
+  // Initialize helpfulUsers array if it doesn't exist
+  if (!review.helpfulUsers) {
+    review.helpfulUsers = [];
+  }
+
+  // Add user to helpful users and increment count
+  review.helpfulUsers.push(userId);
+  review.helpfulVotes = review.helpfulUsers.length;
+
+  await product.save();
+  res.json({ message: 'Review marked as helpful', helpfulVotes: review.helpfulVotes });
+});
+
+/**
+ * @desc    Unmark review as helpful
+ * @route   DELETE /api/products/:productId/reviews/:reviewId/helpful
+ * @access  Private
+ */
+const unmarkReviewHelpful = asyncHandler(async (req, res) => {
+  const { productId, reviewId } = req.params;
+  const userId = req.user._id;
+
+  const product = await Product.findById(productId);
+  if (!product) {
+    res.status(404);
+    throw new Error('Product not found');
+  }
+
+  const review = product.reviews.id(reviewId);
+  if (!review) {
+    res.status(404);
+    throw new Error('Review not found');
+  }
+
+  // Check if user has marked this review as helpful
+  if (!review.helpfulUsers || !review.helpfulUsers.includes(userId)) {
+    res.status(400);
+    throw new Error('You have not marked this review as helpful');
+  }
+
+  // Remove user from helpful users and decrement count
+  review.helpfulUsers = review.helpfulUsers.filter(id => id.toString() !== userId.toString());
+  review.helpfulVotes = review.helpfulUsers.length;
+
+  await product.save();
+  res.json({ message: 'Review unmarked as helpful', helpfulVotes: review.helpfulVotes });
 });
 
 /**
@@ -561,7 +976,7 @@ const getCustomDesignOrders = asyncHandler(async (req, res) => {
   const count = await CustomOrder.countDocuments(query);
   
   const orders = await CustomOrder.find(query)
-    .populate('user', 'name email')
+    .populate('user', 'firstName lastName email')
     .populate('baseProduct', 'name price')
     .sort({ createdAt: -1 })
     .limit(pageSize)
@@ -610,6 +1025,13 @@ module.exports = {
   updateProduct,
   deleteProduct,
   createProductReview,
+  updateProductReview,
+  deleteProductReview,
+  getProductReviews,
+  getReviewEligibility,
+  verifyProductPurchase,
+  markReviewHelpful,
+  unmarkReviewHelpful,
   getTopProducts,
   getFeaturedProducts,
   getSaleProducts,

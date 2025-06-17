@@ -1,4 +1,4 @@
-// productService.js for two-category system
+// productService.js for two-category system with verified reviews
 import api from './apiConfig';
 
 // Get all products with filters - updated for new category system
@@ -101,9 +101,47 @@ export const getBaseProductsForCustomization = async (limit = 10) => {
   return response.data;
 };
 
-// Create product review
+// Enhanced Review operations with purchase verification
 export const createProductReview = async (productId, reviewData) => {
   const response = await api.post(`/products/${productId}/reviews`, reviewData);
+  return response.data;
+};
+
+export const updateProductReview = async (productId, reviewId, reviewData) => {
+  const response = await api.put(`/products/${productId}/reviews/${reviewId}`, reviewData);
+  return response.data;
+};
+
+export const deleteProductReview = async (productId, reviewId) => {
+  const response = await api.delete(`/products/${productId}/reviews/${reviewId}`);
+  return response.data;
+};
+
+export const getProductReviews = async (productId, params = {}) => {
+  const response = await api.get(`/products/${productId}/reviews`, { params });
+  return response.data;
+};
+
+// Get user's review eligibility
+export const getReviewEligibility = async () => {
+  const response = await api.get('/products/review-eligibility');
+  return response.data;
+};
+
+// Mark review as helpful
+export const markReviewHelpful = async (productId, reviewId) => {
+  const response = await api.post(`/products/${productId}/reviews/${reviewId}/helpful`);
+  return response.data;
+};
+
+export const unmarkReviewHelpful = async (productId, reviewId) => {
+  const response = await api.delete(`/products/${productId}/reviews/${reviewId}/helpful`);
+  return response.data;
+};
+
+// Verify product purchase
+export const verifyProductPurchase = async (productId) => {
+  const response = await api.get(`/products/${productId}/verify-purchase`);
   return response.data;
 };
 
