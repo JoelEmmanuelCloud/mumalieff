@@ -40,9 +40,9 @@ const ProductDetailPage = () => {
   
   // Fetch review eligibility for authenticated users
   const { data: eligibility } = useQuery(
-    ['reviewEligibility', user?.id], 
+    ['reviewEligibility', user?._id || user?.id], 
     getReviewEligibility,
-    { enabled: isAuthenticated }
+    { enabled: isAuthenticated && !!user }
   );
   
   // Fetch product reviews with pagination
@@ -89,19 +89,23 @@ const ProductDetailPage = () => {
   
   // Check if user can review this product
   const canReview = () => {
-    if (!isAuthenticated || !eligibility) return false;
+    if (!isAuthenticated || !eligibility || !user) return false;
     
     return eligibility.eligibleForReview.some(
       item => item.productId.toString() === id
     );
   };
   
-  // Check if user already reviewed this product
+  // Check if user already reviewed this product - Fixed the error here
   const hasUserReviewed = () => {
-    if (!product || !user) return false;
+    if (!product || !user || !product.reviews) return false;
+    
+    // Get user ID - handle both _id and id properties
+    const userId = user._id || user.id;
+    if (!userId) return false;
     
     return product.reviews.some(
-      review => review.user.toString() === user.id.toString()
+      review => review.user && review.user.toString() === userId.toString()
     );
   };
   
@@ -189,7 +193,7 @@ const ProductDetailPage = () => {
           <Link to="/products" className="hover:text-primary dark:hover:text-white">Products</Link>
           <span className="mx-2">/</span>
           <Link 
-            to={`/products/category/${product.category}`} 
+            to={`/products/category/${encodeURIComponent(product.category)}`} 
             className="hover:text-primary dark:hover:text-white"
           >
             {product.category}
@@ -204,31 +208,33 @@ const ProductDetailPage = () => {
             <div>
               <div className="aspect-w-1 aspect-h-1 bg-gray-100 dark:bg-dark-bg rounded-lg overflow-hidden mb-4">
                 <img
-                  src={product.images[activeImage]?.url || '/images/placeholder.jpg'}
+                  src={product.images?.[activeImage]?.url || '/images/placeholder.jpg'}
                   alt={product.name}
                   className="object-contain object-center w-full h-full"
                 />
               </div>
               
-              <div className="flex space-x-2 overflow-x-auto py-2">
-                {product.images.map((image, index) => (
-                  <button
-                    key={index}
-                    className={`flex-shrink-0 w-16 h-16 rounded-md ${
-                      activeImage === index 
-                        ? 'ring-2 ring-primary dark:ring-white' 
-                        : 'ring-1 ring-gray-200 dark:ring-gray-700'
-                    }`}
-                    onClick={() => setActiveImage(index)}
-                  >
-                    <img
-                      src={image.url}
-                      alt={`${product.name} view ${index + 1}`}
-                      className="w-full h-full object-cover object-center"
-                    />
-                  </button>
-                ))}
-              </div>
+              {product.images && product.images.length > 0 && (
+                <div className="flex space-x-2 overflow-x-auto py-2">
+                  {product.images.map((image, index) => (
+                    <button
+                      key={index}
+                      className={`flex-shrink-0 w-16 h-16 rounded-md ${
+                        activeImage === index 
+                          ? 'ring-2 ring-primary dark:ring-white' 
+                          : 'ring-1 ring-gray-200 dark:ring-gray-700'
+                      }`}
+                      onClick={() => setActiveImage(index)}
+                    >
+                      <img
+                        src={image.url}
+                        alt={`${product.name} view ${index + 1}`}
+                        className="w-full h-full object-cover object-center rounded-md"
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
             
             {/* Product Info */}
@@ -237,13 +243,13 @@ const ProductDetailPage = () => {
               
               {/* Enhanced Ratings with Verified Reviews */}
               <div className="flex items-center mb-4">
-                <StarRating rating={product.rating} />
+                <StarRating rating={product.rating || 0} />
                 <span className="ml-2 text-gray-500 dark:text-gray-400">
-                  {product.rating.toFixed(1)} ({product.numReviews} reviews)
+                  {(product.rating || 0).toFixed(1)} ({product.numReviews || 0} reviews)
                 </span>
                 {product.verifiedReviewsCount > 0 && (
                   <span className="ml-2 text-sm text-green-600 dark:text-green-400">
-                    {product.verifiedReviewsPercentage}% verified
+                    {product.verifiedReviewsPercentage || 0}% verified
                   </span>
                 )}
               </div>
@@ -253,10 +259,10 @@ const ProductDetailPage = () => {
                 {product.isSale ? (
                   <div className="flex items-center gap-2">
                     <span className="text-2xl font-bold text-error dark:text-error-light">
-                      ₦{product.salePrice.toLocaleString()}
+                      ₦{product.salePrice?.toLocaleString()}
                     </span>
                     <span className="text-gray-500 line-through text-lg dark:text-gray-400">
-                      ₦{product.price.toLocaleString()}
+                      ₦{product.price?.toLocaleString()}
                     </span>
                     <span className="bg-error text-white text-xs px-2 py-1 rounded">
                       {Math.round(((product.price - product.salePrice) / product.price) * 100)}% OFF
@@ -264,7 +270,7 @@ const ProductDetailPage = () => {
                   </div>
                 ) : (
                   <span className="text-2xl font-bold dark:text-white">
-                    ₦{product.price.toLocaleString()}
+                    ₦{product.price?.toLocaleString()}
                   </span>
                 )}
               </div>
@@ -284,47 +290,51 @@ const ProductDetailPage = () => {
               )}
               
               {/* Size Selection */}
-              <div className="mb-4">
-                <h3 className="text-sm font-medium mb-2 dark:text-white">Size</h3>
-                <div className="flex flex-wrap gap-2">
-                  {product.sizes.map((size) => (
-                    <button
-                      key={size.name}
-                      onClick={() => setSelectedSize(size.name)}
-                      disabled={!size.inStock}
-                      className={`px-3 py-1 rounded-md ${
-                        size.name === selectedSize
-                          ? 'bg-primary text-white'
-                          : size.inStock
-                          ? 'bg-gray-100 dark:bg-dark-bg text-gray-800 dark:text-gray-200'
-                          : 'bg-gray-100 dark:bg-dark-bg text-gray-400 dark:text-gray-600 cursor-not-allowed'
-                      }`}
-                    >
-                      {size.name}
-                    </button>
-                  ))}
+              {product.sizes && product.sizes.length > 0 && (
+                <div className="mb-4">
+                  <h3 className="text-sm font-medium mb-2 dark:text-white">Size</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {product.sizes.map((size) => (
+                      <button
+                        key={size.name}
+                        onClick={() => setSelectedSize(size.name)}
+                        disabled={!size.inStock}
+                        className={`px-3 py-1 rounded-md ${
+                          size.name === selectedSize
+                            ? 'bg-primary text-white'
+                            : size.inStock
+                            ? 'bg-gray-100 dark:bg-dark-bg text-gray-800 dark:text-gray-200'
+                            : 'bg-gray-100 dark:bg-dark-bg text-gray-400 dark:text-gray-600 cursor-not-allowed'
+                        }`}
+                      >
+                        {size.name}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
               
               {/* Color Selection */}
-              <div className="mb-6">
-                <h3 className="text-sm font-medium mb-2 dark:text-white">Color</h3>
-                <div className="flex flex-wrap gap-2">
-                  {product.colors.map((color) => (
-                    <button
-                      key={color.name}
-                      onClick={() => setSelectedColor(color.name)}
-                      disabled={!color.inStock}
-                      className={`w-8 h-8 rounded-full ${
-                        color.name === selectedColor ? 'ring-2 ring-primary dark:ring-white' : ''
-                      } ${!color.inStock ? 'opacity-50 cursor-not-allowed' : ''}`}
-                      style={{ backgroundColor: color.colorCode }}
-                      aria-label={color.name}
-                      title={color.name}
-                    ></button>
-                  ))}
+              {product.colors && product.colors.length > 0 && (
+                <div className="mb-6">
+                  <h3 className="text-sm font-medium mb-2 dark:text-white">Color</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {product.colors.map((color) => (
+                      <button
+                        key={color.name}
+                        onClick={() => setSelectedColor(color.name)}
+                        disabled={!color.inStock}
+                        className={`w-8 h-8 rounded-full ${
+                          color.name === selectedColor ? 'ring-2 ring-primary dark:ring-white' : ''
+                        } ${!color.inStock ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        style={{ backgroundColor: color.colorCode }}
+                        aria-label={color.name}
+                        title={color.name}
+                      ></button>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
               
               {/* Quantity */}
               <div className="mb-6">
@@ -341,11 +351,11 @@ const ProductDetailPage = () => {
                     value={qty}
                     onChange={(e) => setQty(Math.max(1, parseInt(e.target.value) || 1))}
                     min="1"
-                    max={product.countInStock}
+                    max={product.countInStock || 999}
                     className="w-16 h-10 border-t border-b border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-card text-center text-gray-700 dark:text-white"
                   />
                   <button
-                    onClick={() => setQty(Math.min(product.countInStock, qty + 1))}
+                    onClick={() => setQty(Math.min(product.countInStock || 999, qty + 1))}
                     className="w-10 h-10 flex items-center justify-center border border-gray-300 dark:border-gray-600 rounded-r-md bg-gray-50 dark:bg-dark-bg text-gray-600 dark:text-gray-300"
                   >
                     +
@@ -357,7 +367,7 @@ const ProductDetailPage = () => {
               <div className="flex flex-col sm:flex-row gap-4 mb-6">
                 <button
                   onClick={handleAddToCart}
-                  disabled={product.countInStock === 0}
+                  disabled={!product.countInStock || product.countInStock === 0}
                   className={`btn ${
                     product.countInStock > 0 ? 'btn-primary' : 'btn-disabled'
                   } flex-1 py-3`}
@@ -368,7 +378,7 @@ const ProductDetailPage = () => {
                 {product.allowCustomization && (
                   <Link
                     to={`/custom-design?productId=${product._id}`}
-                    className="btn btn-accent flex-1 py-3"
+                    className="btn btn-accent flex-1 py-3 text-center"
                   >
                     Customize Design
                   </Link>
@@ -403,17 +413,17 @@ const ProductDetailPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <div className="flex items-center mb-2">
-                      <StarRating rating={reviewsData.statistics.averageRating} />
+                      <StarRating rating={reviewsData.statistics.averageRating || 0} />
                       <span className="ml-2 text-lg font-semibold dark:text-white">
-                        {reviewsData.statistics.averageRating.toFixed(1)}
+                        {(reviewsData.statistics.averageRating || 0).toFixed(1)}
                       </span>
                     </div>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Based on {reviewsData.statistics.totalReviews} reviews
+                      Based on {reviewsData.statistics.totalReviews || 0} reviews
                     </p>
                     {reviewsData.statistics.verifiedCount > 0 && (
                       <p className="text-sm text-green-600 dark:text-green-400">
-                        {reviewsData.statistics.verifiedPercentage}% from verified purchases
+                        {reviewsData.statistics.verifiedPercentage || 0}% from verified purchases
                       </p>
                     )}
                   </div>
@@ -428,13 +438,13 @@ const ProductDetailPage = () => {
                             className="bg-accent-gold h-2 rounded-full"
                             style={{
                               width: `${reviewsData.statistics.totalReviews > 0 
-                                ? (reviewsData.statistics.ratingCounts[star] / reviewsData.statistics.totalReviews) * 100 
+                                ? ((reviewsData.statistics.ratingCounts?.[star] || 0) / reviewsData.statistics.totalReviews) * 100 
                                 : 0}%`
                             }}
                           />
                         </div>
                         <span className="w-8 text-right text-gray-600 dark:text-gray-400">
-                          {reviewsData.statistics.ratingCounts[star]}
+                          {reviewsData.statistics.ratingCounts?.[star] || 0}
                         </span>
                       </div>
                     ))}
@@ -463,15 +473,15 @@ const ProductDetailPage = () => {
                 {/* Reviews List */}
                 {reviewsLoading ? (
                   <Loader />
-                ) : reviewsData?.reviews?.length === 0 ? (
+                ) : !reviewsData?.reviews || reviewsData.reviews.length === 0 ? (
                   <Message>No reviews yet</Message>
                 ) : (
                   <div className="space-y-6">
-                    {reviewsData?.reviews?.map((review) => (
+                    {reviewsData.reviews.map((review) => (
                       <div key={review._id} className="border-b border-gray-200 dark:border-gray-700 pb-6 last:border-b-0">
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex items-center">
-                            <StarRating rating={review.rating} size="w-4 h-4" />
+                            <StarRating rating={review.rating || 0} size="w-4 h-4" />
                             <h4 className="ml-2 font-medium dark:text-white">{review.name}</h4>
                             {review.verified && <div className="ml-2"><VerifiedBadge /></div>}
                           </div>
