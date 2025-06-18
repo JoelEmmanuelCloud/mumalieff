@@ -87,12 +87,24 @@ const Header = () => {
     }`}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Main Header Row */}
-        <div className="flex items-center justify-between h-16 lg:h-20">
-          {/* Logo */}
+        <div className="flex items-center justify-between h-14 sm:h-16 lg:h-18">
+          {/* Logo - Optimized for mobile */}
           <Link to="/" className="flex items-center flex-shrink-0">
-            <span className="font-display font-bold text-lg sm:text-xl lg:text-2xl text-primary dark:text-white">
-              MUMALIEFF
-            </span>
+            <div className="h-6 w-auto sm:h-7 md:h-8 lg:h-9 xl:h-10">
+              {theme === 'dark' ? (
+                <img
+                  src="/images/mumalieffwhite.png"
+                  alt="MUMALIEFF"
+                  className="h-full w-auto object-contain max-w-[120px] sm:max-w-[140px] md:max-w-[160px] lg:max-w-[180px]"
+                />
+              ) : (
+                <img
+                  src="/images/logo-black.svg"
+                  alt="MUMALIEFF"
+                  className="h-full w-auto object-contain max-w-[120px] sm:max-w-[140px] md:max-w-[160px] lg:max-w-[180px]"
+                />
+              )}
+            </div>
           </Link>
           
           {/* Desktop Navigation - Hidden on mobile and tablet */}
@@ -109,7 +121,7 @@ const Header = () => {
           </nav>
           
           {/* Right Side Icons */}
-          <div className="flex items-center space-x-2 sm:space-x-3 lg:space-x-4">
+          <div className="flex items-center space-x-1 sm:space-x-2 lg:space-x-3">
             {/* Desktop Search Form - Hidden on mobile and tablet */}
             <form onSubmit={handleSearchSubmit} className="hidden lg:flex items-center relative">
               <input
@@ -133,15 +145,15 @@ const Header = () => {
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
-              className="p-2 text-gray-700 hover:text-primary dark:text-gray-300 dark:hover:text-white transition-colors rounded-md hover:bg-gray-100 dark:hover:bg-dark-bg"
+              className="p-1.5 sm:p-2 text-gray-700 hover:text-primary dark:text-gray-300 dark:hover:text-white transition-colors rounded-md hover:bg-gray-100 dark:hover:bg-dark-bg"
               aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
             >
               {theme === 'light' ? (
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                 </svg>
               ) : (
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                 </svg>
               )}
@@ -150,10 +162,10 @@ const Header = () => {
             {/* Wishlist - Hidden on mobile, visible on tablet+ */}
             <Link 
               to="/wishlist" 
-              className="hidden sm:block p-2 text-gray-700 hover:text-primary dark:text-gray-300 dark:hover:text-white transition-colors rounded-md hover:bg-gray-100 dark:hover:bg-dark-bg"
+              className="hidden sm:block p-1.5 sm:p-2 text-gray-700 hover:text-primary dark:text-gray-300 dark:hover:text-white transition-colors rounded-md hover:bg-gray-100 dark:hover:bg-dark-bg"
               aria-label="Wishlist"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
               </svg>
             </Link>
@@ -161,14 +173,14 @@ const Header = () => {
             {/* Cart */}
             <Link 
               to="/cart"
-              className="p-2 text-gray-700 hover:text-primary dark:text-gray-300 dark:hover:text-white relative transition-colors rounded-md hover:bg-gray-100 dark:hover:bg-dark-bg"
+              className="p-1.5 sm:p-2 text-gray-700 hover:text-primary dark:text-gray-300 dark:hover:text-white relative transition-colors rounded-md hover:bg-gray-100 dark:hover:bg-dark-bg"
               aria-label="Cart"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
               </svg>
               {cartItemsCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-accent-gold text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium min-w-[1.25rem]">
+                <span className="absolute -top-1 -right-1 bg-accent-gold text-white text-xs rounded-full h-4 w-4 sm:h-5 sm:w-5 flex items-center justify-center font-medium min-w-[1rem] sm:min-w-[1.25rem] text-[10px] sm:text-xs">
                   {cartItemsCount > 99 ? '99+' : cartItemsCount}
                 </span>
               )}
@@ -179,14 +191,14 @@ const Header = () => {
               <button
                 id="user-menu-button"
                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                className="p-2 text-gray-700 hover:text-primary dark:text-gray-300 dark:hover:text-white flex items-center transition-colors rounded-md hover:bg-gray-100 dark:hover:bg-dark-bg"
+                className="p-1.5 sm:p-2 text-gray-700 hover:text-primary dark:text-gray-300 dark:hover:text-white flex items-center transition-colors rounded-md hover:bg-gray-100 dark:hover:bg-dark-bg"
                 aria-expanded={isUserMenuOpen}
                 aria-haspopup="true"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
-                <span className="hidden lg:inline-block ml-2 font-medium">
+                <span className="hidden lg:inline-block ml-2 font-medium text-sm">
                   {isAuthenticated ? user.firstName.split(' ')[0] : 'Account'}
                 </span>
               </button>
@@ -264,14 +276,14 @@ const Header = () => {
             <button
               id="mobile-menu-button"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="p-2 text-gray-700 hover:text-primary dark:text-gray-300 dark:hover:text-white md:hidden transition-colors rounded-md hover:bg-gray-100 dark:hover:bg-dark-bg"
+              className="p-1.5 sm:p-2 text-gray-700 hover:text-primary dark:text-gray-300 dark:hover:text-white md:hidden transition-colors rounded-md hover:bg-gray-100 dark:hover:bg-dark-bg"
               aria-expanded={isMenuOpen}
               aria-controls="mobile-nav"
               aria-label="Toggle mobile menu"
             >
               <svg 
                 xmlns="http://www.w3.org/2000/svg" 
-                className="h-6 w-6" 
+                className="h-5 w-5 sm:h-6 sm:w-6" 
                 fill="none" 
                 viewBox="0 0 24 24" 
                 stroke="currentColor"
@@ -287,21 +299,21 @@ const Header = () => {
         </div>
         
         {/* Mobile/Tablet Search Bar */}
-        <div className="lg:hidden px-4 pb-4">
+        <div className="lg:hidden px-2 sm:px-4 pb-3 sm:pb-4">
           <form onSubmit={handleSearchSubmit} className="flex items-center relative">
             <input
               type="text"
               placeholder="Search products..."
               value={searchKeyword}
               onChange={(e) => setSearchKeyword(e.target.value)}
-              className="pl-4 pr-12 py-3 rounded-lg bg-gray-100 dark:bg-dark-bg focus:outline-none focus:ring-2 focus:ring-primary dark:text-white w-full text-base"
+              className="pl-3 sm:pl-4 pr-10 sm:pr-12 py-2 sm:py-3 rounded-lg bg-gray-100 dark:bg-dark-bg focus:outline-none focus:ring-2 focus:ring-primary dark:text-white w-full text-sm sm:text-base"
             />
             <button 
               type="submit" 
-              className="absolute right-3 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-white transition-colors"
+              className="absolute right-2 sm:right-3 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-white transition-colors"
               aria-label="Search"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </button>
