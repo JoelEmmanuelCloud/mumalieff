@@ -7,7 +7,7 @@ const mongoose = require('mongoose');
 const User = require('../models/userModel');
 require('dotenv').config();
 
-mongoose.connect('mongodb+srv://newuser:Pampersbaby@cluster0.olifzgj.mongodb.net/mumalieff?retryWrites=true&w=majority&appName=Cluster0')
+mongoose.connect('r0')
   .then(() => console.log('MongoDB connected for seeding users'))
   .catch(err => console.error('MongoDB connection error:', err));
 
