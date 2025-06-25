@@ -34,6 +34,7 @@ router.route('/')
 router.route('/:id')
   .get(protect, getOrderById);
 
+// IMPORTANT: Add this route for direct payment updates
 router.route('/:id/pay')
   .put(protect, updateOrderToPaid);
 

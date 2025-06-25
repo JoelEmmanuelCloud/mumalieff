@@ -5,14 +5,15 @@ import { toast } from 'react-toastify';
 import { 
   processPaystackPayment, 
   verifyPaymentAndUpdateOrder,
+  directPaymentVerification,
   retryPayment,
   formatAmount,
   validatePaymentAmount,
   handlePaymentError
 } from '../services/paymentService';
 import { useAuth } from '../context/AuthContext';
-import Loader from './common/Loader';
-import Message from './common/Message';
+import Loader from '../components/common/Loader';
+import Message from '../components/common/Message';
 
 const PaymentHandler = ({ order, onPaymentSuccess, onPaymentError }) => {
   const navigate = useNavigate();
@@ -24,9 +25,18 @@ const PaymentHandler = ({ order, onPaymentSuccess, onPaymentError }) => {
   const [paymentStatus, setPaymentStatus] = useState('idle');
   const [error, setError] = useState(null);
   
-  // Verify payment mutation
+  // Verify payment mutation with fallback
   const verifyPaymentMutation = useMutation(
-    ({ reference, orderId }) => verifyPaymentAndUpdateOrder(reference, orderId),
+    ({ reference, orderId }) => {
+      return verifyPaymentAndUpdateOrder(reference, orderId).catch(async (error) => {
+        // If backend verification fails, try direct verification
+        console.log('Backend verification failed, trying direct verification...');
+        if (error.message.includes('Payment record not found')) {
+          return await directPaymentVerification(reference, orderId);
+        }
+        throw error;
+      });
+    },
     {
       onSuccess: (data) => {
         setPaymentStatus('success');
@@ -38,6 +48,7 @@ const PaymentHandler = ({ order, onPaymentSuccess, onPaymentError }) => {
         }
       },
       onError: (error) => {
+        console.error('Payment verification failed:', error);
         setPaymentStatus('failed');
         const errorInfo = handlePaymentError(error);
         setError(errorInfo);
@@ -55,7 +66,7 @@ const PaymentHandler = ({ order, onPaymentSuccess, onPaymentError }) => {
     {
       onSuccess: (paymentData) => {
         toast.success('Payment retry initiated');
-        handlePaystackPayment(paymentData.data);
+        handlePaystackPayment(paymentData);
       },
       onError: (error) => {
         const errorInfo = handlePaymentError(error);
@@ -84,7 +95,7 @@ const PaymentHandler = ({ order, onPaymentSuccess, onPaymentError }) => {
     }
   }, [searchParams, order, navigate, verifyPaymentMutation]);
   
-  // Handle Paystack payment
+  // Handle Paystack payment with better error handling
   const handlePaystackPayment = async (paymentData = null) => {
     if (!order) {
       toast.error('Order information is missing');
@@ -109,9 +120,13 @@ const PaymentHandler = ({ order, onPaymentSuccess, onPaymentError }) => {
         orderId: order._id,
       };
       
+      console.log('Processing payment with data:', paymentInfo);
+      
       const response = await processPaystackPayment(paymentInfo);
       
-      // Payment was successful on Paystack side
+      console.log('Paystack payment response:', response);
+      
+      // Payment was successful on Paystack side, now verify
       setPaymentStatus('verifying');
       verifyPaymentMutation.mutate({ 
         reference: response.reference, 
@@ -119,6 +134,7 @@ const PaymentHandler = ({ order, onPaymentSuccess, onPaymentError }) => {
       });
       
     } catch (error) {
+      console.error('Payment processing error:', error);
       setIsProcessing(false);
       setPaymentStatus('failed');
       const errorInfo = handlePaymentError(error);
@@ -160,6 +176,9 @@ const PaymentHandler = ({ order, onPaymentSuccess, onPaymentError }) => {
             <p className="mt-4 text-gray-600 dark:text-gray-300">
               Verifying your payment...
             </p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              This may take a few seconds
+            </p>
           </div>
         );
         
@@ -181,13 +200,21 @@ const PaymentHandler = ({ order, onPaymentSuccess, onPaymentError }) => {
             {error?.suggestion && (
               <p className="text-sm mb-4">{error.suggestion}</p>
             )}
-            <button 
-              onClick={handleRetryPayment}
-              disabled={retryPaymentMutation.isLoading}
-              className="btn btn-primary"
-            >
-              {retryPaymentMutation.isLoading ? 'Retrying...' : 'Retry Payment'}
-            </button>
+            <div className="space-x-3">
+              <button 
+                onClick={handleRetryPayment}
+                disabled={retryPaymentMutation.isLoading}
+                className="btn btn-primary"
+              >
+                {retryPaymentMutation.isLoading ? 'Retrying...' : 'Retry Payment'}
+              </button>
+              <button 
+                onClick={() => window.location.href = 'mailto:support@mumalieff.com'}
+                className="btn btn-secondary"
+              >
+                Contact Support
+              </button>
+            </div>
           </Message>
         );
         
@@ -206,7 +233,7 @@ const PaymentHandler = ({ order, onPaymentSuccess, onPaymentError }) => {
           </Message>
         );
         
-              default:
+      default:
         return null;
     }
   };
@@ -284,14 +311,9 @@ const PaymentHandler = ({ order, onPaymentSuccess, onPaymentError }) => {
             <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
-                  <img 
-                    src="/images/paystack-logo.png" 
-                    alt="Paystack" 
-                    className="h-8 w-auto"
-                    onError={(e) => {
-                      e.target.style.display = 'none';
-                    }}
-                  />
+                  <div className="w-8 h-8 bg-green-600 text-white rounded flex items-center justify-center text-sm font-bold">
+                    P
+                  </div>
                 </div>
                 <div className="ml-3">
                   <p className="text-sm font-medium text-gray-900 dark:text-white">
@@ -310,7 +332,7 @@ const PaymentHandler = ({ order, onPaymentSuccess, onPaymentError }) => {
             <div className="flex">
               <div className="flex-shrink-0">
                 <svg className="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd"/>
                 </svg>
               </div>
               <div className="ml-3">
@@ -366,7 +388,7 @@ const PaymentHandler = ({ order, onPaymentSuccess, onPaymentError }) => {
             <p className="text-sm text-gray-500 dark:text-gray-400">
               Having trouble with payment?{' '}
               <button 
-                onClick={() => window.location.href = 'mailto:support@yourstore.com'}
+                onClick={() => window.location.href = 'mailto:support@mumalieff.com'}
                 className="text-blue-600 hover:text-blue-800 dark:text-blue-400"
               >
                 Contact Support

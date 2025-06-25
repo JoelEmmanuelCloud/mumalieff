@@ -31,7 +31,11 @@ const initializePaystack = asyncHandler(async (req, res) => {
   }
 
   // Check if order already has a successful payment
-  const existingPayment = await Payment.findSuccessfulPayment(orderId);
+  const existingPayment = await Payment.findOne({ 
+    order: orderId, 
+    status: 'success' 
+  });
+  
   if (existingPayment) {
     res.status(400);
     throw new Error('Order is already paid');
@@ -105,7 +109,7 @@ const initializePaystack = asyncHandler(async (req, res) => {
 });
 
 /**
- * @desc    Verify Paystack payment
+ * @desc    Verify Paystack payment with fallback
  * @route   GET /api/payments/paystack/verify/:reference
  * @access  Private
  */
@@ -113,14 +117,97 @@ const verifyPaystack = asyncHandler(async (req, res) => {
   const { reference } = req.params;
 
   try {
-    // Find the payment record
-    const payment = await Payment.findOne({ transactionReference: reference }).populate('order');
+    // First, try to find the payment record
+    let payment = await Payment.findOne({ transactionReference: reference }).populate('order');
+    
+    // If no payment record found, try to find by order and create one
     if (!payment) {
-      res.status(404);
-      throw new Error('Payment record not found');
+      console.log('Payment record not found, attempting to verify directly with Paystack...');
+      
+      // Verify with Paystack directly
+      const paystackResponse = await axios.get(
+        `https://api.paystack.co/transaction/verify/${reference}`,
+        {
+          headers: {
+            Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      const { data } = paystackResponse.data;
+
+      if (data.status === 'success') {
+        // Find the order from metadata
+        const orderId = data.metadata?.order_id;
+        
+        if (!orderId) {
+          res.status(400);
+          throw new Error('Order ID not found in payment metadata');
+        }
+
+        const order = await Order.findById(orderId);
+        if (!order) {
+          res.status(404);
+          throw new Error('Order not found');
+        }
+
+        // Verify the order belongs to the authenticated user
+        if (order.user.toString() !== req.user._id.toString()) {
+          res.status(401);
+          throw new Error('Not authorized');
+        }
+
+        // Create payment record retroactively
+        payment = new Payment({
+          order: orderId,
+          user: req.user._id,
+          paymentMethod: 'paystack',
+          amount: data.amount,
+          currency: 'NGN',
+          status: 'success',
+          transactionReference: reference,
+          customerEmail: data.customer.email,
+          customerPhone: data.customer.phone,
+          initiatedAt: new Date(data.created_at),
+          paidAt: new Date(data.paid_at),
+          paymentGatewayResponse: data,
+        });
+
+        await payment.save();
+
+        // Update order payment status
+        order.isPaid = true;
+        order.paidAt = new Date();
+        order.paymentMethod = 'paystack';
+        order.paymentReference = reference;
+        order.paymentResult = {
+          id: data.id,
+          status: data.status,
+          update_time: new Date().toISOString(),
+          email_address: data.customer.email,
+          reference: data.reference,
+          channel: data.channel,
+          amount: data.amount,
+          fees: data.fees,
+        };
+
+        await order.save();
+
+        return res.json({
+          success: true,
+          message: 'Payment verification successful',
+          payment: payment,
+          order: order,
+          transaction: data,
+        });
+      } else {
+        res.status(400);
+        throw new Error(`Payment verification failed: ${data.gateway_response || 'Unknown error'}`);
+      }
     }
 
-    // Verify the payment belongs to the authenticated user
+    // If payment record exists, verify the payment belongs to the authenticated user
     if (payment.user.toString() !== req.user._id.toString()) {
       res.status(401);
       throw new Error('Not authorized');
@@ -136,7 +223,7 @@ const verifyPaystack = asyncHandler(async (req, res) => {
       });
     }
 
-    // Verify transaction with Paystack
+    // Verify transaction with Paystack for pending payments
     const response = await axios.get(
       `https://api.paystack.co/transaction/verify/${reference}`,
       {
@@ -203,9 +290,56 @@ const verifyPaystack = asyncHandler(async (req, res) => {
       throw new Error('Transaction not found');
     }
     
+    // If payment record not found error, provide better message
+    if (error.message.includes('Payment record not found')) {
+      res.status(404);
+      throw new Error('Payment record not found');
+    }
+    
     res.status(500);
-    throw new Error('Failed to verify payment');
+    throw new Error(error.message || 'Failed to verify payment');
   }
+});
+
+/**
+ * @desc    Handle direct payment update (for orders without payment records)
+ * @route   PUT /api/orders/:id/pay
+ * @access  Private
+ */
+const updateOrderToPaid = asyncHandler(async (req, res) => {
+  const order = await Order.findById(req.params.id);
+
+  if (!order) {
+    res.status(404);
+    throw new Error('Order not found');
+  }
+
+  // Check if order belongs to user or if user is admin
+  if (order.user.toString() !== req.user._id.toString() && !req.user.isAdmin) {
+    res.status(401);
+    throw new Error('Not authorized');
+  }
+
+  // Update order payment information
+  order.isPaid = true;
+  order.paidAt = Date.now();
+  order.paymentResult = {
+    id: req.body.id,
+    status: req.body.status,
+    update_time: req.body.update_time,
+    email_address: req.body.email_address,
+    reference: req.body.reference,
+    channel: req.body.channel,
+    amount: req.body.amount,
+    fees: req.body.fees,
+  };
+
+  if (req.body.reference) {
+    order.paymentReference = req.body.reference;
+  }
+
+  const updatedOrder = await order.save();
+  res.json(updatedOrder);
 });
 
 /**
@@ -254,18 +388,6 @@ const paystackWebhook = asyncHandler(async (req, res) => {
         await handleDisputeResolve(event.data);
         break;
       
-      case 'transfer.success':
-        await handleTransferSuccess(event.data);
-        break;
-      
-      case 'transfer.failed':
-        await handleTransferFailed(event.data);
-        break;
-      
-      case 'transfer.reversed':
-        await handleTransferReversed(event.data);
-        break;
-      
       default:
         console.log(`Unhandled webhook event: ${event.event}`);
     }
@@ -288,15 +410,35 @@ const handleChargeSuccess = async (data) => {
     return;
   }
 
-  // Find payment record
-  const payment = await Payment.findOne({ transactionReference: reference });
-  
-  if (payment && payment.status !== 'success') {
-    // Add webhook event to payment history
-    await payment.addWebhookEvent('charge.success', data);
+  try {
+    // Find payment record or create one if it doesn't exist
+    let payment = await Payment.findOne({ transactionReference: reference });
     
-    // Update payment record
-    await payment.markAsSuccessful(data);
+    if (!payment) {
+      // Create payment record from webhook data
+      const order = await Order.findById(orderId);
+      if (order) {
+        payment = new Payment({
+          order: orderId,
+          user: order.user,
+          paymentMethod: 'paystack',
+          amount: data.amount,
+          currency: 'NGN',
+          status: 'success',
+          transactionReference: reference,
+          customerEmail: data.customer.email,
+          customerPhone: data.customer.phone,
+          initiatedAt: new Date(data.created_at),
+          paidAt: new Date(data.paid_at),
+          paymentGatewayResponse: data,
+        });
+        
+        await payment.save();
+      }
+    } else if (payment.status !== 'success') {
+      // Update existing payment record
+      await payment.markAsSuccessful(data);
+    }
 
     // Update order
     const order = await Order.findById(orderId);
@@ -319,10 +461,12 @@ const handleChargeSuccess = async (data) => {
       
       console.log(`Order ${orderId} marked as paid via webhook`);
     }
+  } catch (error) {
+    console.error('Error handling charge success webhook:', error);
   }
 };
 
-// Helper function to handle dispute creation
+// Helper functions for other webhook events
 const handleDisputeCreate = async (data) => {
   const reference = data.transaction?.reference;
   
@@ -336,7 +480,6 @@ const handleDisputeCreate = async (data) => {
   }
 };
 
-// Helper function to handle dispute reminder
 const handleDisputeRemind = async (data) => {
   const reference = data.transaction?.reference;
   
@@ -349,7 +492,6 @@ const handleDisputeRemind = async (data) => {
   }
 };
 
-// Helper function to handle dispute resolution
 const handleDisputeResolve = async (data) => {
   const reference = data.transaction?.reference;
   
@@ -370,24 +512,6 @@ const handleDisputeResolve = async (data) => {
       console.log(`Dispute resolved for payment ${reference}: ${data.resolution}`);
     }
   }
-};
-
-// Helper function to handle transfer success
-const handleTransferSuccess = async (data) => {
-  console.log('Transfer successful:', data.reference);
-  // Handle transfer success logic here
-};
-
-// Helper function to handle transfer failure
-const handleTransferFailed = async (data) => {
-  console.log('Transfer failed:', data.reference);
-  // Handle transfer failure logic here
-};
-
-// Helper function to handle transfer reversal
-const handleTransferReversed = async (data) => {
-  console.log('Transfer reversed:', data.reference);
-  // Handle transfer reversal logic here
 };
 
 /**
@@ -451,7 +575,7 @@ const getOrderPayments = asyncHandler(async (req, res) => {
     throw new Error('Not authorized');
   }
 
-  const payments = await Payment.findByOrder(orderId);
+  const payments = await Payment.find({ order: orderId }).sort({ createdAt: -1 });
   
   res.json({
     success: true,
@@ -491,6 +615,7 @@ const getPaymentAnalytics = asyncHandler(async (req, res) => {
 module.exports = {
   initializePaystack,
   verifyPaystack,
+  updateOrderToPaid,
   paystackWebhook,
   getPaymentHistory,
   getOrderPayments,

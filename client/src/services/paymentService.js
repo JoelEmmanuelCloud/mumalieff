@@ -1,6 +1,8 @@
+// Updated paymentService.js - Fix payment record creation issue
+
 import api from './apiConfig';
 
-// Initialize Paystack payment
+// Initialize Paystack payment with backend record creation
 export const initializePaystack = async (paymentData) => {
   try {
     const response = await api.post('/payments/paystack/initialize', paymentData);
@@ -20,36 +22,9 @@ export const verifyPaystack = async (reference) => {
   }
 };
 
-// Get payment history
-export const getPaymentHistory = async (params = {}) => {
-  try {
-    const { page = 1, limit = 10, status, startDate, endDate } = params;
-    let url = `/payments/history?page=${page}&limit=${limit}`;
-    
-    if (status) url += `&status=${status}`;
-    if (startDate) url += `&startDate=${startDate}`;
-    if (endDate) url += `&endDate=${endDate}`;
-    
-    const response = await api.get(url);
-    return response.data;
-  } catch (error) {
-    throw new Error(error.response?.data?.message || 'Failed to fetch payment history');
-  }
-};
-
-// Get payments for a specific order
-export const getOrderPayments = async (orderId) => {
-  try {
-    const response = await api.get(`/payments/order/${orderId}`);
-    return response.data;
-  } catch (error) {
-    throw new Error(error.response?.data?.message || 'Failed to fetch order payments');
-  }
-};
-
-// Enhanced Paystack inline payment with better error handling
+// Enhanced Paystack inline payment with proper backend integration
 export const processPaystackPayment = (data) => {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     try {
       // Check if Paystack is loaded
       if (!window.PaystackPop) {
@@ -63,21 +38,36 @@ export const processPaystackPayment = (data) => {
         return;
       }
 
-      // Generate reference if not provided
-      const reference = data.reference || `mlf_${Math.random().toString(36).substr(2, 9)}_${Date.now()}`;
-
-      const handler = window.PaystackPop.setup({
-        key: process.env.REACT_APP_PAYSTACK_PUBLIC_KEY,
+      // Step 1: Initialize payment with backend (creates payment record)
+      console.log('Initializing payment with backend...');
+      const initResponse = await initializePaystack({
         email: data.email,
-        amount: Math.round(data.amount * 100), // Convert to kobo and ensure integer
+        amount: data.amount,
+        orderId: data.orderId,
+        callbackUrl: data.callbackUrl || `${window.location.origin}/order/${data.orderId}`
+      });
+
+      if (!initResponse.success) {
+        reject(new Error('Failed to initialize payment'));
+        return;
+      }
+
+      const { data: paystackData } = initResponse;
+      
+      // Step 2: Open Paystack payment modal
+      const handler = window.PaystackPop.setup({
+        key: paystackData.public_key || process.env.REACT_APP_PAYSTACK_PUBLIC_KEY,
+        email: data.email,
+        amount: paystackData.amount,
         currency: 'NGN',
-        ref: reference,
+        ref: paystackData.reference,
         callback: function(response) {
-          // Payment successful
-          console.log('Payment successful:', response);
+          // Payment successful on Paystack side
+          console.log('Payment successful on Paystack:', response);
           resolve({
             ...response,
-            orderId: data.orderId
+            orderId: data.orderId,
+            paystackData: initResponse
           });
         },
         onClose: function() {
@@ -105,21 +95,84 @@ export const processPaystackPayment = (data) => {
 
       // Open the payment modal
       handler.openIframe();
+      
     } catch (error) {
       console.error('Payment initialization error:', error);
-      reject(new Error('Failed to initialize payment. Please try again.'));
+      reject(new Error(error.message || 'Failed to initialize payment. Please try again.'));
     }
   });
 };
 
-// Process payment with order creation
-export const processOrderPayment = async (orderData) => {
+// Verify payment and update order with proper error handling
+export const verifyPaymentAndUpdateOrder = async (reference, orderId) => {
   try {
-    // First, create the order
+    console.log('Verifying payment:', { reference, orderId });
+    
+    // Verify payment with backend
+    const verificationResponse = await verifyPaystack(reference);
+    
+    if (verificationResponse.success) {
+      console.log('Payment verified successfully:', verificationResponse);
+      return {
+        payment: verificationResponse,
+        order: verificationResponse.order
+      };
+    } else {
+      throw new Error('Payment verification failed');
+    }
+  } catch (error) {
+    console.error('Payment verification error:', error);
+    throw new Error(error.message || 'Failed to verify payment');
+  }
+};
+
+// Alternative payment flow for orders without payment records
+export const directPaymentVerification = async (reference, orderId) => {
+  try {
+    // First try to verify directly with Paystack API
+    const response = await fetch(`https://api.paystack.co/transaction/verify/${reference}`, {
+      headers: {
+        'Authorization': `Bearer ${process.env.REACT_APP_PAYSTACK_SECRET_KEY}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    const result = await response.json();
+    
+    if (result.status && result.data.status === 'success') {
+      // Update order payment status directly
+      const orderUpdateResponse = await api.put(`/orders/${orderId}/pay`, {
+        id: result.data.id,
+        status: result.data.status,
+        update_time: new Date().toISOString(),
+        email_address: result.data.customer.email,
+        reference: result.data.reference,
+        channel: result.data.channel,
+        amount: result.data.amount,
+        fees: result.data.fees,
+      });
+
+      return {
+        payment: result,
+        order: orderUpdateResponse.data
+      };
+    } else {
+      throw new Error('Payment verification failed');
+    }
+  } catch (error) {
+    console.error('Direct payment verification error:', error);
+    throw new Error(error.message || 'Failed to verify payment');
+  }
+};
+
+// Create order and initialize payment in one go
+export const createOrderAndInitializePayment = async (orderData) => {
+  try {
+    // Step 1: Create order
     const orderResponse = await api.post('/orders', orderData);
     const order = orderResponse.data;
 
-    // Initialize payment for the created order
+    // Step 2: Initialize payment for the created order
     const paymentData = {
       email: orderData.customerEmail || orderData.user?.email,
       amount: order.totalPrice,
@@ -134,42 +187,12 @@ export const processOrderPayment = async (orderData) => {
       payment: paymentResponse
     };
   } catch (error) {
-    throw new Error(error.response?.data?.message || 'Failed to process order payment');
+    console.error('Create order and payment error:', error);
+    throw new Error(error.response?.data?.message || 'Failed to create order and initialize payment');
   }
 };
 
-// Verify payment and update order
-export const verifyPaymentAndUpdateOrder = async (reference, orderId) => {
-  try {
-    // Verify payment with Paystack
-    const paymentVerification = await verifyPaystack(reference);
-    
-    if (paymentVerification.success) {
-      // Update order payment status
-      const orderUpdateResponse = await api.put(`/orders/${orderId}/pay`, {
-        id: paymentVerification.transaction.id,
-        status: paymentVerification.transaction.status,
-        update_time: new Date().toISOString(),
-        email_address: paymentVerification.transaction.customer.email,
-        reference: paymentVerification.transaction.reference,
-        channel: paymentVerification.transaction.channel,
-        amount: paymentVerification.transaction.amount,
-        fees: paymentVerification.transaction.fees,
-      });
-
-      return {
-        payment: paymentVerification,
-        order: orderUpdateResponse.data
-      };
-    } else {
-      throw new Error('Payment verification failed');
-    }
-  } catch (error) {
-    throw new Error(error.response?.data?.message || 'Failed to verify payment');
-  }
-};
-
-// Retry failed payment
+// Retry payment for existing order
 export const retryPayment = async (orderId) => {
   try {
     // Get order details
@@ -188,15 +211,23 @@ export const retryPayment = async (orderId) => {
       callbackUrl: `${window.location.origin}/order/${order._id}`
     };
 
-    return await initializePaystack(paymentData);
+    const initResponse = await initializePaystack(paymentData);
+    
+    if (initResponse.success) {
+      return initResponse.data;
+    } else {
+      throw new Error('Failed to initialize retry payment');
+    }
   } catch (error) {
+    console.error('Retry payment error:', error);
     throw new Error(error.response?.data?.message || 'Failed to retry payment');
   }
 };
 
-// Check payment status
-export const checkPaymentStatus = async (reference) => {
+// Check payment status with fallback
+export const checkPaymentStatus = async (reference, orderId = null) => {
   try {
+    // First try backend verification
     const response = await verifyPaystack(reference);
     return {
       isPaid: response.success && response.transaction?.status === 'success',
@@ -204,6 +235,20 @@ export const checkPaymentStatus = async (reference) => {
       transaction: response.transaction
     };
   } catch (error) {
+    // Fallback to direct Paystack verification if orderId is provided
+    if (orderId) {
+      try {
+        const directResult = await directPaymentVerification(reference, orderId);
+        return {
+          isPaid: true,
+          status: 'success',
+          transaction: directResult.payment.data
+        };
+      } catch (directError) {
+        console.error('Direct verification also failed:', directError);
+      }
+    }
+    
     console.error('Error checking payment status:', error);
     return {
       isPaid: false,
@@ -231,17 +276,6 @@ export const koboToNaira = (kobo) => {
 // Convert naira to kobo
 export const nairaToKobo = (naira) => {
   return Math.round(naira * 100);
-};
-
-// Get supported payment channels
-export const getPaymentChannels = () => {
-  return [
-    { value: 'card', label: 'Debit/Credit Card', icon: '💳' },
-    { value: 'bank', label: 'Bank Transfer', icon: '🏦' },
-    { value: 'ussd', label: 'USSD', icon: '📱' },
-    { value: 'qr', label: 'QR Code', icon: '📱' },
-    { value: 'mobile_money', label: 'Mobile Money', icon: '📱' },
-  ];
 };
 
 // Validate payment amount
@@ -272,6 +306,7 @@ export const handlePaymentError = (error) => {
     'declined': 'Transaction was declined by your bank',
     'network_error': 'Network error. Please check your connection and try again',
     'timeout': 'Transaction timed out. Please try again',
+    'payment_record_not_found': 'Payment record not found. Please try again or contact support.',
   };
   
   const message = errorMessages[error.code] || error.message || 'An unexpected error occurred';
@@ -279,7 +314,7 @@ export const handlePaymentError = (error) => {
   return {
     message,
     code: error.code || 'unknown_error',
-    suggestion: getSuggestionForError(error.code)
+    suggestion: getSuggestionForError(error.code || error.message)
   };
 };
 
@@ -292,6 +327,7 @@ const getSuggestionForError = (errorCode) => {
     'declined': 'Please contact your bank or try a different payment method',
     'network_error': 'Please check your internet connection and try again',
     'timeout': 'Please try again in a few minutes',
+    'payment_record_not_found': 'This appears to be a technical issue. Please contact support if the problem persists.',
   };
   
   return suggestions[errorCode] || 'Please try again or contact support if the problem persists';
