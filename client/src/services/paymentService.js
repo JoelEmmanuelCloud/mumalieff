@@ -1,4 +1,4 @@
-// Updated paymentService.js - Fix payment record creation issue
+// Updated paymentService.js
 
 import api from './apiConfig';
 
