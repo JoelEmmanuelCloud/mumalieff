@@ -1,11 +1,13 @@
+// CartPage.js 
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import Message from '../components/common/Message';
+import QuickCheckoutButton from '../components/ui/QuickCheckoutButton';
 
 const CartPage = () => {
-  const { cartItems, updateCartItem, removeFromCart, itemsPrice, shippingPrice, taxPrice, totalPrice, applyPromoCode, removePromoCode, promoCode, discount } = useCart();
+  const { cartItems, updateCartItem, removeFromCart, itemsPrice, shippingPrice, taxPrice, totalPrice, applyPromoCode, removePromoCode, promoCode, discount, shippingAddress, paymentMethod } = useCart();
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   
@@ -43,6 +45,9 @@ const CartPage = () => {
       navigate('/login?redirect=shipping');
     }
   };
+
+  // Check if quick checkout is available (user has shipping & payment method set)
+  const canQuickCheckout = isAuthenticated && shippingAddress?.address && paymentMethod;
   
   return (
     <div className="bg-gray-50 dark:bg-dark-bg py-8">
@@ -210,16 +215,48 @@ const CartPage = () => {
                   )}
                 </div>
                 
-                {/* Checkout Button */}
-                <div className="mt-6">
+                {/* Checkout Buttons */}
+                <div className="mt-6 space-y-3">
+                  {/* Quick Checkout Option (if available) */}
+                  {canQuickCheckout && (
+                    <>
+                      <QuickCheckoutButton disabled={cartItems.length === 0} />
+                      
+                      {/* Divider */}
+                      <div className="flex items-center">
+                        <div className="flex-1 border-t border-gray-300 dark:border-gray-600"></div>
+                        <span className="px-3 text-sm text-gray-500 dark:text-gray-400">or</span>
+                        <div className="flex-1 border-t border-gray-300 dark:border-gray-600"></div>
+                      </div>
+                    </>
+                  )}
+                  
+                  {/* Regular Checkout Button */}
                   <button
                     onClick={handleCheckout}
                     className="btn btn-primary w-full py-3"
                     disabled={cartItems.length === 0}
                   >
-                    Proceed to Checkout
+                    {canQuickCheckout ? 'Review & Checkout' : 'Proceed to Checkout'}
                   </button>
                 </div>
+                
+                {/* Info Messages */}
+                {!isAuthenticated && (
+                  <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                    <p className="text-sm text-blue-700 dark:text-blue-300">
+                      <Link to="/login" className="font-medium underline">Sign in</Link> for faster checkout
+                    </p>
+                  </div>
+                )}
+                
+                {isAuthenticated && !canQuickCheckout && (
+                  <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                    <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                      Complete your shipping and payment details for one-click checkout
+                    </p>
+                  </div>
+                )}
                 
                 {/* Continue Shopping Link */}
                 <div className="mt-4 text-center">

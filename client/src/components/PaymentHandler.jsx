@@ -11,8 +11,8 @@ import {
   handlePaymentError
 } from '../services/paymentService';
 import { useAuth } from '../context/AuthContext';
-import Loader from '../components/common/Loader';
-import Message from '../components/common/Message';
+import Loader from './common/Loader';
+import Message from './common/Message';
 
 const PaymentHandler = ({ order, onPaymentSuccess, onPaymentError }) => {
   const navigate = useNavigate();
