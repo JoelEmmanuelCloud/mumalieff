@@ -1,3 +1,5 @@
+// CartContext.js
+
 import React, { createContext, useContext, useReducer, useEffect, useCallback, useRef } from 'react';
 import { toast } from 'react-toastify';
 import { useAuth } from './AuthContext';
@@ -14,7 +16,7 @@ const initialState = {
   paymentMethod: '',
   itemsPrice: 0,
   shippingPrice: 0,
-  taxPrice: 0,
+  taxPrice: 0, // Keep for compatibility but will always be 0
   totalPrice: 0,
   discount: 0,
   promoCode: '',
@@ -31,10 +33,11 @@ const loadFromStorage = () => {
     return {
       ...cartInfoFromStorage,
       itemsPrice: calculateItemsPrice(cartInfoFromStorage.cartItems),
+      taxPrice: 0, // No VAT
       totalPrice: calculateTotalPrice(
         calculateItemsPrice(cartInfoFromStorage.cartItems),
         cartInfoFromStorage.shippingPrice || 0,
-        cartInfoFromStorage.taxPrice || 0,
+        0, // No VAT
         cartInfoFromStorage.discount || 0
       ),
     };
@@ -49,9 +52,9 @@ const calculateItemsPrice = (cartItems) => {
   return cartItems.reduce((acc, item) => acc + item.price * item.qty, 0);
 };
 
-// Helper function to calculate total price
+// Helper function to calculate total price (no tax)
 const calculateTotalPrice = (itemsPrice, shippingPrice, taxPrice, discount) => {
-  return itemsPrice + shippingPrice + taxPrice - discount;
+  return itemsPrice + shippingPrice - discount; // Removed taxPrice from calculation
 };
 
 // Action types
@@ -96,12 +99,12 @@ const cartReducer = (state, action) => {
         cartItems = [...state.cartItems, newItem];
       }
       
-      // Calculate new prices
+      // Calculate new prices (no tax)
       const itemsPrice = calculateItemsPrice(cartItems);
       const totalPrice = calculateTotalPrice(
         itemsPrice,
         state.shippingPrice,
-        state.taxPrice,
+        0, // No VAT
         state.discount
       );
       
@@ -109,6 +112,7 @@ const cartReducer = (state, action) => {
         ...state,
         cartItems,
         itemsPrice,
+        taxPrice: 0, // No VAT
         totalPrice,
       };
     }
@@ -123,12 +127,12 @@ const cartReducer = (state, action) => {
           : item
       );
       
-      // Calculate new prices
+      // Calculate new prices (no tax)
       const itemsPrice = calculateItemsPrice(cartItems);
       const totalPrice = calculateTotalPrice(
         itemsPrice,
         state.shippingPrice,
-        state.taxPrice,
+        0, // No VAT
         state.discount
       );
       
@@ -136,6 +140,7 @@ const cartReducer = (state, action) => {
         ...state,
         cartItems,
         itemsPrice,
+        taxPrice: 0, // No VAT
         totalPrice,
       };
     }
@@ -148,12 +153,12 @@ const cartReducer = (state, action) => {
         (item) => !(item.product === id && item.size === size && item.color === color)
       );
       
-      // Calculate new prices
+      // Calculate new prices (no tax)
       const itemsPrice = calculateItemsPrice(cartItems);
       const totalPrice = calculateTotalPrice(
         itemsPrice,
         state.shippingPrice,
-        state.taxPrice,
+        0, // No VAT
         state.discount
       );
       
@@ -161,6 +166,7 @@ const cartReducer = (state, action) => {
         ...state,
         cartItems,
         itemsPrice,
+        taxPrice: 0, // No VAT
         totalPrice,
       };
     }
@@ -170,7 +176,8 @@ const cartReducer = (state, action) => {
         ...state,
         cartItems: [],
         itemsPrice: 0,
-        totalPrice: state.shippingPrice + state.taxPrice - state.discount,
+        taxPrice: 0, // No VAT
+        totalPrice: state.shippingPrice - state.discount, // Removed tax
       };
     
     case CART_SAVE_SHIPPING_ADDRESS:
@@ -190,7 +197,7 @@ const cartReducer = (state, action) => {
       const totalPrice = calculateTotalPrice(
         state.itemsPrice,
         state.shippingPrice,
-        state.taxPrice,
+        0, // No VAT
         discountAmount
       );
       
@@ -206,7 +213,7 @@ const cartReducer = (state, action) => {
       const totalPrice = calculateTotalPrice(
         state.itemsPrice,
         state.shippingPrice,
-        state.taxPrice,
+        0, // No VAT
         0
       );
       
@@ -219,18 +226,18 @@ const cartReducer = (state, action) => {
     }
     
     case CART_UPDATE_PRICING: {
-      const { shippingPrice, taxPrice } = action.payload;
+      const { shippingPrice } = action.payload; // Removed taxPrice parameter
       const totalPrice = calculateTotalPrice(
         state.itemsPrice,
         shippingPrice,
-        taxPrice,
+        0, // No VAT
         state.discount
       );
       
       return {
         ...state,
         shippingPrice,
-        taxPrice,
+        taxPrice: 0, // No VAT
         totalPrice,
       };
     }
@@ -415,26 +422,25 @@ export const CartProvider = ({ children }) => {
     dispatch({ type: CART_RESET });
   };
 
-  // Calculate shipping price based on items total
+  // Calculate shipping price based on items total (removed tax calculation)
   useEffect(() => {
     const calculatePricing = () => {
       // Free shipping for orders over ₦50,000
       const shippingPrice = state.itemsPrice > 50000 ? 0 : 2500;
       
-      // Calculate tax (7.5% VAT)
-      const taxPrice = Math.round(state.itemsPrice * 0.075);
+      // No tax calculation needed
       
-      // Only update if prices have changed
-      if (state.shippingPrice !== shippingPrice || state.taxPrice !== taxPrice) {
+      // Only update if shipping price has changed
+      if (state.shippingPrice !== shippingPrice) {
         dispatch({
           type: CART_UPDATE_PRICING,
-          payload: { shippingPrice, taxPrice }
+          payload: { shippingPrice }
         });
       }
     };
     
     calculatePricing();
-  }, [state.itemsPrice, state.shippingPrice, state.taxPrice]);
+  }, [state.itemsPrice, state.shippingPrice]);
 
   // Get cart item count
   const getCartItemCount = () => {
@@ -447,7 +453,7 @@ export const CartProvider = ({ children }) => {
       itemCount: getCartItemCount(),
       subtotal: state.itemsPrice,
       shipping: state.shippingPrice,
-      tax: state.taxPrice,
+      tax: 0, // No VAT
       discount: state.discount,
       total: state.totalPrice,
       promoCode: state.promoCode,

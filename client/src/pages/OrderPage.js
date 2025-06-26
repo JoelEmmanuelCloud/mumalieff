@@ -1,3 +1,5 @@
+// OrderPage.js
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
@@ -457,12 +459,7 @@ const OrderPage = () => {
                   </span>
                 </div>
                 
-                <div className="flex justify-between text-base">
-                  <span className="text-gray-600 dark:text-gray-300">Tax (0.0% VAT)</span>
-                  <span className="font-medium dark:text-white">
-                    ₦{order.taxPrice.toLocaleString()}
-                  </span>
-                </div>
+                {/* VAT line removed completely */}
                 
                 {order.discount > 0 && (
                   <div className="flex justify-between text-base">

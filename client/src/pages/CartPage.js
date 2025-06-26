@@ -1,4 +1,5 @@
-// CartPage.js 
+// CartPage.js
+
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
@@ -7,7 +8,7 @@ import Message from '../components/common/Message';
 import QuickCheckoutButton from '../components/ui/QuickCheckoutButton';
 
 const CartPage = () => {
-  const { cartItems, updateCartItem, removeFromCart, itemsPrice, shippingPrice, taxPrice, totalPrice, applyPromoCode, removePromoCode, promoCode, discount, shippingAddress, paymentMethod } = useCart();
+  const { cartItems, updateCartItem, removeFromCart, itemsPrice, shippingPrice, totalPrice, applyPromoCode, removePromoCode, promoCode, discount, shippingAddress, paymentMethod } = useCart();
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   
@@ -160,10 +161,7 @@ const CartPage = () => {
                     </span>
                   </div>
                   
-                  <div className="flex justify-between text-base">
-                    <span className="text-gray-600 dark:text-gray-300">Tax (7.5% VAT)</span>
-                    <span className="font-medium dark:text-white">₦{taxPrice.toLocaleString()}</span>
-                  </div>
+                  {/* VAT line removed completely */}
                   
                   {discount > 0 && (
                     <div className="flex justify-between text-base">

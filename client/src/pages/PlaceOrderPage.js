@@ -1,3 +1,5 @@
+//PlaceOrderPage.js 
+
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useMutation } from 'react-query';
@@ -17,8 +19,7 @@ const PlaceOrderPage = () => {
     paymentMethod, 
     itemsPrice, 
     shippingPrice, 
-    taxPrice, 
-    totalPrice, 
+    totalPrice, // taxPrice removed
     discount, 
     promoCode, 
     resetCart 
@@ -69,7 +70,7 @@ const PlaceOrderPage = () => {
       paymentMethod,
       itemsPrice,
       shippingPrice,
-      taxPrice,
+      taxPrice: 0, // No VAT
       totalPrice,
       discount,
       promoCode,
@@ -85,7 +86,7 @@ const PlaceOrderPage = () => {
       paymentMethod,
       itemsPrice,
       shippingPrice,
-      taxPrice,
+      taxPrice: 0, // No VAT
       totalPrice,
       discount,
       promoCode,
@@ -270,10 +271,7 @@ const PlaceOrderPage = () => {
                   </span>
                 </div>
                 
-                <div className="flex justify-between text-base">
-                  <span className="text-gray-600 dark:text-gray-300">Tax (7.5% VAT)</span>
-                  <span className="font-medium dark:text-white">₦{taxPrice.toLocaleString()}</span>
-                </div>
+                {/* VAT line removed completely */}
                 
                 {discount > 0 && (
                   <div className="flex justify-between text-base">
