@@ -1,9 +1,19 @@
+// server/src/controllers/orderController.js 
 const asyncHandler = require('express-async-handler');
 const Order = require('../models/orderModel');
 const Product = require('../models/productModel');
+const User = require('../models/userModel');
+const { 
+  sendOrderConfirmationEmail,
+  sendShippingConfirmationEmail,
+  sendDeliveryConfirmationEmail,
+  sendOrderCancellationEmail,
+  sendOrderStatusUpdateEmail,
+  sendPaymentFailedEmail
+} = require('../services/emailService');
 
 /**
- * @desc    Create new order
+ * @desc    Create new order (UPDATED with email)
  * @route   POST /api/orders
  * @access  Private
  */
@@ -64,6 +74,15 @@ const createOrder = asyncHandler(async (req, res) => {
     await product.save();
   }
 
+  // Send order confirmation email
+  try {
+    await sendOrderConfirmationEmail(createdOrder, req.user);
+    console.log(`Order confirmation email sent for order ${createdOrder._id}`);
+  } catch (emailError) {
+    console.error('Failed to send order confirmation email:', emailError);
+    // Don't fail the order creation if email fails
+  }
+
   res.status(201).json(createdOrder);
 });
 
@@ -96,14 +115,16 @@ const getOrderById = asyncHandler(async (req, res) => {
 });
 
 /**
- * @desc    Update order to paid
+ * @desc    Update order to paid (UPDATED with email)
  * @route   PUT /api/orders/:id/pay
  * @access  Private
  */
 const updateOrderToPaid = asyncHandler(async (req, res) => {
-  const order = await Order.findById(req.params.id);
+  const order = await Order.findById(req.params.id).populate('user', 'name email');
 
   if (order) {
+    const wasUnpaid = !order.isPaid;
+    
     order.isPaid = true;
     order.paidAt = Date.now();
     order.paymentResult = {
@@ -115,6 +136,17 @@ const updateOrderToPaid = asyncHandler(async (req, res) => {
     };
 
     const updatedOrder = await order.save();
+
+    // Send payment confirmation email only if order was previously unpaid
+    if (wasUnpaid) {
+      try {
+        await sendOrderConfirmationEmail(updatedOrder, order.user);
+        console.log(`Payment confirmation email sent for order ${updatedOrder._id}`);
+      } catch (emailError) {
+        console.error('Failed to send payment confirmation email:', emailError);
+      }
+    }
+
     res.json(updatedOrder);
   } else {
     res.status(404);
@@ -123,15 +155,16 @@ const updateOrderToPaid = asyncHandler(async (req, res) => {
 });
 
 /**
- * @desc    Update order status
+ * @desc    Update order status (UPDATED with email)
  * @route   PUT /api/orders/:id/status
  * @access  Private/Admin
  */
 const updateOrderStatus = asyncHandler(async (req, res) => {
   const { status, trackingNumber } = req.body;
-  const order = await Order.findById(req.params.id);
+  const order = await Order.findById(req.params.id).populate('user', 'name email');
 
   if (order) {
+    const previousStatus = order.status;
     order.status = status || order.status;
     
     if (trackingNumber) {
@@ -145,12 +178,33 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
     }
 
     const updatedOrder = await order.save();
+
+    // Send appropriate email based on status change
+    try {
+      if (status === 'Shipped' && previousStatus !== 'Shipped') {
+        await sendShippingConfirmationEmail(updatedOrder, order.user, {
+          trackingNumber: trackingNumber,
+          carrier: 'Our delivery partner'
+        });
+        console.log(`Shipping confirmation email sent for order ${updatedOrder._id}`);
+      } else if (status === 'Delivered' && previousStatus !== 'Delivered') {
+        await sendDeliveryConfirmationEmail(updatedOrder, order.user);
+        console.log(`Delivery confirmation email sent for order ${updatedOrder._id}`);
+      } else if (status !== previousStatus) {
+        await sendOrderStatusUpdateEmail(updatedOrder, order.user, previousStatus, status);
+        console.log(`Order status update email sent for order ${updatedOrder._id}`);
+      }
+    } catch (emailError) {
+      console.error('Failed to send order status email:', emailError);
+    }
+
     res.json(updatedOrder);
   } else {
     res.status(404);
     throw new Error('Order not found');
   }
 });
+
 
 /**
  * @desc    Get logged in user orders
@@ -242,7 +296,8 @@ const getOrders = asyncHandler(async (req, res) => {
  * @access  Private
  */
 const cancelOrder = asyncHandler(async (req, res) => {
-  const order = await Order.findById(req.params.id);
+  const { reason } = req.body;
+  const order = await Order.findById(req.params.id).populate('user', 'name email');
 
   if (!order) {
     res.status(404);
@@ -251,7 +306,7 @@ const cancelOrder = asyncHandler(async (req, res) => {
 
   // Check if the order belongs to the user or if the user is an admin
   if (
-    order.user.toString() !== req.user._id.toString() &&
+    order.user._id.toString() !== req.user._id.toString() &&
     !req.user.isAdmin
   ) {
     res.status(401);
@@ -266,6 +321,7 @@ const cancelOrder = asyncHandler(async (req, res) => {
 
   // Update order status
   order.status = 'Cancelled';
+  order.cancellationReason = reason || 'Customer requested cancellation';
   
   // Restore product inventory
   for (const item of order.orderItems) {
@@ -277,6 +333,15 @@ const cancelOrder = asyncHandler(async (req, res) => {
   }
 
   const updatedOrder = await order.save();
+
+  // Send cancellation confirmation email
+  try {
+    await sendOrderCancellationEmail(updatedOrder, order.user, reason);
+    console.log(`Order cancellation email sent for order ${updatedOrder._id}`);
+  } catch (emailError) {
+    console.error('Failed to send order cancellation email:', emailError);
+  }
+
   res.json(updatedOrder);
 });
 
