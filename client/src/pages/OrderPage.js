@@ -458,7 +458,7 @@ const OrderPage = () => {
                 </div>
                 
                 <div className="flex justify-between text-base">
-                  <span className="text-gray-600 dark:text-gray-300">Tax (7.5% VAT)</span>
+                  <span className="text-gray-600 dark:text-gray-300">Tax (0.0% VAT)</span>
                   <span className="font-medium dark:text-white">
                     ₦{order.taxPrice.toLocaleString()}
                   </span>
