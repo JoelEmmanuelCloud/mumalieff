@@ -14,6 +14,9 @@ const uploadRoutes = require('./routes/uploadRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const otpRoutes = require('./routes/otpRoutes'); 
+const cartRoutes = require('./routes/cartRoutes');
+
+const { startEmailJobs } = require('./jobs/emailJobs');
 
 // Initialize Express
 const app = express();
@@ -39,6 +42,10 @@ if (process.env.NODE_ENV === 'development') {
 // Important: For webhook routes, use raw body parser
 app.use('/api/payments/paystack/webhook', express.raw({ type: 'application/json' }));
 
+// Start email automation jobs
+if (process.env.ENABLE_EMAIL_JOBS === 'true') {
+  startEmailJobs();
+}
 
 // Welcome route
 app.get('/', (req, res) => {
@@ -53,6 +60,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/cart', cartRoutes);
 
 // In your server.js, replace this line:
 app.use('/api/auth', otpRoutes)
