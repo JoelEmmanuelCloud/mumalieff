@@ -5,12 +5,14 @@ const Order = require('../models/orderModel');
 const Payment = require('../models/paymentModel');
 
 /**
- * @desc    Initialize Paystack payment
+ * @desc    Initialize Paystack payment - FIXED VERSION
  * @route   POST /api/payments/paystack/initialize
  * @access  Private
  */
 const initializePaystack = asyncHandler(async (req, res) => {
   const { email, amount, orderId, callbackUrl } = req.body;
+
+  console.log('Initialize payment request:', { email, amount, orderId });
 
   // Validate required fields
   if (!email || !amount || !orderId) {
@@ -45,17 +47,24 @@ const initializePaystack = asyncHandler(async (req, res) => {
   const reference = `mlf_${Math.random().toString(36).substr(2, 9)}_${Date.now()}`;
 
   try {
+    console.log('Initializing with Paystack API...');
+    
+    // FIXED: Ensure amount is in kobo and properly formatted
+    const amountInKobo = Math.round(amount * 100);
+    
     // Initialize Paystack transaction
     const response = await axios.post(
       'https://api.paystack.co/transaction/initialize',
       {
         email,
-        amount: amount * 100, // Paystack uses kobo (smallest currency unit)
+        amount: amountInKobo, // Paystack uses kobo
         reference,
-        callback_url: callbackUrl,
+        callback_url: callbackUrl || `${req.protocol}://${req.get('host')}/order/${orderId}`,
         metadata: {
           order_id: orderId,
           user_id: req.user._id.toString(),
+          order_number: order.orderNumber,
+          customer_name: req.user.name,
           custom_fields: [
             {
               display_name: 'Order ID',
@@ -67,9 +76,14 @@ const initializePaystack = asyncHandler(async (req, res) => {
               variable_name: 'customer_name',
               value: req.user.name,
             },
+            {
+              display_name: 'Order Number',
+              variable_name: 'order_number',
+              value: order.orderNumber || orderId.slice(-8),
+            },
           ],
         },
-        channels: ['card', 'bank', 'ussd', 'qr', 'mobile_money'], // Enable all channels
+        channels: ['card', 'bank', 'ussd', 'qr', 'mobile_money', 'bank_transfer'],
       },
       {
         headers: {
@@ -79,12 +93,14 @@ const initializePaystack = asyncHandler(async (req, res) => {
       }
     );
 
+    console.log('Paystack API response:', response.data);
+
     // Create payment record
     const payment = new Payment({
       order: orderId,
       user: req.user._id,
       paymentMethod: 'paystack',
-      amount: amount * 100, // Store in kobo
+      amount: amountInKobo, // Store in kobo for consistency
       currency: 'NGN',
       status: 'pending',
       transactionReference: reference,
@@ -95,50 +111,73 @@ const initializePaystack = asyncHandler(async (req, res) => {
 
     await payment.save();
 
+    console.log('Payment record created:', payment._id);
+
+    // FIXED: Return the correct response structure
     res.json({
       success: true,
-      data: response.data.data,
+      data: {
+        authorization_url: response.data.data.authorization_url,
+        access_code: response.data.data.access_code,
+        reference: reference,
+        amount: amountInKobo,
+        public_key: process.env.PAYSTACK_PUBLIC_KEY, // Include public key for frontend
+      },
       paymentId: payment._id,
       message: 'Payment initialization successful',
     });
   } catch (error) {
     console.error('Paystack initialization error:', error.response?.data || error.message);
-    res.status(500);
-    throw new Error('Failed to initialize payment');
+    
+    // More specific error handling
+    if (error.response?.status === 400) {
+      res.status(400);
+      throw new Error(error.response.data.message || 'Invalid payment data');
+    } else if (error.response?.status === 401) {
+      res.status(500);
+      throw new Error('Payment gateway authentication failed');
+    } else {
+      res.status(500);
+      throw new Error('Failed to initialize payment');
+    }
   }
 });
 
 /**
- * @desc    Verify Paystack payment with fallback
+ * @desc    Verify Paystack payment with enhanced fallback - FIXED VERSION
  * @route   GET /api/payments/paystack/verify/:reference
  * @access  Private
  */
 const verifyPaystack = asyncHandler(async (req, res) => {
   const { reference } = req.params;
 
+  console.log('Verifying payment reference:', reference);
+
   try {
     // First, try to find the payment record
     let payment = await Payment.findOne({ transactionReference: reference }).populate('order');
     
-    // If no payment record found, try to find by order and create one
-    if (!payment) {
-      console.log('Payment record not found, attempting to verify directly with Paystack...');
-      
-      // Verify with Paystack directly
-      const paystackResponse = await axios.get(
-        `https://api.paystack.co/transaction/verify/${reference}`,
-        {
-          headers: {
-            Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+    // Always verify with Paystack regardless of local payment status
+    console.log('Verifying with Paystack API...');
+    const paystackResponse = await axios.get(
+      `https://api.paystack.co/transaction/verify/${reference}`,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
 
-      const { data } = paystackResponse.data;
+    const { data } = paystackResponse.data;
+    console.log('Paystack verification result:', data.status, data.gateway_response);
 
-      if (data.status === 'success') {
-        // Find the order from metadata
+    if (data.status === 'success') {
+      // Find or create payment record
+      if (!payment) {
+        console.log('Payment record not found, creating from Paystack data...');
+        
+        // Extract order ID from metadata
         const orderId = data.metadata?.order_id;
         
         if (!orderId) {
@@ -175,8 +214,19 @@ const verifyPaystack = asyncHandler(async (req, res) => {
         });
 
         await payment.save();
+        payment.order = order; // Populate for response
+      } else {
+        // Update existing payment record
+        if (payment.status !== 'success') {
+          await payment.markAsSuccessful(data);
+        }
+      }
 
-        // Update order payment status
+      // Update order payment status
+      const order = await Order.findById(payment.order._id || payment.order);
+      if (order && !order.isPaid) {
+        console.log('Updating order payment status...');
+        
         order.isPaid = true;
         order.paidAt = new Date();
         order.paymentMethod = 'paystack';
@@ -193,77 +243,10 @@ const verifyPaystack = asyncHandler(async (req, res) => {
         };
 
         await order.save();
-
-        return res.json({
-          success: true,
-          message: 'Payment verification successful',
-          payment: payment,
-          order: order,
-          transaction: data,
-        });
-      } else {
-        res.status(400);
-        throw new Error(`Payment verification failed: ${data.gateway_response || 'Unknown error'}`);
+        console.log('Order payment status updated successfully');
       }
-    }
-
-    // If payment record exists, verify the payment belongs to the authenticated user
-    if (payment.user.toString() !== req.user._id.toString()) {
-      res.status(401);
-      throw new Error('Not authorized');
-    }
-
-    // If already successful, return existing data
-    if (payment.status === 'success') {
-      return res.json({
-        success: true,
-        message: 'Payment already verified',
-        payment: payment,
-        order: payment.order,
-      });
-    }
-
-    // Verify transaction with Paystack for pending payments
-    const response = await axios.get(
-      `https://api.paystack.co/transaction/verify/${reference}`,
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
-          'Content-Type': 'application/json',
-        },
-      }
-    );
-
-    const { data } = response.data;
-
-    if (data.status === 'success') {
-      // Update payment record
-      await payment.markAsSuccessful(data);
-
-      // Update order payment status
-      const order = await Order.findById(payment.order);
-      if (!order) {
-        res.status(404);
-        throw new Error('Order not found');
-      }
-
-      order.isPaid = true;
-      order.paidAt = new Date();
-      order.paymentMethod = 'paystack';
-      order.paymentReference = reference;
-      order.paymentResult = {
-        id: data.id,
-        status: data.status,
-        update_time: new Date().toISOString(),
-        email_address: data.customer.email,
-        reference: data.reference,
-        channel: data.channel,
-        amount: data.amount,
-        fees: data.fees,
-      };
-
-      await order.save();
       
+      // FIXED: Return consistent response structure
       res.json({
         success: true,
         message: 'Payment verification successful',
@@ -272,11 +255,13 @@ const verifyPaystack = asyncHandler(async (req, res) => {
         transaction: data,
       });
     } else {
-      // Mark payment as failed
-      await payment.markAsFailed(
-        data.gateway_response || 'Payment verification failed',
-        data.gateway_response
-      );
+      // Payment failed
+      if (payment && payment.status !== 'failed') {
+        await payment.markAsFailed(
+          data.gateway_response || 'Payment verification failed',
+          data.gateway_response
+        );
+      }
       
       res.status(400);
       throw new Error(`Payment verification failed: ${data.gateway_response || 'Unknown error'}`);
@@ -284,25 +269,31 @@ const verifyPaystack = asyncHandler(async (req, res) => {
   } catch (error) {
     console.error('Paystack verification error:', error.response?.data || error.message);
     
-    // If it's an axios error, check if it's due to invalid reference
+    // Enhanced error handling
     if (error.response?.status === 404) {
       res.status(404);
       throw new Error('Transaction not found');
+    } else if (error.message.includes('Not authorized')) {
+      res.status(401);
+      throw new Error('Not authorized');
+    } else if (error.message.includes('already verified')) {
+      // This is okay, return success
+      const payment = await Payment.findOne({ transactionReference: reference }).populate('order');
+      res.json({
+        success: true,
+        message: 'Payment already verified',
+        payment: payment,
+        order: payment?.order,
+      });
+    } else {
+      res.status(500);
+      throw new Error(error.message || 'Failed to verify payment');
     }
-    
-    // If payment record not found error, provide better message
-    if (error.message.includes('Payment record not found')) {
-      res.status(404);
-      throw new Error('Payment record not found');
-    }
-    
-    res.status(500);
-    throw new Error(error.message || 'Failed to verify payment');
   }
 });
 
 /**
- * @desc    Handle direct payment update (for orders without payment records)
+ * @desc    Handle direct payment update (for orders without payment records) - IMPROVED
  * @route   PUT /api/orders/:id/pay
  * @access  Private
  */
@@ -320,18 +311,25 @@ const updateOrderToPaid = asyncHandler(async (req, res) => {
     throw new Error('Not authorized');
   }
 
+  // Prevent duplicate payment updates
+  if (order.isPaid) {
+    return res.json(order);
+  }
+
+  console.log('Updating order to paid status:', order._id);
+
   // Update order payment information
   order.isPaid = true;
   order.paidAt = Date.now();
   order.paymentResult = {
-    id: req.body.id,
-    status: req.body.status,
-    update_time: req.body.update_time,
-    email_address: req.body.email_address,
+    id: req.body.id || req.body.reference,
+    status: req.body.status || 'success',
+    update_time: req.body.update_time || new Date().toISOString(),
+    email_address: req.body.email_address || order.user?.email,
     reference: req.body.reference,
-    channel: req.body.channel,
-    amount: req.body.amount,
-    fees: req.body.fees,
+    channel: req.body.channel || 'paystack',
+    amount: req.body.amount || order.totalPrice * 100,
+    fees: req.body.fees || 0,
   };
 
   if (req.body.reference) {
@@ -339,11 +337,13 @@ const updateOrderToPaid = asyncHandler(async (req, res) => {
   }
 
   const updatedOrder = await order.save();
+  console.log('Order payment status updated successfully');
+  
   res.json(updatedOrder);
 });
 
 /**
- * @desc    Handle Paystack webhook
+ * @desc    Handle Paystack webhook - ENHANCED
  * @route   POST /api/payments/paystack/webhook
  * @access  Public
  */
@@ -400,10 +400,12 @@ const paystackWebhook = asyncHandler(async (req, res) => {
   }
 });
 
-// Helper function to handle successful charge
+// Helper function to handle successful charge - ENHANCED
 const handleChargeSuccess = async (data) => {
   const orderId = data.metadata?.order_id;
   const reference = data.reference;
+
+  console.log('Processing successful charge webhook:', { orderId, reference });
 
   if (!orderId || !reference) {
     console.log('Missing order ID or reference in webhook data');
@@ -411,11 +413,11 @@ const handleChargeSuccess = async (data) => {
   }
 
   try {
-    // Find payment record or create one if it doesn't exist
+    // Find or create payment record
     let payment = await Payment.findOne({ transactionReference: reference });
     
     if (!payment) {
-      // Create payment record from webhook data
+      console.log('Creating payment record from webhook...');
       const order = await Order.findById(orderId);
       if (order) {
         payment = new Payment({
@@ -434,10 +436,12 @@ const handleChargeSuccess = async (data) => {
         });
         
         await payment.save();
+        console.log('Payment record created from webhook');
       }
     } else if (payment.status !== 'success') {
       // Update existing payment record
       await payment.markAsSuccessful(data);
+      console.log('Payment record updated from webhook');
     }
 
     // Update order
@@ -466,7 +470,7 @@ const handleChargeSuccess = async (data) => {
   }
 };
 
-// Helper functions for other webhook events
+// Helper functions for other webhook events (unchanged)
 const handleDisputeCreate = async (data) => {
   const reference = data.transaction?.reference;
   
@@ -513,23 +517,6 @@ const handleDisputeResolve = async (data) => {
     }
   }
 };
-
-/**
- * @desc    Handle payment failure notification
- */
-const handlePaymentFailure = asyncHandler(async (orderId, userId, failureReason) => {
-  try {
-    const order = await Order.findById(orderId).populate('user', 'name email');
-    const user = await User.findById(userId);
-    
-    if (order && user) {
-      await sendPaymentFailedEmail(order, user, failureReason);
-      console.log(`Payment failed email sent for order ${orderId}`);
-    }
-  } catch (error) {
-    console.error('Error sending payment failed email:', error);
-  }
-});
 
 
 /**
@@ -638,5 +625,4 @@ module.exports = {
   getPaymentHistory,
   getOrderPayments,
   getPaymentAnalytics,
-  handlePaymentFailure
 };
