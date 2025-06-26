@@ -14,14 +14,14 @@ const TEMPLATES = {
     WELCOME_EMAIL: 'd-8e6df1c30633437a8ad82fca203b24c5',
     
     // E-commerce Templates
-    ORDER_CONFIRMATION: 'd-order-confirmation-template-id',
-    SHIPPING_CONFIRMATION: 'd-shipping-confirmation-template-id',
-    DELIVERY_CONFIRMATION: 'd-delivery-confirmation-template-id',
-    ORDER_CANCELLATION: 'd-order-cancellation-template-id',
-    ABANDONED_CART_REMINDER: 'd-abandoned-cart-template-id',
+    ORDER_CONFIRMATION: 'd-c7dd785dea82475bae9e440b0be550c1',
+    SHIPPING_CONFIRMATION: 'd-54e73adf2adf4063a5425f826d860199',
+    DELIVERY_CONFIRMATION: 'd-e5fbe9ed8ff64c1f91bd29165beaca7d',
+    ORDER_CANCELLATION: 'd-a2ea5729069a4ed3a8973c40e577fc09',
+    ABANDONED_CART_REMINDER: 'd-eae04b1f48124861aac72b92b9d2456d',
     PAYMENT_FAILED: 'd-payment-failed-template-id',
-    REFUND_CONFIRMATION: 'd-refund-confirmation-template-id',
-    ORDER_STATUS_UPDATE: 'd-order-status-update-template-id',
+    REFUND_CONFIRMATION: 'd-c7e712f8d89845429d1c731e709d76aa',
+    ORDER_STATUS_UPDATE: 'd-f7c96491f45e4b46aa5c37937239e432',
 };
 
 /**
@@ -218,7 +218,7 @@ const sendForgotPasswordOTP = async (email, otp, name = 'User', req = null) => {
  */
 const sendWelcomeEmail = async (email, name = 'User') => {
     try {
-        const baseUrl = process.env.FRONTEND_URL || 'https://mumalieff.com';
+        const baseUrl = process.env.CLIENT_URL || 'https://mumalieff.com';
         
         const msg = {
             to: email,
@@ -260,7 +260,7 @@ const sendWelcomeEmail = async (email, name = 'User') => {
  */
 const sendOrderConfirmationEmail = async (order, user) => {
     try {
-        const baseUrl = process.env.FRONTEND_URL || 'https://mumalieff.com';
+        const baseUrl = process.env.CLIENT_URL || 'https://mumalieff.com';
         
         const msg = {
             to: user.email,
@@ -326,7 +326,7 @@ const sendOrderConfirmationEmail = async (order, user) => {
  */
 const sendShippingConfirmationEmail = async (order, user, trackingInfo = {}) => {
     try {
-        const baseUrl = process.env.FRONTEND_URL || 'https://mumalieff.com';
+        const baseUrl = process.env.CLIENT_URL || 'https://mumalieff.com';
         
         const msg = {
             to: user.email,
@@ -384,7 +384,7 @@ const sendShippingConfirmationEmail = async (order, user, trackingInfo = {}) => 
  */
 const sendDeliveryConfirmationEmail = async (order, user) => {
     try {
-        const baseUrl = process.env.FRONTEND_URL || 'https://mumalieff.com';
+        const baseUrl = process.env.CLIENT_URL || 'https://mumalieff.com';
         
         const msg = {
             to: user.email,
@@ -432,7 +432,7 @@ const sendDeliveryConfirmationEmail = async (order, user) => {
  */
 const sendOrderCancellationEmail = async (order, user, cancellationReason = '') => {
     try {
-        const baseUrl = process.env.FRONTEND_URL || 'https://mumalieff.com';
+        const baseUrl = process.env.CLIENT_URL || 'https://mumalieff.com';
         
         const msg = {
             to: user.email,
@@ -479,7 +479,7 @@ const sendOrderCancellationEmail = async (order, user, cancellationReason = '') 
  */
 const sendAbandonedCartEmail = async (cartData, user, reminderType = 'first') => {
     try {
-        const baseUrl = process.env.FRONTEND_URL || 'https://mumalieff.com';
+        const baseUrl = process.env.CLIENT_URL || 'https://mumalieff.com';
         
         // Different messaging based on reminder type
         const reminderContent = {
@@ -550,7 +550,7 @@ const sendAbandonedCartEmail = async (cartData, user, reminderType = 'first') =>
  */
 const sendPaymentFailedEmail = async (order, user, failureReason = '') => {
     try {
-        const baseUrl = process.env.FRONTEND_URL || 'https://mumalieff.com';
+        const baseUrl = process.env.CLIENT_URL || 'https://mumalieff.com';
         
         const msg = {
             to: user.email,
@@ -591,7 +591,7 @@ const sendPaymentFailedEmail = async (order, user, failureReason = '') => {
  */
 const sendOrderStatusUpdateEmail = async (order, user, previousStatus, newStatus) => {
     try {
-        const baseUrl = process.env.FRONTEND_URL || 'https://mumalieff.com';
+        const baseUrl = process.env.CLIENT_URL || 'https://mumalieff.com';
         
         const statusMessages = {
             'Processing': 'We\'re preparing your order',
