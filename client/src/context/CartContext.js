@@ -1,5 +1,7 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useCallback, useRef } from 'react';
 import { toast } from 'react-toastify';
+import { useAuth } from './AuthContext';
+import { saveAbandonedCart, clearAbandonedCart } from '../services/cartService';
 
 const CartContext = createContext();
 
@@ -62,6 +64,7 @@ const CART_SAVE_PAYMENT_METHOD = 'CART_SAVE_PAYMENT_METHOD';
 const CART_APPLY_PROMO = 'CART_APPLY_PROMO';
 const CART_REMOVE_PROMO = 'CART_REMOVE_PROMO';
 const CART_RESET = 'CART_RESET';
+const CART_UPDATE_PRICING = 'CART_UPDATE_PRICING';
 
 // Reducer function
 const cartReducer = (state, action) => {
@@ -215,6 +218,23 @@ const cartReducer = (state, action) => {
       };
     }
     
+    case CART_UPDATE_PRICING: {
+      const { shippingPrice, taxPrice } = action.payload;
+      const totalPrice = calculateTotalPrice(
+        state.itemsPrice,
+        shippingPrice,
+        taxPrice,
+        state.discount
+      );
+      
+      return {
+        ...state,
+        shippingPrice,
+        taxPrice,
+        totalPrice,
+      };
+    }
+    
     case CART_RESET:
       return initialState;
     
@@ -225,12 +245,92 @@ const cartReducer = (state, action) => {
 
 export const CartProvider = ({ children }) => {
   const [state, dispatch] = useReducer(cartReducer, initialState, loadFromStorage);
-  
+  const { isAuthenticated, user } = useAuth();
+  const abandonedCartTimeoutRef = useRef(null);
+  const previousCartItemsRef = useRef([]);
+
   // Save cart to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem('cartInfo', JSON.stringify(state));
   }, [state]);
-  
+
+  // Abandoned cart tracking function
+  const saveCartForAbandonment = useCallback(async () => {
+    if (isAuthenticated && state.cartItems.length > 0) {
+      try {
+        const cartData = {
+          cartItems: state.cartItems.map(item => ({
+            product: item.product,
+            name: item.name,
+            image: item.image,
+            price: item.price,
+            qty: item.qty,
+            size: item.size,
+            color: item.color,
+            customDesign: item.customDesign
+          })),
+          total: state.totalPrice
+        };
+        
+        await saveAbandonedCart(cartData);
+        console.log('Cart saved for abandonment tracking');
+      } catch (error) {
+        console.error('Failed to save cart for abandonment:', error);
+      }
+    } else if (isAuthenticated && state.cartItems.length === 0) {
+      // Clear abandoned cart if cart is empty
+      try {
+        await clearAbandonedCart();
+        console.log('Abandoned cart cleared');
+      } catch (error) {
+        console.error('Failed to clear abandoned cart:', error);
+      }
+    }
+  }, [isAuthenticated, state.cartItems, state.totalPrice]);
+
+  // Track cart changes for abandoned cart
+  useEffect(() => {
+    // Clear existing timeout
+    if (abandonedCartTimeoutRef.current) {
+      clearTimeout(abandonedCartTimeoutRef.current);
+    }
+
+    // Only track if cart has items and user is authenticated
+    if (isAuthenticated && state.cartItems.length > 0) {
+      // Check if cart actually changed (not just initial load)
+      const cartChanged = JSON.stringify(state.cartItems) !== JSON.stringify(previousCartItemsRef.current);
+      
+      if (cartChanged) {
+        // Set a timeout to save cart after 2 seconds of inactivity
+        abandonedCartTimeoutRef.current = setTimeout(() => {
+          saveCartForAbandonment();
+        }, 2000);
+      }
+    }
+
+    // Update previous cart items reference
+    previousCartItemsRef.current = state.cartItems;
+
+    // Cleanup timeout on unmount
+    return () => {
+      if (abandonedCartTimeoutRef.current) {
+        clearTimeout(abandonedCartTimeoutRef.current);
+      }
+    };
+  }, [state.cartItems, isAuthenticated, saveCartForAbandonment]);
+
+  // Clear abandoned cart when user completes order
+  const handleOrderCompletion = useCallback(async () => {
+    if (isAuthenticated) {
+      try {
+        await clearAbandonedCart();
+        console.log('Abandoned cart cleared after order completion');
+      } catch (error) {
+        console.error('Failed to clear abandoned cart after order:', error);
+      }
+    }
+  }, [isAuthenticated]);
+
   // Add item to cart
   const addToCart = (product, qty, size, color, customDesign = null) => {
     dispatch({
@@ -307,35 +407,69 @@ export const CartProvider = ({ children }) => {
   };
   
   // Reset cart after checkout
-  const resetCart = () => {
+  const resetCart = async () => {
+    // Clear abandoned cart tracking first
+    await handleOrderCompletion();
+    
+    // Then reset the cart state
     dispatch({ type: CART_RESET });
   };
-  
+
   // Calculate shipping price based on items total
   useEffect(() => {
-    const calculateShipping = () => {
+    const calculatePricing = () => {
       // Free shipping for orders over ₦50,000
       const shippingPrice = state.itemsPrice > 50000 ? 0 : 2500;
       
       // Calculate tax (7.5% VAT)
-      const taxPrice = state.itemsPrice * 0.075;
+      const taxPrice = Math.round(state.itemsPrice * 0.075);
       
-      // Update total with new shipping and tax values
-      const totalPrice = calculateTotalPrice(
-        state.itemsPrice,
-        shippingPrice,
-        taxPrice,
-        state.discount
-      );
-      
-      // Save to state
-      state.shippingPrice = shippingPrice;
-      state.taxPrice = taxPrice;
-      state.totalPrice = totalPrice;
+      // Only update if prices have changed
+      if (state.shippingPrice !== shippingPrice || state.taxPrice !== taxPrice) {
+        dispatch({
+          type: CART_UPDATE_PRICING,
+          payload: { shippingPrice, taxPrice }
+        });
+      }
     };
     
-    calculateShipping();
-  }, [state.itemsPrice, state.discount]);
+    calculatePricing();
+  }, [state.itemsPrice, state.shippingPrice, state.taxPrice]);
+
+  // Get cart item count
+  const getCartItemCount = () => {
+    return state.cartItems.reduce((total, item) => total + item.qty, 0);
+  };
+
+  // Get cart summary for display
+  const getCartSummary = () => {
+    return {
+      itemCount: getCartItemCount(),
+      subtotal: state.itemsPrice,
+      shipping: state.shippingPrice,
+      tax: state.taxPrice,
+      discount: state.discount,
+      total: state.totalPrice,
+      promoCode: state.promoCode,
+      hasItems: state.cartItems.length > 0,
+      freeShippingEligible: state.itemsPrice > 50000,
+      freeShippingProgress: state.itemsPrice < 50000 ? (50000 - state.itemsPrice) : 0
+    };
+  };
+
+  // Check if specific item is in cart
+  const isItemInCart = (productId, size, color) => {
+    return state.cartItems.some(
+      item => item.product === productId && item.size === size && item.color === color
+    );
+  };
+
+  // Get specific cart item
+  const getCartItem = (productId, size, color) => {
+    return state.cartItems.find(
+      item => item.product === productId && item.size === size && item.color === color
+    );
+  };
   
   return (
     <CartContext.Provider
@@ -350,6 +484,12 @@ export const CartProvider = ({ children }) => {
         applyPromoCode,
         removePromoCode,
         resetCart,
+        handleOrderCompletion,
+        getCartItemCount,
+        getCartSummary,
+        isItemInCart,
+        getCartItem,
+        saveCartForAbandonment,
       }}
     >
       {children}
