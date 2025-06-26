@@ -335,7 +335,7 @@ const sendShippingConfirmationEmail = async (order, user, trackingInfo = {}) => 
             },
             templateId: TEMPLATES.SHIPPING_CONFIRMATION,
             dynamicTemplateData: {
-                firstName: user.name,
+                firstName: user.firstName,
                 orderNumber: order.orderNumber || order._id.slice(-8),
                 shippedDate: formatDate(new Date()),
                 trackingNumber: order.trackingNumber || trackingInfo.trackingNumber,
@@ -393,7 +393,7 @@ const sendDeliveryConfirmationEmail = async (order, user) => {
             },
             templateId: TEMPLATES.DELIVERY_CONFIRMATION,
             dynamicTemplateData: {
-                firstName: user.name,
+                firstName: user.firstName,
                 orderNumber: order.orderNumber || order._id.slice(-8),
                 deliveredDate: formatDate(order.deliveredAt || new Date()),
                 
@@ -441,7 +441,7 @@ const sendOrderCancellationEmail = async (order, user, cancellationReason = '') 
             },
             templateId: TEMPLATES.ORDER_CANCELLATION,
             dynamicTemplateData: {
-                firstName: user.name,
+                firstName: user.firstName,
                 orderNumber: order.orderNumber || order._id.slice(-8),
                 cancelledDate: formatDate(new Date()),
                 cancellationReason: cancellationReason || 'Customer requested cancellation',
@@ -509,7 +509,7 @@ const sendAbandonedCartEmail = async (cartData, user, reminderType = 'first') =>
             },
             templateId: TEMPLATES.ABANDONED_CART_REMINDER,
             dynamicTemplateData: {
-                firstName: user.name,
+                firstName: user.firstName,
                 reminderType: reminderType,
                 urgencyLevel: content.urgency,
                 
@@ -559,7 +559,7 @@ const sendPaymentFailedEmail = async (order, user, failureReason = '') => {
             },
             templateId: TEMPLATES.PAYMENT_FAILED,
             dynamicTemplateData: {
-                firstName: user.name,
+                firstName: user.firstName,
                 orderNumber: order.orderNumber || order._id.slice(-8),
                 failureReason: failureReason || 'Payment could not be processed',
                 
@@ -607,7 +607,7 @@ const sendOrderStatusUpdateEmail = async (order, user, previousStatus, newStatus
             },
             templateId: TEMPLATES.ORDER_STATUS_UPDATE,
             dynamicTemplateData: {
-                firstName: user.name,
+                firstName: user.firstName,
                 orderNumber: order.orderNumber || order._id.slice(-8),
                 previousStatus: previousStatus,
                 newStatus: newStatus,
