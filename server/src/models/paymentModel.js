@@ -37,7 +37,7 @@ const paymentSchema = mongoose.Schema(
       required: true,
       unique: true,
     },
-    // Store complete Paystack transaction response
+    // Store complete Paystack transaction response - FIXED
     paymentGatewayResponse: {
       id: Number,
       domain: String,
@@ -113,6 +113,7 @@ const paymentSchema = mongoose.Schema(
         stamp_duty_fee: Number,
         total_fees: Number,
       },
+      // FIXED: Changed log structure to be more flexible
       log: {
         start_time: Number,
         time_spent: Number,
@@ -121,13 +122,8 @@ const paymentSchema = mongoose.Schema(
         success: Boolean,
         mobile: Boolean,
         input: [mongoose.Schema.Types.Mixed],
-        history: [
-          {
-            type: String,
-            message: String,
-            time: Number,
-          }
-        ],
+        // FIXED: Use Mixed type instead of strict object structure
+        history: [mongoose.Schema.Types.Mixed],
       },
     },
     // Legacy field for backward compatibility - maps to paymentGatewayResponse
@@ -371,12 +367,23 @@ paymentSchema.statics.getRevenueAnalytics = function (startDate, endDate) {
   ]);
 };
 
-// Instance method to mark as successful
+// FIXED: Instance method to mark as successful with better error handling
 paymentSchema.methods.markAsSuccessful = function (paystackResponse) {
   this.status = 'success';
   this.paidAt = new Date();
-  this.paymentGatewayResponse = paystackResponse;
-  this.paystackData = paystackResponse; // For backward compatibility
+  
+  // FIXED: Safely assign the Paystack response to handle complex nested structures
+  try {
+    // Create a deep copy to avoid reference issues
+    this.paymentGatewayResponse = JSON.parse(JSON.stringify(paystackResponse));
+    this.paystackData = JSON.parse(JSON.stringify(paystackResponse)); // For backward compatibility
+  } catch (error) {
+    console.error('Error serializing Paystack response:', error);
+    // Fallback: use the original response (may cause cast errors but preserves data)
+    this.paymentGatewayResponse = paystackResponse;
+    this.paystackData = paystackResponse;
+  }
+  
   this.webhookVerified = true;
   this.gatewayResponse = paystackResponse.gateway_response;
   return this.save();
@@ -466,7 +473,7 @@ paymentSchema.methods.getPaymentSummary = function () {
   };
 };
 
-// Pre-save middleware to set customer email and sync paystackData
+// FIXED: Pre-save middleware with better error handling
 paymentSchema.pre('save', function (next) {
   // Set customer email from gateway response if not already set
   if (this.paymentGatewayResponse?.customer?.email && !this.customerEmail) {
@@ -480,7 +487,12 @@ paymentSchema.pre('save', function (next) {
   
   // Sync paystackData with paymentGatewayResponse for backward compatibility
   if (this.paymentGatewayResponse && this.isModified('paymentGatewayResponse')) {
-    this.paystackData = this.paymentGatewayResponse;
+    try {
+      this.paystackData = JSON.parse(JSON.stringify(this.paymentGatewayResponse));
+    } catch (error) {
+      console.error('Error syncing paystackData:', error);
+      this.paystackData = this.paymentGatewayResponse;
+    }
   }
   
   next();
