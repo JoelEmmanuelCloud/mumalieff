@@ -259,6 +259,13 @@ const OrderPage = () => {
                 Payment Pending
               </span>
             )}
+
+            {/* Add delivery confirmation badge */}
+            {order.status === 'Delivered' && order.deliveryConfirmedByCustomer && (
+              <span className="px-3 py-1 rounded-full text-sm font-medium text-green-600 bg-green-100">
+                Delivery Confirmed
+              </span>
+            )}
           </div>
         </div>
 
@@ -415,14 +422,37 @@ const OrderPage = () => {
                   </button>
                 )}
                 
-                {order.status === 'Delivered' && (
+                {/* Delivery confirmation logic */}
+                {order.status === 'Delivered' && !order.deliveryConfirmedByCustomer && (
                   <button
                     onClick={() => confirmDeliveryMutation.mutate(id)}
                     className="btn btn-success"
                     disabled={confirmDeliveryMutation.isLoading}
                   >
-                    Confirm Delivery
+                    {confirmDeliveryMutation.isLoading ? 'Confirming...' : 'Confirm Delivery'}
                   </button>
+                )}
+                
+                {order.status === 'Delivered' && order.deliveryConfirmedByCustomer && (
+                  <div className="flex items-center px-4 py-2 bg-green-100 dark:bg-green-900/20 rounded-lg">
+                    <svg className="w-5 h-5 text-green-600 dark:text-green-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+                    </svg>
+                    <div>
+                      <span className="font-medium text-green-800 dark:text-green-200">
+                        Delivery Confirmed
+                      </span>
+                      {order.customerDeliveryConfirmedAt && (
+                        <p className="text-sm text-green-600 dark:text-green-400 mt-1">
+                          Confirmed on {new Date(order.customerDeliveryConfirmedAt).toLocaleDateString('en-NG', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                          })}
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 )}
                 
                 <button

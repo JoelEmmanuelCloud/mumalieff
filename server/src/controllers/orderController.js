@@ -553,6 +553,519 @@ const getDailySales = asyncHandler(async (req, res) => {
   }
 });
 
+/**
+ * @desc    Confirm order delivery (UPDATED)
+ * @route   PUT /api/orders/:id/confirm-delivery
+ * @access  Private
+ */
+const confirmOrderDelivery = asyncHandler(async (req, res) => {
+  const order = await Order.findById(req.params.id).populate('user', 'name email');
+
+  if (!order) {
+    res.status(404);
+    throw new Error('Order not found');
+  }
+
+  // Check if the order belongs to the user
+  if (order.user._id.toString() !== req.user._id.toString()) {
+    res.status(401);
+    throw new Error('Not authorized');
+  }
+
+  // Check if order is marked as delivered by admin
+  if (order.status !== 'Delivered') {
+    res.status(400);
+    throw new Error('Order is not marked as delivered yet');
+  }
+
+  // Check if already confirmed by customer
+  if (order.deliveryConfirmedByCustomer) {
+    res.status(400);
+    throw new Error('Delivery has already been confirmed');
+  }
+
+  // Update delivery confirmation
+  order.deliveryConfirmedByCustomer = true;
+  order.customerDeliveryConfirmedAt = Date.now();
+  order.notes = order.notes 
+    ? `${order.notes}. Customer confirmed delivery on ${new Date().toISOString()}.` 
+    : `Customer confirmed delivery on ${new Date().toISOString()}.`;
+
+  const updatedOrder = await order.save();
+
+  // Optional: Send confirmation email to admin or update analytics
+  try {
+    // You can add email notification logic here
+    console.log(`Customer confirmed delivery for order ${updatedOrder.orderNumber}`);
+  } catch (emailError) {
+    console.error('Failed to send delivery confirmation notification:', emailError);
+  }
+
+  res.json({
+    message: 'Delivery confirmed successfully',
+    order: updatedOrder
+  });
+});
+
+/**
+ * @desc    Get order tracking information
+ * @route   GET /api/orders/:id/tracking
+ * @access  Private
+ */
+const getOrderTracking = asyncHandler(async (req, res) => {
+  const order = await Order.findById(req.params.id);
+
+  if (!order) {
+    res.status(404);
+    throw new Error('Order not found');
+  }
+
+  // Check if the order belongs to the user or if the user is an admin
+  if (
+    order.user.toString() !== req.user._id.toString() &&
+    !req.user.isAdmin
+  ) {
+    res.status(401);
+    throw new Error('Not authorized');
+  }
+
+  // Return tracking information
+  const trackingInfo = {
+    orderId: order._id,
+    orderNumber: order.orderNumber,
+    status: order.status,
+    trackingNumber: order.trackingNumber,
+    isDelivered: order.isDelivered,
+    deliveredAt: order.deliveredAt,
+    estimatedDeliveryDate: order.estimatedDeliveryDate,
+    // You can add more tracking details here based on your logistics provider
+    trackingEvents: [
+      { 
+        status: 'Order Placed', 
+        date: order.createdAt,
+        description: 'Your order has been placed successfully'
+      },
+      ...(order.isPaid ? [{
+        status: 'Payment Confirmed',
+        date: order.paidAt,
+        description: 'Payment has been confirmed'
+      }] : []),
+      ...(order.status === 'Processing' ? [{
+        status: 'Processing',
+        date: order.updatedAt,
+        description: 'Your order is being processed'
+      }] : []),
+      ...(order.status === 'Shipped' ? [{
+        status: 'Shipped',
+        date: order.updatedAt,
+        description: `Your order has been shipped${order.trackingNumber ? ` with tracking number ${order.trackingNumber}` : ''}`
+      }] : []),
+      ...(order.isDelivered ? [{
+        status: 'Delivered',
+        date: order.deliveredAt,
+        description: 'Your order has been delivered'
+      }] : [])
+    ]
+  };
+
+  res.json(trackingInfo);
+});
+
+/**
+ * @desc    Report order issue
+ * @route   POST /api/orders/:id/report-issue
+ * @access  Private
+ */
+const reportOrderIssue = asyncHandler(async (req, res) => {
+  const { type, description } = req.body;
+  const order = await Order.findById(req.params.id).populate('user', 'name email');
+
+  if (!order) {
+    res.status(404);
+    throw new Error('Order not found');
+  }
+
+  // Check if the order belongs to the user
+  if (order.user._id.toString() !== req.user._id.toString()) {
+    res.status(401);
+    throw new Error('Not authorized');
+  }
+
+  if (!type || !description) {
+    res.status(400);
+    throw new Error('Issue type and description are required');
+  }
+
+  // Add issue to order notes
+  const issueNote = `ISSUE REPORTED - Type: ${type}, Description: ${description}, Reported on: ${new Date().toISOString()}`;
+  order.notes = order.notes ? `${order.notes}\n${issueNote}` : issueNote;
+
+  await order.save();
+
+  // Here you could also create a separate Issue model or send email to admin
+  // For now, we'll just update the order notes
+
+  res.json({
+    message: 'Issue reported successfully. Our team will contact you soon.',
+    order
+  });
+});
+
+/**
+ * @desc    Retry order payment
+ * @route   POST /api/orders/:id/retry-payment
+ * @access  Private
+ */
+const retryOrderPayment = asyncHandler(async (req, res) => {
+  const order = await Order.findById(req.params.id);
+
+  if (!order) {
+    res.status(404);
+    throw new Error('Order not found');
+  }
+
+  // Check if the order belongs to the user
+  if (order.user.toString() !== req.user._id.toString()) {
+    res.status(401);
+    throw new Error('Not authorized');
+  }
+
+  // Check if order is already paid
+  if (order.isPaid) {
+    res.status(400);
+    throw new Error('Order is already paid');
+  }
+
+  // Check if order can accept payment
+  if (!['Pending', 'Processing'].includes(order.status)) {
+    res.status(400);
+    throw new Error('Payment cannot be retried for this order status');
+  }
+
+  // Return order details for payment processing
+  res.json({
+    message: 'Payment retry initiated',
+    order: {
+      _id: order._id,
+      orderNumber: order.orderNumber,
+      totalPrice: order.totalPrice,
+      user: order.user,
+      orderItems: order.orderItems
+    }
+  });
+});
+
+/**
+ * @desc    Update shipping address
+ * @route   PUT /api/orders/:id/shipping-address
+ * @access  Private
+ */
+const updateShippingAddress = asyncHandler(async (req, res) => {
+  const { shippingAddress } = req.body;
+  const order = await Order.findById(req.params.id);
+
+  if (!order) {
+    res.status(404);
+    throw new Error('Order not found');
+  }
+
+  // Check if the order belongs to the user
+  if (order.user.toString() !== req.user._id.toString()) {
+    res.status(401);
+    throw new Error('Not authorized');
+  }
+
+  // Check if order status allows address change
+  if (order.status !== 'Pending') {
+    res.status(400);
+    throw new Error('Shipping address can only be updated for pending orders');
+  }
+
+  // Validate shipping address
+  if (!shippingAddress || !shippingAddress.address || !shippingAddress.city) {
+    res.status(400);
+    throw new Error('Complete shipping address is required');
+  }
+
+  // Update shipping address
+  order.shippingAddress = {
+    address: shippingAddress.address,
+    city: shippingAddress.city,
+    state: shippingAddress.state,
+    postalCode: shippingAddress.postalCode,
+    country: shippingAddress.country || 'Nigeria'
+  };
+
+  const updatedOrder = await order.save();
+
+  res.json({
+    message: 'Shipping address updated successfully',
+    order: updatedOrder
+  });
+});
+
+/**
+ * @desc    Validate order for payment
+ * @route   POST /api/orders/validate
+ * @access  Private
+ */
+const validateOrderForPayment = asyncHandler(async (req, res) => {
+  const { orderItems, shippingAddress } = req.body;
+
+  if (!orderItems || orderItems.length === 0) {
+    res.status(400);
+    throw new Error('No order items provided');
+  }
+
+  if (!shippingAddress) {
+    res.status(400);
+    throw new Error('Shipping address is required');
+  }
+
+  // Validate all products exist and have enough stock
+  for (const item of orderItems) {
+    const product = await Product.findById(item.product);
+    
+    if (!product) {
+      res.status(404);
+      throw new Error(`Product not found: ${item.name}`);
+    }
+    
+    if (product.countInStock < item.qty) {
+      res.status(400);
+      throw new Error(`Not enough stock for ${product.name}`);
+    }
+  }
+
+  res.json({
+    message: 'Order validation successful',
+    valid: true
+  });
+});
+
+/**
+ * @desc    Calculate order total
+ * @route   POST /api/orders/calculate-total
+ * @access  Private
+ */
+const calculateOrderTotal = asyncHandler(async (req, res) => {
+  const { orderItems, shippingAddress, promoCode } = req.body;
+
+  if (!orderItems || orderItems.length === 0) {
+    res.status(400);
+    throw new Error('No order items provided');
+  }
+
+  // Calculate items total
+  let itemsPrice = 0;
+  for (const item of orderItems) {
+    itemsPrice += item.price * item.qty;
+  }
+
+  // Calculate shipping (simple logic - can be enhanced)
+  const shippingPrice = itemsPrice > 50000 ? 0 : 2500; // Free shipping over ₦50,000
+
+  // Calculate tax (if applicable)
+  const taxPrice = 0; // No tax in your current setup
+
+  // Apply discount (simple promo code logic)
+  let discount = 0;
+  if (promoCode) {
+    // You can implement promo code validation here
+    // For now, just a simple example
+    if (promoCode === 'WELCOME10') {
+      discount = itemsPrice * 0.1; // 10% discount
+    }
+  }
+
+  const totalPrice = itemsPrice + shippingPrice + taxPrice - discount;
+
+  res.json({
+    itemsPrice,
+    shippingPrice,
+    taxPrice,
+    discount,
+    totalPrice,
+    promoCodeValid: promoCode ? true : false
+  });
+});
+
+/**
+ * @desc    Check order status
+ * @route   GET /api/orders/:id/status-check
+ * @access  Private
+ */
+const checkOrderStatus = asyncHandler(async (req, res) => {
+  const order = await Order.findById(req.params.id);
+
+  if (!order) {
+    res.status(404);
+    throw new Error('Order not found');
+  }
+
+  // Check if the order belongs to the user or if the user is an admin
+  if (
+    order.user.toString() !== req.user._id.toString() &&
+    !req.user.isAdmin
+  ) {
+    res.status(401);
+    throw new Error('Not authorized');
+  }
+
+  res.json({
+    orderId: order._id,
+    orderNumber: order.orderNumber,
+    status: order.status,
+    isPaid: order.isPaid,
+    isDelivered: order.isDelivered,
+    canBeCancelled: ['Pending', 'Processing'].includes(order.status)
+  });
+});
+
+/**
+ * @desc    Get order summary
+ * @route   GET /api/orders/summary
+ * @access  Private
+ */
+const getOrderSummary = asyncHandler(async (req, res) => {
+  const { userId } = req.query;
+  
+  // If userId is provided and user is not admin, check authorization
+  if (userId && !req.user.isAdmin && userId !== req.user._id.toString()) {
+    res.status(401);
+    throw new Error('Not authorized');
+  }
+
+  const targetUserId = userId || req.user._id;
+
+  const summary = await Order.aggregate([
+    { $match: { user: mongoose.Types.ObjectId(targetUserId) } },
+    {
+      $group: {
+        _id: null,
+        totalOrders: { $sum: 1 },
+        totalSpent: { $sum: { $cond: ['$isPaid', '$totalPrice', 0] } },
+        pendingOrders: { 
+          $sum: { $cond: [{ $eq: ['$status', 'Pending'] }, 1, 0] } 
+        },
+        processingOrders: { 
+          $sum: { $cond: [{ $eq: ['$status', 'Processing'] }, 1, 0] } 
+        },
+        shippedOrders: { 
+          $sum: { $cond: [{ $eq: ['$status', 'Shipped'] }, 1, 0] } 
+        },
+        deliveredOrders: { 
+          $sum: { $cond: [{ $eq: ['$status', 'Delivered'] }, 1, 0] } 
+        },
+        cancelledOrders: { 
+          $sum: { $cond: [{ $eq: ['$status', 'Cancelled'] }, 1, 0] } 
+        }
+      }
+    }
+  ]);
+
+  const result = summary[0] || {
+    totalOrders: 0,
+    totalSpent: 0,
+    pendingOrders: 0,
+    processingOrders: 0,
+    shippedOrders: 0,
+    deliveredOrders: 0,
+    cancelledOrders: 0
+  };
+
+  res.json(result);
+});
+
+/**
+ * @desc    Estimate delivery date
+ * @route   POST /api/orders/estimate-delivery
+ * @access  Private
+ */
+const estimateDeliveryDate = asyncHandler(async (req, res) => {
+  const { shippingAddress, orderItems } = req.body;
+
+  if (!shippingAddress) {
+    res.status(400);
+    throw new Error('Shipping address is required');
+  }
+
+  // Simple delivery estimation logic (can be enhanced with real logistics API)
+  let estimatedDays = 3; // Default 3 days
+
+  // Adjust based on location (simple example)
+  if (shippingAddress.state?.toLowerCase() === 'lagos') {
+    estimatedDays = 1;
+  } else if (['abuja', 'kano', 'ibadan', 'port harcourt'].includes(shippingAddress.state?.toLowerCase())) {
+    estimatedDays = 2;
+  } else {
+    estimatedDays = 4;
+  }
+
+  // Add extra day for custom designs
+  if (orderItems?.some(item => item.customDesign?.hasCustomDesign)) {
+    estimatedDays += 1;
+  }
+
+  const estimatedDeliveryDate = new Date();
+  estimatedDeliveryDate.setDate(estimatedDeliveryDate.getDate() + estimatedDays);
+
+  res.json({
+    estimatedDeliveryDate,
+    estimatedDays,
+    message: `Estimated delivery in ${estimatedDays} business days`
+  });
+});
+
+/**
+ * @desc    Validate promo code
+ * @route   POST /api/orders/validate-promo
+ * @access  Private
+ */
+const validatePromoCode = asyncHandler(async (req, res) => {
+  const { promoCode, orderTotal, orderItems } = req.body;
+
+  if (!promoCode) {
+    res.status(400);
+    throw new Error('Promo code is required');
+  }
+
+  // Simple promo code validation (enhance with database)
+  const promoCodes = {
+    'WELCOME10': { discount: 0.1, type: 'percentage', minOrder: 0 },
+    'SAVE5000': { discount: 5000, type: 'fixed', minOrder: 20000 },
+    'NEWUSER': { discount: 0.15, type: 'percentage', minOrder: 10000 },
+  };
+
+  const promo = promoCodes[promoCode.toUpperCase()];
+
+  if (!promo) {
+    res.status(400);
+    throw new Error('Invalid promo code');
+  }
+
+  if (orderTotal < promo.minOrder) {
+    res.status(400);
+    throw new Error(`Minimum order value of ₦${promo.minOrder.toLocaleString()} required for this promo code`);
+  }
+
+  let discountAmount = 0;
+  if (promo.type === 'percentage') {
+    discountAmount = orderTotal * promo.discount;
+  } else {
+    discountAmount = promo.discount;
+  }
+
+  res.json({
+    valid: true,
+    promoCode: promoCode.toUpperCase(),
+    discountAmount,
+    discountType: promo.type,
+    message: `Promo code applied! You saved ₦${discountAmount.toLocaleString()}`
+  });
+});
+
+
 module.exports = {
   createOrder,
   getOrderById,
@@ -563,4 +1076,15 @@ module.exports = {
   cancelOrder,
   getOrderStats,
   getDailySales, 
+  confirmOrderDelivery,
+  getOrderTracking,
+  reportOrderIssue,
+  retryOrderPayment,
+  updateShippingAddress,
+  validateOrderForPayment,
+  calculateOrderTotal,
+  checkOrderStatus,
+  getOrderSummary,
+  estimateDeliveryDate,
+  validatePromoCode,
 };

@@ -10,6 +10,17 @@ const {
   cancelOrder,
   getOrderStats,
   getDailySales,
+  confirmOrderDelivery,
+  getOrderTracking,
+  reportOrderIssue,
+  retryOrderPayment,
+  updateShippingAddress,
+  validateOrderForPayment,
+  calculateOrderTotal,
+  checkOrderStatus,
+  getOrderSummary,
+  estimateDeliveryDate,
+  validatePromoCode,
 } = require('../controllers/orderController');
 const { protect, admin } = require('../middleware/authMiddleware');
 
@@ -34,14 +45,62 @@ router.route('/')
 router.route('/:id')
   .get(protect, getOrderById);
 
-// IMPORTANT: Add this route for direct payment updates
+// Payment route
 router.route('/:id/pay')
   .put(protect, updateOrderToPaid);
 
+// Cancel order route
 router.route('/:id/cancel')
   .put(protect, cancelOrder);
 
+// Update order status route (admin only)
 router.route('/:id/status')
   .put(protect, admin, updateOrderStatus);
+
+// NEW ROUTES - Add these missing endpoints:
+
+// Confirm delivery route
+router.route('/:id/confirm-delivery')
+  .put(protect, confirmOrderDelivery);
+
+// Get order tracking route
+router.route('/:id/tracking')
+  .get(protect, getOrderTracking);
+
+// Report order issue route
+router.route('/:id/report-issue')
+  .post(protect, reportOrderIssue);
+
+// Retry payment route
+router.route('/:id/retry-payment')
+  .post(protect, retryOrderPayment);
+
+// Update shipping address route
+router.route('/:id/shipping-address')
+  .put(protect, updateShippingAddress);
+
+// Validate order route
+router.route('/validate')
+  .post(protect, validateOrderForPayment);
+
+// Calculate order total route
+router.route('/calculate-total')
+  .post(protect, calculateOrderTotal);
+
+// Check order status route
+router.route('/:id/status-check')
+  .get(protect, checkOrderStatus);
+
+// Get order summary route
+router.route('/summary')
+  .get(protect, getOrderSummary);
+
+// Estimate delivery date route
+router.route('/estimate-delivery')
+  .post(protect, estimateDeliveryDate);
+
+// Validate promo code route
+router.route('/validate-promo')
+  .post(protect, validatePromoCode);
 
 module.exports = router;

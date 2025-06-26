@@ -117,6 +117,13 @@ const orderSchema = mongoose.Schema(
     deliveredAt: {
       type: Date,
     },
+    deliveryConfirmedByCustomer: {
+      type: Boolean,
+      default: false,
+    },
+    customerDeliveryConfirmedAt: {
+      type: Date,
+    },
     notes: {
       type: String,
     },
