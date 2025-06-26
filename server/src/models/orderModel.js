@@ -66,8 +66,12 @@ const orderSchema = mongoose.Schema(
     paymentReference: {
       type: String,
       unique: true,
-      sparse: true, // Allow multiple null values
+      sparse: true, 
     },
+    paymentReminderSent: {
+    type: Boolean,
+    default: false,
+   },
     itemsPrice: {
       type: Number,
       required: true,
