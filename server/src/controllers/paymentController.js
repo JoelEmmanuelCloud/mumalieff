@@ -515,6 +515,24 @@ const handleDisputeResolve = async (data) => {
 };
 
 /**
+ * @desc    Handle payment failure notification
+ */
+const handlePaymentFailure = asyncHandler(async (orderId, userId, failureReason) => {
+  try {
+    const order = await Order.findById(orderId).populate('user', 'name email');
+    const user = await User.findById(userId);
+    
+    if (order && user) {
+      await sendPaymentFailedEmail(order, user, failureReason);
+      console.log(`Payment failed email sent for order ${orderId}`);
+    }
+  } catch (error) {
+    console.error('Error sending payment failed email:', error);
+  }
+});
+
+
+/**
  * @desc    Get payment history for user
  * @route   GET /api/payments/history
  * @access  Private
@@ -620,4 +638,5 @@ module.exports = {
   getPaymentHistory,
   getOrderPayments,
   getPaymentAnalytics,
+  handlePaymentFailure
 };
