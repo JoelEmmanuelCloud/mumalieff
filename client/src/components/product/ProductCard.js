@@ -1,4 +1,4 @@
-//component/product/productCard to display product card with wishlist and quick add to cart functionality
+// components/product/ProductCard.js - Updated with mobile optimizations
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -67,31 +67,31 @@ const ProductCard = ({ product, isWishlist = false }) => {
   
   return (
     <div 
-      className="product-card"
+      className="mobile-product-card bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md hover:-translate-y-1"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="relative overflow-hidden rounded-t-lg">
-        {/* Product Image */}
+      <div className="relative overflow-hidden">
+        {/* Product Image with proper aspect ratio */}
         <Link to={`/product/${product._id}`}>
-          <div className="aspect-w-3 aspect-h-4 bg-gray-100">
+          <div className="mobile-product-image bg-gray-100">
             <img
               src={product.images[0]?.url || '/images/placeholder.jpg'}
               alt={product.name}
-              className="object-contain object-center w-full h-full transition-transform duration-300 transform hover:scale-105"
+              className="w-full h-full object-cover object-center transition-transform duration-300 hover:scale-105"
             />
           </div>
           
           {/* Sale Badge */}
           {product.isSale && (
-            <div className="absolute top-2 left-2 bg-accent-gold text-white px-2 py-1 text-xs font-bold rounded">
+            <div className="mobile-badge bg-red-500 text-white">
               Sale {Math.round(((product.price - product.salePrice) / product.price) * 100)}% Off
             </div>
           )}
           
           {/* Featured Badge */}
           {product.featured && !product.isSale && (
-            <div className="absolute top-2 left-2 bg-primary text-white px-2 py-1 text-xs font-bold rounded">
+            <div className="mobile-badge bg-blue-600 text-white">
               Featured
             </div>
           )}
@@ -99,16 +99,12 @@ const ProductCard = ({ product, isWishlist = false }) => {
           {/* Wishlist Button */}
           <button
             onClick={handleWishlistToggle}
-            className={`absolute top-2 right-2 p-2 rounded-full ${
-              isWishlist 
-                ? 'bg-white dark:bg-dark-card text-error' 
-                : 'bg-white/80 dark:bg-dark-card/80 text-gray-400 hover:text-error'
-            }`}
+            className="mobile-wishlist-btn"
             aria-label={isWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
           >
             <svg 
               xmlns="http://www.w3.org/2000/svg" 
-              className="h-5 w-5" 
+              className="w-4 h-4" 
               fill={isWishlist ? "currentColor" : "none"}
               viewBox="0 0 24 24" 
               stroke="currentColor"
@@ -119,13 +115,13 @@ const ProductCard = ({ product, isWishlist = false }) => {
           
           {/* Quick add to cart - shown on hover */}
           <div 
-            className={`absolute bottom-0 left-0 right-0 bg-primary/90 dark:bg-primary/95 text-white p-2 text-center text-sm font-medium transition-transform duration-300 ${
+            className={`mobile-quick-add-overlay ${
               isHovered ? 'translate-y-0' : 'translate-y-full'
             }`}
           >
             <button 
               onClick={handleQuickAddToCart}
-              className="w-full py-1"
+              className="w-full py-2 text-center text-sm font-medium hover:opacity-90"
             >
               {product.sizes.length > 1 || product.colors.length > 1 
                 ? 'View Options' 
@@ -136,9 +132,9 @@ const ProductCard = ({ product, isWishlist = false }) => {
       </div>
       
       {/* Product Info */}
-      <div className="p-4">
+      <div className="mobile-card-content">
         <Link to={`/product/${product._id}`} className="block">
-          <h3 className="text-sm font-medium line-clamp-2 mb-1 dark:text-gray-200">
+          <h3 className="mobile-product-title">
             {product.name}
           </h3>
           
@@ -149,12 +145,12 @@ const ProductCard = ({ product, isWishlist = false }) => {
                 <svg 
                   key={i}
                   xmlns="http://www.w3.org/2000/svg" 
-                  className={`h-4 w-4 ${
+                  className={`mobile-star ${
                     i < Math.floor(product.rating) 
-                      ? 'text-accent-gold' 
+                      ? 'text-yellow-400' 
                       : i < product.rating 
-                        ? 'text-accent-gold-light' 
-                        : 'text-gray-300 dark:text-gray-600'
+                        ? 'text-yellow-300' 
+                        : 'text-gray-300'
                   }`}
                   viewBox="0 0 20 20"
                   fill="currentColor"
@@ -164,7 +160,7 @@ const ProductCard = ({ product, isWishlist = false }) => {
               ))}
             </div>
             
-            <span className="text-xs text-gray-500 dark:text-gray-400">
+            <span className="mobile-review-count">
               ({product.numReviews} {product.numReviews === 1 ? 'review' : 'reviews'})
             </span>
           </div>
@@ -174,15 +170,15 @@ const ProductCard = ({ product, isWishlist = false }) => {
             <div>
               {product.isSale ? (
                 <div className="flex items-center space-x-2">
-                  <span className="text-error font-medium dark:text-error-light">
+                  <span className="mobile-sale-price">
                     ₦{product.salePrice.toLocaleString()}
                   </span>
-                  <span className="text-gray-500 line-through text-sm dark:text-gray-400">
+                  <span className="mobile-original-price">
                     ₦{product.price.toLocaleString()}
                   </span>
                 </div>
               ) : (
-                <span className="font-medium dark:text-gray-200">
+                <span className="mobile-price">
                   ₦{product.price.toLocaleString()}
                 </span>
               )}
@@ -190,9 +186,9 @@ const ProductCard = ({ product, isWishlist = false }) => {
             
             {/* Stock Indicator */}
             {product.countInStock > 0 ? (
-              <span className="text-xs text-success dark:text-success-light">In Stock</span>
+              <span className="mobile-stock-indicator text-green-600">In Stock</span>
             ) : (
-              <span className="text-xs text-error dark:text-error-light">Out of Stock</span>
+              <span className="mobile-stock-indicator text-red-600">Out of Stock</span>
             )}
           </div>
         </Link>

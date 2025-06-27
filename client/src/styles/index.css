@@ -159,15 +159,92 @@
     width: 100%;
   }
   
-  /* Product cards with mobile-first grid */
+  /* Enhanced product cards with mobile-first design */
   .product-card {
     @apply card transition-transform duration-300 hover:-translate-y-1;
     width: 100%;
+    max-width: 100%;
+    overflow: hidden;
   }
   
-  /* Product grid that works on all screen sizes */
+  /* Mobile-optimized product card styles - Compact design for mobile */
+  .mobile-product-card {
+    @apply w-full max-w-full bg-white rounded-md shadow-sm overflow-hidden
+    transition-all duration-300 hover:shadow-md hover:-translate-y-1
+    dark:bg-dark-card;
+    /* Smaller overall size on mobile */
+  }
+  
+  .mobile-product-image {
+    @apply relative overflow-hidden bg-gray-100 rounded-t-md;
+    aspect-ratio: 1/1; /* Square aspect ratio for mobile - more compact */
+    width: 100%;
+  }
+  
+  .mobile-badge {
+    @apply absolute top-1 left-1 z-10 px-1.5 py-0.5 text-xs font-bold rounded
+    text-white uppercase tracking-wide;
+    font-size: 8px; /* Smaller badge text */
+  }
+  
+  .mobile-wishlist-btn {
+    @apply absolute top-1 right-1 z-10 w-7 h-7 rounded-full bg-white/90 border-none 
+    flex items-center justify-center transition-all duration-300 cursor-pointer
+    text-gray-400 hover:text-red-500 hover:bg-white hover:scale-110
+    dark:bg-dark-card/90 dark:hover:bg-dark-card;
+  }
+  
+  .mobile-quick-add-overlay {
+    @apply absolute bottom-0 left-0 right-0 bg-black/80 text-white p-2 
+    transition-transform duration-300;
+    font-size: 11px; /* Smaller overlay text */
+  }
+  
+  .mobile-card-content {
+    @apply p-2 sm:p-3; /* Reduced padding for mobile */
+  }
+  
+  .mobile-product-title {
+    @apply text-xs sm:text-sm font-medium text-gray-900 mb-1 line-clamp-2
+    dark:text-dark-text;
+    line-height: 1.3; /* Tighter line height */
+  }
+  
+  .mobile-star {
+    @apply w-2.5 h-2.5 sm:w-3 sm:h-3; /* Smaller stars on mobile */
+  }
+  
+  .mobile-review-count {
+    @apply text-xs text-gray-500 dark:text-gray-400;
+    font-size: 10px; /* Extra small review count */
+  }
+  
+  .mobile-sale-price {
+    @apply text-red-600 font-medium text-xs sm:text-sm dark:text-red-400;
+  }
+  
+  .mobile-original-price {
+    @apply text-gray-400 line-through dark:text-gray-500;
+    font-size: 10px; /* Smaller crossed-out price */
+  }
+  
+  .mobile-price {
+    @apply font-medium text-gray-900 text-xs sm:text-sm dark:text-dark-text;
+  }
+  
+  .mobile-stock-indicator {
+    @apply font-medium;
+    font-size: 10px; /* Smaller stock indicator */
+  }
+  
+  /* Enhanced product grid for better mobile display */
   .product-grid {
     @apply grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4 md:gap-6;
+  }
+  
+  .mobile-product-grid {
+    @apply grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 
+    gap-3 sm:gap-4 md:gap-6;
   }
   
   /* Section headings with better mobile sizing */
@@ -246,6 +323,228 @@
     max-width: 100vw;
     overflow-x: hidden;
   }
+
+  /* Mobile-optimized cart item styles */
+  .mobile-cart-item {
+    @apply flex gap-3 p-3 border-b border-gray-100 dark:border-gray-700 last:border-b-0;
+  }
+  
+  .mobile-cart-image {
+    @apply w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800;
+  }
+  
+  .mobile-cart-image img {
+    @apply w-full h-full object-cover object-center;
+  }
+  
+  .mobile-cart-content {
+    @apply flex-1 min-w-0 space-y-2;
+  }
+  
+  .mobile-cart-title {
+    @apply text-sm font-medium text-gray-900 dark:text-white line-clamp-2 leading-tight;
+  }
+  
+  .mobile-cart-details {
+    @apply flex flex-wrap gap-1 text-xs text-gray-500 dark:text-gray-400;
+  }
+  
+  .mobile-cart-price {
+    @apply text-sm font-semibold text-gray-900 dark:text-white;
+  }
+  
+  .mobile-quantity-controls {
+    @apply flex items-center border border-gray-300 dark:border-gray-600 rounded-md overflow-hidden w-fit;
+  }
+  
+  .mobile-quantity-btn {
+    @apply w-8 h-8 flex items-center justify-center bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 
+    hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 active:bg-gray-200 dark:active:bg-gray-600;
+  }
+  
+  .mobile-quantity-input {
+    @apply w-12 h-8 border-0 bg-white dark:bg-dark-card text-center text-sm font-medium 
+    text-gray-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-primary;
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+  
+  .mobile-remove-btn {
+    @apply p-2 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 
+    rounded-md transition-all duration-200 active:scale-95;
+  }
+  
+  /* Mobile order card styles */
+  .mobile-order-card {
+    @apply bg-white dark:bg-dark-card border-b border-gray-200 dark:border-gray-700 p-4 space-y-3;
+  }
+  
+  .mobile-order-header {
+    @apply flex justify-between items-start;
+  }
+  
+  .mobile-order-id {
+    @apply text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wide;
+  }
+  
+  .mobile-order-id-value {
+    @apply text-sm font-mono text-gray-900 dark:text-white mt-1;
+  }
+  
+  .mobile-order-total {
+    @apply text-right;
+  }
+  
+  .mobile-order-total-label {
+    @apply text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wide;
+  }
+  
+  .mobile-order-total-value {
+    @apply text-sm font-semibold text-gray-900 dark:text-white mt-1;
+  }
+  
+  .mobile-order-meta {
+    @apply flex justify-between items-center;
+  }
+  
+  .mobile-order-date {
+    @apply text-sm text-gray-700 dark:text-gray-300;
+  }
+  
+  .mobile-order-status {
+    @apply px-2 py-1 text-xs font-semibold rounded-full;
+  }
+  
+  .mobile-order-actions {
+    @apply flex justify-between items-center pt-2;
+  }
+  
+  .mobile-payment-status {
+    @apply text-xs px-2 py-1 rounded-full font-medium;
+  }
+  
+  /* Enhanced touch targets for mobile */
+  .mobile-touch-enhanced {
+    @apply min-h-[48px] min-w-[48px] flex items-center justify-center;
+  }
+  
+  /* Better spacing for mobile forms */
+  .mobile-form-group {
+    @apply space-y-2 mb-4;
+  }
+  
+  .mobile-form-input {
+    @apply w-full px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg
+    bg-white dark:bg-dark-card text-gray-900 dark:text-white
+    focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent
+    placeholder-gray-400 dark:placeholder-gray-500;
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+  
+  /* Mobile-first button improvements */
+  .mobile-btn-primary {
+    @apply w-full py-3 px-4 bg-primary text-white font-medium rounded-lg
+    hover:bg-primary-light focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2
+    disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed
+    transition-all duration-200 active:scale-[0.98];
+    min-height: 48px;
+    font-size: 16px;
+  }
+  
+  .mobile-btn-secondary {
+    @apply w-full py-3 px-4 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 
+    font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700
+    focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2
+    transition-all duration-200 active:scale-[0.98];
+    min-height: 48px;
+    font-size: 16px;
+  }
+  
+  /* Mobile sticky elements */
+  .mobile-sticky-bottom {
+    @apply fixed bottom-0 left-0 right-0 bg-white dark:bg-dark-card border-t border-gray-200 dark:border-gray-700 
+    p-4 z-50 md:relative md:border-t-0 md:p-0 md:bg-transparent md:dark:bg-transparent;
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+  }
+  
+  /* Enhanced mobile navigation */
+  .mobile-nav-item {
+    @apply flex-1 flex flex-col items-center justify-center py-2 px-1 text-xs font-medium
+    text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-accent-blue-light
+    transition-colors duration-200;
+    min-height: 48px;
+  }
+  
+  .mobile-nav-item.active {
+    @apply text-primary dark:text-accent-blue-light;
+  }
+  
+  .mobile-nav-icon {
+    @apply w-5 h-5 mb-1;
+  }
+  
+  /* Mobile-optimized alerts and messages */
+  .mobile-alert {
+    @apply p-3 rounded-lg border text-sm;
+  }
+  
+  .mobile-alert-info {
+    @apply mobile-alert bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 
+    text-blue-700 dark:text-blue-300;
+  }
+  
+  .mobile-alert-success {
+    @apply mobile-alert bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 
+    text-green-700 dark:text-green-300;
+  }
+  
+  .mobile-alert-warning {
+    @apply mobile-alert bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800 
+    text-yellow-700 dark:text-yellow-300;
+  }
+  
+  .mobile-alert-error {
+    @apply mobile-alert bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 
+    text-red-700 dark:text-red-300;
+  }
+  
+  /* Mobile table alternatives */
+  .mobile-table-card {
+    @apply bg-white dark:bg-dark-card rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 
+    overflow-hidden mb-3;
+  }
+  
+  .mobile-table-row {
+    @apply p-4 border-b border-gray-100 dark:border-gray-700 last:border-b-0;
+  }
+  
+  .mobile-table-cell {
+    @apply flex justify-between items-center py-1;
+  }
+  
+  .mobile-table-label {
+    @apply text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide;
+  }
+  
+  .mobile-table-value {
+    @apply text-sm font-medium text-gray-900 dark:text-white text-right;
+  }
+  
+  /* Loading states for mobile */
+  .mobile-skeleton {
+    @apply animate-pulse bg-gray-200 dark:bg-gray-700 rounded;
+  }
+  
+  .mobile-skeleton-text {
+    @apply mobile-skeleton h-4 w-full mb-2;
+  }
+  
+  .mobile-skeleton-button {
+    @apply mobile-skeleton h-12 w-full rounded-lg;
+  }
+  
+  .mobile-skeleton-card {
+    @apply mobile-skeleton h-32 w-full rounded-lg;
+  }
 }
 
 /* Custom styles that don't fit into components or utilities */
@@ -293,6 +592,22 @@
   .mobile-m-2 { @apply m-2 sm:m-3 md:m-4; }
   .mobile-m-4 { @apply m-3 sm:m-4 md:m-6; }
   .mobile-m-6 { @apply m-4 sm:m-6 md:m-8; }
+  
+  /* Additional mobile layout fixes */
+  .mobile-container-fix {
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+  
+  /* Better touch targets */
+  .mobile-touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+  
+  /* Safe area for newer phones */
+  .mobile-safe-area {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
 }
 
 /* Mobile-specific media queries for fine-tuning */
@@ -318,11 +633,218 @@
   button, .btn {
     margin: 2px;
   }
+  
+  /* Compact mobile product cards */
+  .mobile-product-card {
+    font-size: 12px; /* Smaller base font size */
+    border-radius: 6px; /* Smaller border radius */
+  }
+  
+  .mobile-badge {
+    @apply top-1 left-1 px-1 py-0.5;
+    font-size: 7px; /* Very small badge text */
+    border-radius: 3px;
+  }
+  
+  .mobile-wishlist-btn {
+    @apply w-6 h-6 top-1 right-1; /* Even smaller wishlist button */
+  }
+  
+  .mobile-wishlist-btn svg {
+    @apply w-3 h-3; /* Smaller icon */
+  }
+  
+  .mobile-card-content {
+    @apply p-1.5; /* Minimal padding */
+  }
+  
+  .mobile-quick-add-overlay {
+    @apply p-1.5;
+    font-size: 10px;
+  }
+  
+  .mobile-star {
+    @apply w-2 h-2; /* Tiny stars */
+  }
+  
+  .mobile-product-title {
+    font-size: 11px; /* Smaller title */
+    margin-bottom: 4px;
+  }
+  
+  /* Even tighter grid spacing on mobile */
+  .mobile-product-grid {
+    @apply gap-1.5; /* Minimal gap between products */
+  }
+  
+  /* Smaller rating and price section */
+  .mobile-review-count {
+    font-size: 9px;
+  }
+  
+  .mobile-sale-price {
+    font-size: 11px;
+  }
+  
+  .mobile-price {
+    font-size: 11px;
+  }
+  
+  .mobile-original-price {
+    font-size: 9px;
+  }
+  
+  .mobile-stock-indicator {
+    font-size: 9px;
+  }
+
+  /* Mobile cart and order optimizations */
+  .mobile-cart-image {
+    @apply w-14 h-14;
+  }
+  
+  .mobile-cart-title {
+    @apply text-xs;
+  }
+  
+  .mobile-cart-details {
+    @apply text-xs;
+  }
+  
+  .mobile-cart-price {
+    @apply text-xs;
+  }
+  
+  .mobile-quantity-btn {
+    @apply w-7 h-7;
+  }
+  
+  .mobile-quantity-input {
+    @apply w-10 h-7 text-xs;
+  }
+  
+  .mobile-order-card {
+    @apply p-3 space-y-2;
+  }
+  
+  .mobile-order-id-value,
+  .mobile-order-total-value,
+  .mobile-order-date {
+    @apply text-xs;
+  }
+  
+  .mobile-payment-status,
+  .mobile-order-status {
+    @apply text-xs px-1.5 py-0.5;
+  }
 }
 
 /* iPhone X and newer safe area support */
 @supports (padding: max(0px)) {
   .mobile-bottom-nav {
     padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  }
+}
+
+/* Additional responsive improvements for product images */
+@media (max-width: 480px) {
+  .mobile-product-image {
+    aspect-ratio: 1/1; /* Keep square aspect ratio on very small screens */
+    border-radius: 6px 6px 0 0;
+  }
+  
+  /* Ultra-compact for very small screens */
+  .mobile-product-card {
+    border-radius: 4px;
+  }
+  
+  .mobile-card-content {
+    @apply p-1; /* Minimal padding on tiny screens */
+  }
+  
+  .mobile-product-title {
+    font-size: 10px;
+    line-height: 1.2;
+  }
+  
+  /* Stack price and stock vertically on tiny screens */
+  .mobile-price-section {
+    @apply flex-col items-start space-y-1;
+  }
+}
+
+/* Landscape phone optimizations */
+@media (max-height: 500px) and (orientation: landscape) {
+  .mobile-sticky-bottom {
+    @apply relative p-2;
+  }
+  
+  .mobile-btn-primary,
+  .mobile-btn-secondary {
+    @apply py-2;
+    min-height: 40px;
+  }
+  
+  .mobile-cart-item {
+    @apply p-2;
+  }
+  
+  .mobile-order-card {
+    @apply p-3;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .mobile-cart-item {
+    @apply border-gray-400 dark:border-gray-300;
+  }
+  
+  .mobile-quantity-controls {
+    @apply border-2 border-gray-600 dark:border-gray-400;
+  }
+  
+  .mobile-order-status {
+    @apply border border-current;
+  }
+  
+  .mobile-payment-status {
+    @apply border border-current;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .mobile-cart-image img,
+  .mobile-quantity-btn,
+  .mobile-remove-btn,
+  .mobile-btn-primary,
+  .mobile-btn-secondary {
+    @apply transition-none;
+  }
+  
+  .mobile-skeleton {
+    @apply animate-none;
+  }
+}
+
+/* Print styles for order history */
+@media print {
+  .mobile-order-card {
+    @apply border border-gray-400 break-inside-avoid;
+  }
+  
+  .mobile-remove-btn,
+  .mobile-btn-primary,
+  .mobile-btn-secondary {
+    @apply hidden;
+  }
+}
+
+/* High DPI screen optimizations */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .mobile-product-image img {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
   }
 }
