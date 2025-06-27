@@ -456,7 +456,7 @@ const getOrderStats = asyncHandler(async (req, res) => {
 });
 
 /**
- * @desc    Get daily sales data
+ * @desc    Get daily sales data (FIXED VERSION)
  * @route   GET /api/orders/daily-sales
  * @access  Private/Admin
  */
@@ -464,17 +464,30 @@ const getDailySales = asyncHandler(async (req, res) => {
   try {
     const days = Number(req.query.days) || 7;
     
-    // Calculate the start date based on the number of days requested
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - days);
-    startDate.setHours(0, 0, 0, 0); // Start of day
-
+    console.log(`Getting daily sales for ${days} days`);
     
-    // Get daily sales data with improved error handling
+    // Calculate dates in Lagos timezone to match your data
+    const lagosTime = new Date().toLocaleString("en-US", {timeZone: "Africa/Lagos"});
+    const today = new Date(lagosTime);
+    
+    // Calculate the start date - go back (days-1) to include today
+    const startDate = new Date(today);
+    startDate.setDate(startDate.getDate() - (days - 1));
+    startDate.setHours(0, 0, 0, 0);
+    
+    // End date is end of today
+    const endDate = new Date(today);
+    endDate.setHours(23, 59, 59, 999);
+
+    console.log('Date range:', { startDate, endDate });
+    console.log('Lagos time now:', today);
+    
+    // Get daily sales data - using createdAt directly without timezone conversion
+    // since your data is already stored with proper timestamps
     const dailySalesData = await Order.aggregate([
       {
         $match: {
-          createdAt: { $gte: startDate },
+          createdAt: { $gte: startDate, $lte: endDate },
           isPaid: true, // Only count paid orders for sales
         },
       },
@@ -484,7 +497,7 @@ const getDailySales = asyncHandler(async (req, res) => {
             $dateToString: { 
               format: '%Y-%m-%d', 
               date: '$createdAt'
-              // Remove timezone specification to use local time
+              // Remove timezone conversion - let it use the stored timezone
             } 
           },
           sales: { $sum: '$totalPrice' },
@@ -496,6 +509,7 @@ const getDailySales = asyncHandler(async (req, res) => {
       },
     ]);
     
+    console.log('Raw sales data from DB:', dailySalesData);
     
     // Create a complete array with all days, filling in missing days with 0 values
     const completeSalesData = [];
@@ -520,6 +534,8 @@ const getDailySales = asyncHandler(async (req, res) => {
       currentDate.setDate(currentDate.getDate() + 1);
     }
     
+    console.log('Complete sales data:', completeSalesData);
+    
     // If requesting more than 7 days, group by weeks
     if (days > 7) {
       const weeklyData = [];
@@ -538,10 +554,9 @@ const getDailySales = asyncHandler(async (req, res) => {
         weeklyData.push(weekSummary);
       }
       
-      
+      console.log('Weekly data:', weeklyData);
       return res.json(weeklyData);
     }
-    
     
     res.json(completeSalesData);
     
@@ -552,6 +567,7 @@ const getDailySales = asyncHandler(async (req, res) => {
     throw new Error(`Failed to fetch daily sales data: ${error.message}`);
   }
 });
+
 
 /**
  * @desc    Confirm order delivery (UPDATED)

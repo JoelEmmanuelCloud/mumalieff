@@ -24,6 +24,9 @@ const {
 } = require('../controllers/orderController');
 const { protect, admin } = require('../middleware/authMiddleware');
 
+// IMPORTANT: All specific routes MUST come before the /:id route
+// Otherwise Express will try to match them as ID parameters
+
 // Stats route - must come before /:id
 router.route('/stats')
   .get(protect, admin, getOrderStats);
@@ -36,12 +39,32 @@ router.route('/daily-sales')
 router.route('/myorders')
   .get(protect, getMyOrders);
 
+// Validate order route - must come before /:id
+router.route('/validate')
+  .post(protect, validateOrderForPayment);
+
+// Calculate order total route - must come before /:id
+router.route('/calculate-total')
+  .post(protect, calculateOrderTotal);
+
+// Get order summary route - must come before /:id
+router.route('/summary')
+  .get(protect, getOrderSummary);
+
+// Estimate delivery date route - must come before /:id
+router.route('/estimate-delivery')
+  .post(protect, estimateDeliveryDate);
+
+// Validate promo code route - must come before /:id
+router.route('/validate-promo')
+  .post(protect, validatePromoCode);
+
 // General routes for creating and listing orders
 router.route('/')
   .post(protect, createOrder)
   .get(protect, admin, getOrders);
 
-// Specific order by ID routes
+// Specific order by ID routes - MUST come after all specific routes
 router.route('/:id')
   .get(protect, getOrderById);
 
@@ -56,8 +79,6 @@ router.route('/:id/cancel')
 // Update order status route (admin only)
 router.route('/:id/status')
   .put(protect, admin, updateOrderStatus);
-
-// NEW ROUTES - Add these missing endpoints:
 
 // Confirm delivery route
 router.route('/:id/confirm-delivery')
@@ -79,28 +100,8 @@ router.route('/:id/retry-payment')
 router.route('/:id/shipping-address')
   .put(protect, updateShippingAddress);
 
-// Validate order route
-router.route('/validate')
-  .post(protect, validateOrderForPayment);
-
-// Calculate order total route
-router.route('/calculate-total')
-  .post(protect, calculateOrderTotal);
-
 // Check order status route
 router.route('/:id/status-check')
   .get(protect, checkOrderStatus);
-
-// Get order summary route
-router.route('/summary')
-  .get(protect, getOrderSummary);
-
-// Estimate delivery date route
-router.route('/estimate-delivery')
-  .post(protect, estimateDeliveryDate);
-
-// Validate promo code route
-router.route('/validate-promo')
-  .post(protect, validatePromoCode);
 
 module.exports = router;
