@@ -83,61 +83,61 @@ const Header = () => {
   
   return (
     <>
-      <header className={`sticky top-0 z-50 bg-white dark:bg-dark-card transition-shadow duration-300 ${
+      <header className={`sticky top-0 z-50 bg-white dark:bg-dark-card transition-shadow duration-300 w-full ${
         isScrolled ? 'shadow-md' : ''
       }`}>
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
           {/* Main Header Row */}
-          <div className="flex items-center justify-between h-14 sm:h-16 lg:h-18">
+          <div className="flex items-center justify-between h-12 sm:h-14 md:h-16 w-full">
             {/* Logo - Optimized for mobile */}
-            <Link to="/" className="flex items-center flex-shrink-0">
-              <div className="h-6 w-auto sm:h-7 md:h-8 lg:h-9 xl:h-10">
+            <Link to="/" className="flex items-center flex-shrink-0 min-w-0">
+              <div className="h-5 w-auto sm:h-6 md:h-7 lg:h-8 flex-shrink-0">
                 {theme === 'dark' ? (
                   <img
                     src="/images/mumalieffwhite.png"
                     alt="MUMALIEFF"
-                    className="h-full w-auto object-contain max-w-[120px] sm:max-w-[140px] md:max-w-[160px] lg:max-w-[180px]"
+                    className="h-full w-auto object-contain max-w-[100px] sm:max-w-[120px] md:max-w-[140px] lg:max-w-[160px]"
                   />
                 ) : (
                   <img
                     src="/images/logo-black.svg"
                     alt="MUMALIEFF"
-                    className="h-full w-auto object-contain max-w-[120px] sm:max-w-[140px] md:max-w-[160px] lg:max-w-[180px]"
+                    className="h-full w-auto object-contain max-w-[100px] sm:max-w-[120px] md:max-w-[140px] lg:max-w-[160px]"
                   />
                 )}
               </div>
             </Link>
             
             {/* Desktop Navigation - Hidden on mobile and tablet */}
-            <nav className="hidden lg:flex items-center space-x-6 xl:space-x-8">
-              <Link to="/products" className="font-medium text-gray-700 hover:text-primary dark:text-gray-300 dark:hover:text-white transition-colors">
+            <nav className="hidden lg:flex items-center space-x-4 xl:space-x-6 flex-shrink-0">
+              <Link to="/products" className="font-medium text-gray-700 hover:text-primary dark:text-gray-300 dark:hover:text-white transition-colors text-sm xl:text-base whitespace-nowrap">
                 All Products
               </Link>
-              <Link to="/products/category/Wear Your Conviction" className="font-medium text-gray-700 hover:text-primary dark:text-gray-300 dark:hover:text-white transition-colors">
+              <Link to="/products/category/Wear Your Conviction" className="font-medium text-gray-700 hover:text-primary dark:text-gray-300 dark:hover:text-white transition-colors text-sm xl:text-base whitespace-nowrap">
                 Wear Your Conviction
               </Link>
-              <Link to="/products/category/Customize Your Prints" className="font-medium text-accent-gold hover:text-accent-gold-dark dark:text-accent-gold-light dark:hover:text-accent-gold transition-colors">
+              <Link to="/products/category/Customize Your Prints" className="font-medium text-accent-gold hover:text-accent-gold-dark dark:text-accent-gold-light dark:hover:text-accent-gold transition-colors text-sm xl:text-base whitespace-nowrap">
                 Customize Your Prints
               </Link>
             </nav>
             
             {/* Right Side Icons */}
-            <div className="flex items-center space-x-1 sm:space-x-2 lg:space-x-3">
+            <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
               {/* Desktop Search Form - Hidden on mobile and tablet */}
-              <form onSubmit={handleSearchSubmit} className="hidden lg:flex items-center relative">
+              <form onSubmit={handleSearchSubmit} className="hidden lg:flex items-center relative flex-shrink-0">
                 <input
                   type="text"
                   placeholder="Search..."
                   value={searchKeyword}
                   onChange={(e) => setSearchKeyword(e.target.value)}
-                  className="pl-3 pr-10 py-2 rounded-md bg-gray-100 dark:bg-dark-bg focus:outline-none focus:ring-2 focus:ring-primary dark:text-white w-40 xl:w-56 transition-all"
+                  className="pl-3 pr-8 py-1.5 rounded-md bg-gray-100 dark:bg-dark-bg focus:outline-none focus:ring-2 focus:ring-primary dark:text-white w-32 xl:w-40 transition-all text-sm"
                 />
                 <button 
                   type="submit" 
                   className="absolute right-2 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-white transition-colors"
                   aria-label="Search"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                 </button>
@@ -146,7 +146,7 @@ const Header = () => {
               {/* Theme Toggle */}
               <button
                 onClick={toggleTheme}
-                className="p-1.5 sm:p-2 text-gray-700 hover:text-primary dark:text-gray-300 dark:hover:text-white transition-colors rounded-md hover:bg-gray-100 dark:hover:bg-dark-bg"
+                className="p-1.5 text-gray-700 hover:text-primary dark:text-gray-300 dark:hover:text-white transition-colors rounded-md hover:bg-gray-100 dark:hover:bg-dark-bg flex-shrink-0"
                 aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
               >
                 {theme === 'light' ? (
@@ -163,7 +163,7 @@ const Header = () => {
               {/* Wishlist - Hidden on mobile, visible on tablet+ */}
               <Link 
                 to="/wishlist" 
-                className="hidden sm:block p-1.5 sm:p-2 text-gray-700 hover:text-primary dark:text-gray-300 dark:hover:text-white transition-colors rounded-md hover:bg-gray-100 dark:hover:bg-dark-bg"
+                className="hidden sm:block p-1.5 text-gray-700 hover:text-primary dark:text-gray-300 dark:hover:text-white transition-colors rounded-md hover:bg-gray-100 dark:hover:bg-dark-bg flex-shrink-0"
                 aria-label="Wishlist"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -174,32 +174,32 @@ const Header = () => {
               {/* Cart */}
               <Link 
                 to="/cart"
-                className="p-1.5 sm:p-2 text-gray-700 hover:text-primary dark:text-gray-300 dark:hover:text-white relative transition-colors rounded-md hover:bg-gray-100 dark:hover:bg-dark-bg"
+                className="p-1.5 text-gray-700 hover:text-primary dark:text-gray-300 dark:hover:text-white relative transition-colors rounded-md hover:bg-gray-100 dark:hover:bg-dark-bg flex-shrink-0"
                 aria-label="Cart"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                 </svg>
                 {cartItemsCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-accent-gold text-white text-xs rounded-full h-4 w-4 sm:h-5 sm:w-5 flex items-center justify-center font-medium min-w-[1rem] sm:min-w-[1.25rem] text-[10px] sm:text-xs">
+                  <span className="absolute -top-0.5 -right-0.5 bg-accent-gold text-white text-xs rounded-full h-4 w-4 sm:h-5 sm:w-5 flex items-center justify-center font-medium min-w-[1rem] sm:min-w-[1.25rem] text-[10px] sm:text-xs">
                     {cartItemsCount > 99 ? '99+' : cartItemsCount}
                   </span>
                 )}
               </Link>
               
               {/* User Menu - Desktop */}
-              <div className="hidden md:block relative">
+              <div className="hidden md:block relative flex-shrink-0">
                 <button
                   id="user-menu-button"
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="p-1.5 sm:p-2 text-gray-700 hover:text-primary dark:text-gray-300 dark:hover:text-white flex items-center transition-colors rounded-md hover:bg-gray-100 dark:hover:bg-dark-bg"
+                  className="p-1.5 text-gray-700 hover:text-primary dark:text-gray-300 dark:hover:text-white flex items-center transition-colors rounded-md hover:bg-gray-100 dark:hover:bg-dark-bg"
                   aria-expanded={isUserMenuOpen}
                   aria-haspopup="true"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
-                  <span className="hidden lg:inline-block ml-2 font-medium text-sm">
+                  <span className="hidden lg:inline-block ml-1 font-medium text-sm whitespace-nowrap max-w-[80px] truncate">
                     {isAuthenticated ? user.firstName.split(' ')[0] : 'Account'}
                   </span>
                 </button>
@@ -277,14 +277,14 @@ const Header = () => {
               <button
                 id="mobile-menu-button"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="p-1.5 sm:p-2 text-gray-700 hover:text-primary dark:text-gray-300 dark:hover:text-white md:hidden transition-colors rounded-md hover:bg-gray-100 dark:hover:bg-dark-bg"
+                className="p-1.5 text-gray-700 hover:text-primary dark:text-gray-300 dark:hover:text-white md:hidden transition-colors rounded-md hover:bg-gray-100 dark:hover:bg-dark-bg flex-shrink-0"
                 aria-expanded={isMenuOpen}
                 aria-controls="mobile-nav"
                 aria-label="Toggle mobile menu"
               >
                 <svg 
                   xmlns="http://www.w3.org/2000/svg" 
-                  className="h-5 w-5 sm:h-6 sm:w-6" 
+                  className="h-5 w-5" 
                   fill="none" 
                   viewBox="0 0 24 24" 
                   stroke="currentColor"
@@ -301,21 +301,21 @@ const Header = () => {
           
           {/* Mobile/Tablet Search Bar - Only shown when menu is closed */}
           {!isMenuOpen && (
-            <div className="lg:hidden px-2 sm:px-4 pb-3 sm:pb-4">
-              <form onSubmit={handleSearchSubmit} className="flex items-center relative">
+            <div className="lg:hidden px-1 pb-2 sm:pb-3 w-full">
+              <form onSubmit={handleSearchSubmit} className="flex items-center relative w-full">
                 <input
                   type="text"
                   placeholder="Search products..."
                   value={searchKeyword}
                   onChange={(e) => setSearchKeyword(e.target.value)}
-                  className="pl-3 sm:pl-4 pr-10 sm:pr-12 py-2 sm:py-3 rounded-lg bg-gray-100 dark:bg-dark-bg focus:outline-none focus:ring-2 focus:ring-primary dark:text-white w-full text-sm sm:text-base"
+                  className="pl-3 pr-10 py-2 rounded-lg bg-gray-100 dark:bg-dark-bg focus:outline-none focus:ring-2 focus:ring-primary dark:text-white w-full text-sm"
                 />
                 <button 
                   type="submit" 
-                  className="absolute right-2 sm:right-3 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-white transition-colors"
+                  className="absolute right-2 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-white transition-colors flex-shrink-0"
                   aria-label="Search"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                 </button>
@@ -337,12 +337,12 @@ const Header = () => {
           {/* Mobile Menu */}
           <nav 
             id="mobile-nav"
-            className="fixed top-0 left-0 right-0 bg-white dark:bg-dark-card shadow-lg z-50 md:hidden transform transition-transform duration-300 ease-in-out"
-            style={{ marginTop: isScrolled ? '56px' : '56px' }} // Adjust based on header height
+            className="fixed top-0 left-0 right-0 bg-white dark:bg-dark-card shadow-lg z-50 md:hidden transform transition-transform duration-300 ease-in-out w-full overflow-x-hidden"
+            style={{ marginTop: isScrolled ? '48px' : '48px' }} // Adjust based on header height
           >
             {/* Search Bar in Mobile Menu */}
-            <div className="px-4 py-4 border-b border-gray-200 dark:border-gray-700">
-              <form onSubmit={handleSearchSubmit} className="flex items-center relative">
+            <div className="px-3 py-3 border-b border-gray-200 dark:border-gray-700 w-full">
+              <form onSubmit={handleSearchSubmit} className="flex items-center relative w-full">
                 <input
                   type="text"
                   placeholder="Search products..."
@@ -352,7 +352,7 @@ const Header = () => {
                 />
                 <button 
                   type="submit" 
-                  className="absolute right-2 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-white transition-colors"
+                  className="absolute right-2 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-white transition-colors flex-shrink-0"
                   aria-label="Search"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -362,32 +362,32 @@ const Header = () => {
               </form>
             </div>
 
-            <div className="px-4 py-2 space-y-1 max-h-[calc(100vh-200px)] overflow-y-auto">
+            <div className="px-3 py-2 space-y-1 max-h-[calc(100vh-120px)] overflow-y-auto w-full">
               {/* Navigation Links */}
               <Link 
                 to="/products" 
-                className="block py-3 px-4 font-medium text-gray-700 hover:text-primary hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-dark-bg rounded-md transition-colors"
+                className="block py-3 px-3 font-medium text-gray-700 hover:text-primary hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-dark-bg rounded-md transition-colors text-sm"
                 onClick={() => setIsMenuOpen(false)}
               >
                 All Products
               </Link>
               <Link 
                 to="/products/category/Wear Your Conviction" 
-                className="block py-3 px-4 font-medium text-gray-700 hover:text-primary hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-dark-bg rounded-md transition-colors"
+                className="block py-3 px-3 font-medium text-gray-700 hover:text-primary hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-dark-bg rounded-md transition-colors text-sm"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Wear Your Conviction
               </Link>
               <Link 
                 to="/products/category/Customize Your Prints" 
-                className="block py-3 px-4 font-medium text-accent-gold hover:text-accent-gold-dark hover:bg-gray-100 dark:text-accent-gold-light dark:hover:text-accent-gold dark:hover:bg-dark-bg rounded-md transition-colors"
+                className="block py-3 px-3 font-medium text-accent-gold hover:text-accent-gold-dark hover:bg-gray-100 dark:text-accent-gold-light dark:hover:text-accent-gold dark:hover:bg-dark-bg rounded-md transition-colors text-sm"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Customize Your Prints
               </Link>
               <Link 
                 to="/wishlist" 
-                className="block py-3 px-4 font-medium text-gray-700 hover:text-primary hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-dark-bg rounded-md transition-colors sm:hidden"
+                className="block py-3 px-3 font-medium text-gray-700 hover:text-primary hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-dark-bg rounded-md transition-colors sm:hidden text-sm"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Wishlist
@@ -397,19 +397,19 @@ const Header = () => {
               <div className="pt-2 border-t border-gray-200 dark:border-gray-700 mt-2">
                 {isAuthenticated ? (
                   <>
-                    <div className="px-4 py-2 text-sm text-gray-500 dark:text-gray-400 font-medium">
+                    <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400 font-medium">
                       Hi, {user.firstName.split(' ')[0]}!
                     </div>
                     <Link
                       to="/profile"
-                      className="block py-3 px-4 font-medium text-gray-700 hover:text-primary hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-dark-bg rounded-md transition-colors"
+                      className="block py-3 px-3 font-medium text-gray-700 hover:text-primary hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-dark-bg rounded-md transition-colors text-sm"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       My Profile
                     </Link>
                     <Link
                       to="/orders"
-                      className="block py-3 px-4 font-medium text-gray-700 hover:text-primary hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-dark-bg rounded-md transition-colors"
+                      className="block py-3 px-3 font-medium text-gray-700 hover:text-primary hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-dark-bg rounded-md transition-colors text-sm"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       My Orders
@@ -417,7 +417,7 @@ const Header = () => {
                     {isAdmin && (
                       <Link
                         to="/admin/dashboard"
-                        className="block py-3 px-4 font-medium text-accent-blue hover:text-blue-600 hover:bg-gray-100 dark:text-blue-300 dark:hover:text-blue-200 dark:hover:bg-dark-bg rounded-md transition-colors"
+                        className="block py-3 px-3 font-medium text-accent-blue hover:text-blue-600 hover:bg-gray-100 dark:text-blue-300 dark:hover:text-blue-200 dark:hover:bg-dark-bg rounded-md transition-colors text-sm"
                         onClick={() => setIsMenuOpen(false)}
                       >
                         Admin Dashboard
@@ -425,7 +425,7 @@ const Header = () => {
                     )}
                     <button
                       onClick={handleLogout}
-                      className="block w-full text-left py-3 px-4 font-medium text-error hover:text-red-600 hover:bg-gray-100 dark:text-error-light dark:hover:text-red-400 dark:hover:bg-dark-bg rounded-md transition-colors"
+                      className="block w-full text-left py-3 px-3 font-medium text-error hover:text-red-600 hover:bg-gray-100 dark:text-error-light dark:hover:text-red-400 dark:hover:bg-dark-bg rounded-md transition-colors text-sm"
                     >
                       Logout
                     </button>
@@ -434,14 +434,14 @@ const Header = () => {
                   <>
                     <Link
                       to="/login"
-                      className="block py-3 px-4 font-medium text-gray-700 hover:text-primary hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-dark-bg rounded-md transition-colors"
+                      className="block py-3 px-3 font-medium text-gray-700 hover:text-primary hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-dark-bg rounded-md transition-colors text-sm"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       Login
                     </Link>
                     <Link
                       to="/register"
-                      className="block py-3 px-4 font-medium text-gray-700 hover:text-primary hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-dark-bg rounded-md transition-colors"
+                      className="block py-3 px-3 font-medium text-gray-700 hover:text-primary hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-dark-bg rounded-md transition-colors text-sm"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       Register
