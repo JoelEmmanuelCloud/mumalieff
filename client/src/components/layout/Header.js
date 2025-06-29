@@ -94,7 +94,7 @@ const Header = () => {
               <div className="h-5 w-auto sm:h-6 md:h-7 lg:h-8 flex-shrink-0">
                 {theme === 'dark' ? (
                   <img
-                    src="/images/mumalieffwhite.png"
+                    src="/images/logo-white.svg"
                     alt="MUMALIEFF"
                     className="h-full w-auto object-contain max-w-[100px] sm:max-w-[120px] md:max-w-[140px] lg:max-w-[160px]"
                   />

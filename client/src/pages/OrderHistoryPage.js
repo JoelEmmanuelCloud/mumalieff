@@ -36,88 +36,63 @@ const OrderHistoryPage = () => {
   
   // Format order ID for mobile display
   const formatOrderId = (id) => {
-    return isMobile ? id.substring(0, 6) + '...' : id.substring(0, 10) + '...';
+    return isMobile ? id.substring(0, 8) : id.substring(0, 12);
   };
   
-  // Get status color classes
+  // Get status color classes using your design system
   const getStatusClass = (status) => {
     switch (status) {
       case 'Delivered':
-        return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
+        return 'mobile-alert-success';
       case 'Cancelled':
-        return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400';
+        return 'mobile-alert-error';
       default:
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400';
+        return 'mobile-alert-warning';
     }
   };
 
-  // Mobile Order Card Component
+  // Get payment status classes
+  const getPaymentStatusClass = (isPaid) => {
+    return isPaid ? 'mobile-alert-success' : 'mobile-alert-error';
+  };
+
+  // Mobile Order Card Component - Fully optimized
   const MobileOrderCard = ({ order }) => (
-    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 mb-4 shadow-sm">
-      {/* Header Row */}
-      <div className="flex justify-between items-start mb-3">
-        <div className="flex-1">
-          <div className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">
-            Order ID
-          </div>
-          <div className="text-sm font-mono text-gray-900 dark:text-white">
-            {formatOrderId(order._id)}
-          </div>
+    <div className="mobile-order-card">
+      {/* Header with Order ID and Total */}
+      <div className="mobile-order-header">
+        <div className="flex-1 min-w-0">
+          <div className="mobile-order-id">Order ID</div>
+          <div className="mobile-order-id-value">{formatOrderId(order._id)}</div>
         </div>
-        <div className="text-right">
-          <div className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">
-            Total
-          </div>
-          <div className="text-lg font-bold text-gray-900 dark:text-white">
-            ₦{order.totalPrice.toLocaleString()}
-          </div>
+        <div className="mobile-order-total">
+          <div className="mobile-order-total-label">Total</div>
+          <div className="mobile-order-total-value">₦{order.totalPrice.toLocaleString()}</div>
         </div>
       </div>
       
-      {/* Status and Date Row */}
-      <div className="flex justify-between items-center mb-3 pb-3 border-b border-gray-100 dark:border-gray-700">
-        <div>
-          <div className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">
-            Date
-          </div>
-          <div className="text-sm text-gray-700 dark:text-gray-300">
-            {new Date(order.createdAt).toLocaleDateString('en-US', {
-              month: 'short',
-              day: 'numeric',
-              year: 'numeric'
-            })}
-          </div>
+      {/* Meta information */}
+      <div className="mobile-order-meta">
+        <div className="mobile-order-date">
+          {new Date(order.createdAt).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric'
+          })}
         </div>
-        <div className="text-right">
-          <div className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">
-            Status
-          </div>
-          <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${getStatusClass(order.status)}`}>
-            {order.status}
-          </span>
-        </div>
+        <span className={`mobile-order-status ${getStatusClass(order.status)}`}>
+          {order.status}
+        </span>
       </div>
       
-      {/* Payment and Action Row */}
-      <div className="flex justify-between items-center">
-        <div className="flex-1">
-          <div className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">
-            Payment
-          </div>
-          {order.isPaid ? (
-            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-              ✓ Paid
-            </span>
-          ) : (
-            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
-              ✗ Unpaid
-            </span>
-          )}
-        </div>
+      {/* Actions and Payment Status */}
+      <div className="mobile-order-actions">
+        <span className={`mobile-payment-status ${getPaymentStatusClass(order.isPaid)}`}>
+          {order.isPaid ? '✓ Paid' : '✗ Unpaid'}
+        </span>
         <Link
           to={`/order/${order._id}`}
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
-          style={{ minHeight: '44px', minWidth: '44px' }}
+          className="mobile-btn-primary"
         >
           View Details
         </Link>
@@ -125,56 +100,138 @@ const OrderHistoryPage = () => {
     </div>
   );
 
-  // Desktop Table Row Component
-  const DesktopTableRow = ({ order }) => (
-    <tr className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 font-mono">
-        {formatOrderId(order._id)}
-      </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-        {new Date(order.createdAt).toLocaleDateString()}
-      </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-        ₦{order.totalPrice.toLocaleString()}
-      </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm">
-        {order.isPaid ? (
-          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-            {new Date(order.paidAt).toLocaleDateString()}
+  // Desktop Table Alternative - Mobile-friendly table cards
+  const DesktopOrderCard = ({ order }) => (
+    <div className="mobile-table-card">
+      <div className="mobile-table-row">
+        <div className="mobile-table-cell">
+          <span className="mobile-table-label">Order ID</span>
+          <span className="mobile-table-value font-mono">{formatOrderId(order._id)}</span>
+        </div>
+      </div>
+      <div className="mobile-table-row">
+        <div className="mobile-table-cell">
+          <span className="mobile-table-label">Date</span>
+          <span className="mobile-table-value">{new Date(order.createdAt).toLocaleDateString()}</span>
+        </div>
+      </div>
+      <div className="mobile-table-row">
+        <div className="mobile-table-cell">
+          <span className="mobile-table-label">Total</span>
+          <span className="mobile-table-value font-semibold">₦{order.totalPrice.toLocaleString()}</span>
+        </div>
+      </div>
+      <div className="mobile-table-row">
+        <div className="mobile-table-cell">
+          <span className="mobile-table-label">Payment</span>
+          <span className={`mobile-payment-status ${getPaymentStatusClass(order.isPaid)}`}>
+            {order.isPaid ? (
+              <>✓ Paid {new Date(order.paidAt).toLocaleDateString()}</>
+            ) : (
+              '✗ Not Paid'
+            )}
           </span>
-        ) : (
-          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-            Not Paid
+        </div>
+      </div>
+      <div className="mobile-table-row">
+        <div className="mobile-table-cell">
+          <span className="mobile-table-label">Status</span>
+          <span className={`mobile-order-status ${getStatusClass(order.status)}`}>
+            {order.status}
           </span>
-        )}
-      </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm">
-        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusClass(order.status)}`}>
-          {order.status}
-        </span>
-      </td>
-      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+        </div>
+      </div>
+      <div className="mobile-table-row border-t border-gray-100 dark:border-gray-700 pt-3">
         <Link
           to={`/order/${order._id}`}
-          className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+          className="mobile-btn-primary"
         >
-          Details
+          View Order Details
         </Link>
-      </td>
-    </tr>
+      </div>
+    </div>
+  );
+
+  // Traditional Desktop Table (for large screens only)
+  const DesktopTable = ({ orders }) => (
+    <div className="hidden xl:block card overflow-hidden">
+      <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+        <thead className="bg-gray-50 dark:bg-gray-700">
+          <tr>
+            <th scope="col" className="mobile-p-4 text-left mobile-text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+              Order ID
+            </th>
+            <th scope="col" className="mobile-p-4 text-left mobile-text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+              Date
+            </th>
+            <th scope="col" className="mobile-p-4 text-left mobile-text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+              Total
+            </th>
+            <th scope="col" className="mobile-p-4 text-left mobile-text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+              Payment
+            </th>
+            <th scope="col" className="mobile-p-4 text-left mobile-text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+              Status
+            </th>
+            <th scope="col" className="mobile-p-4 text-right mobile-text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+              Actions
+            </th>
+          </tr>
+        </thead>
+        <tbody className="bg-white dark:bg-dark-card divide-y divide-gray-200 dark:divide-gray-700">
+          {orders.map((order) => (
+            <tr key={order._id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+              <td className="mobile-p-4 whitespace-nowrap mobile-text-sm text-gray-500 dark:text-gray-400 font-mono">
+                {formatOrderId(order._id)}
+              </td>
+              <td className="mobile-p-4 whitespace-nowrap mobile-text-sm text-gray-500 dark:text-gray-400">
+                {new Date(order.createdAt).toLocaleDateString()}
+              </td>
+              <td className="mobile-p-4 whitespace-nowrap mobile-text-sm font-medium text-gray-900 dark:text-white">
+                ₦{order.totalPrice.toLocaleString()}
+              </td>
+              <td className="mobile-p-4 whitespace-nowrap mobile-text-sm">
+                {order.isPaid ? (
+                  <span className="mobile-alert-success">
+                    {new Date(order.paidAt).toLocaleDateString()}
+                  </span>
+                ) : (
+                  <span className="mobile-alert-error">
+                    Not Paid
+                  </span>
+                )}
+              </td>
+              <td className="mobile-p-4 whitespace-nowrap mobile-text-sm">
+                <span className={`mobile-order-status ${getStatusClass(order.status)}`}>
+                  {order.status}
+                </span>
+              </td>
+              <td className="mobile-p-4 whitespace-nowrap text-right mobile-text-sm font-medium">
+                <Link
+                  to={`/order/${order._id}`}
+                  className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 mobile-touch-target"
+                >
+                  Details
+                </Link>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-4 sm:py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-dark-bg mobile-p-4 mobile-safe-area">
+      <div className="container-custom">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mobile-spacing mobile-gap">
+          <h1 className="mobile-title font-bold text-gray-900 dark:text-white">
             My Orders
           </h1>
           <Link 
             to="/products" 
-            className="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
+            className="mobile-touch-target mobile-text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
           >
             Continue Shopping →
           </Link>
@@ -182,7 +239,7 @@ const OrderHistoryPage = () => {
         
         {/* Content */}
         {isLoading ? (
-          <div className="flex justify-center items-center py-12">
+          <div className="flex justify-center items-center mobile-p-6">
             <Loader />
           </div>
         ) : error ? (
@@ -190,64 +247,39 @@ const OrderHistoryPage = () => {
             {error.response?.data?.message || 'Error loading orders'}
           </Message>
         ) : data?.orders.length === 0 ? (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-8 text-center">
+          <div className="card mobile-spacing text-center">
             <div className="text-gray-400 dark:text-gray-500 mb-4">
               <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
               </svg>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No Orders Found</h3>
-            <p className="text-gray-500 dark:text-gray-400 mb-6">You haven't placed any orders yet.</p>
+            <h3 className="mobile-text-lg font-medium text-gray-900 dark:text-white mb-2">No Orders Found</h3>
+            <p className="text-gray-500 dark:text-gray-400 mobile-text-sm mb-6">You haven't placed any orders yet.</p>
             <Link 
               to="/products" 
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="mobile-btn-primary"
             >
               Start Shopping
             </Link>
           </div>
         ) : (
           <>
-            {/* Mobile View */}
-            {isMobile ? (
-              <div className="space-y-4">
-                {data?.orders.map((order) => (
-                  <MobileOrderCard key={order._id} order={order} />
-                ))}
-              </div>
-            ) : (
-              /* Desktop View */
-              <div className="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-md">
-                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                  <thead className="bg-gray-50 dark:bg-gray-700">
-                    <tr>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        ID
-                      </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Date
-                      </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Total
-                      </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Paid
-                      </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Status
-                      </th>
-                      <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                    {data?.orders.map((order) => (
-                      <DesktopTableRow key={order._id} order={order} />
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
+            {/* Mobile View (xs to sm) */}
+            <div className="block sm:hidden space-y-3">
+              {data?.orders.map((order) => (
+                <MobileOrderCard key={order._id} order={order} />
+              ))}
+            </div>
+
+            {/* Tablet View (sm to xl) - Card-based table */}
+            <div className="hidden sm:block xl:hidden space-y-4">
+              {data?.orders.map((order) => (
+                <DesktopOrderCard key={order._id} order={order} />
+              ))}
+            </div>
+
+            {/* Desktop View (xl+) - Traditional table */}
+            <DesktopTable orders={data?.orders || []} />
             
             {/* Pagination */}
             {data && data.pages > 1 && (
@@ -256,10 +288,10 @@ const OrderHistoryPage = () => {
                   <button
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className={`relative inline-flex items-center px-2 py-2 rounded-l-md border text-sm font-medium ${
+                    className={`relative inline-flex items-center mobile-p-2 rounded-l-md border mobile-text-sm font-medium mobile-touch-target ${
                       currentPage === 1
                         ? 'bg-gray-100 border-gray-300 text-gray-400 cursor-not-allowed dark:bg-gray-700 dark:border-gray-600 dark:text-gray-500'
-                        : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700'
+                        : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50 dark:bg-dark-card dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700'
                     }`}
                   >
                     <span className="sr-only">Previous</span>
@@ -270,7 +302,7 @@ const OrderHistoryPage = () => {
                   
                   {/* Page numbers - simplified for mobile */}
                   {isMobile ? (
-                    <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white dark:bg-gray-800 dark:border-gray-600 text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <span className="relative inline-flex items-center mobile-p-4 border border-gray-300 bg-white dark:bg-dark-card dark:border-gray-600 mobile-text-sm font-medium text-gray-700 dark:text-gray-300">
                       {currentPage} of {data.pages}
                     </span>
                   ) : (
@@ -290,10 +322,10 @@ const OrderHistoryPage = () => {
                         <button
                           key={pageNum}
                           onClick={() => handlePageChange(pageNum)}
-                          className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                          className={`relative inline-flex items-center mobile-p-4 border mobile-text-sm font-medium mobile-touch-target ${
                             pageNum === currentPage
                               ? 'z-10 bg-blue-50 border-blue-500 text-blue-600 dark:bg-blue-900/50 dark:border-blue-500 dark:text-blue-400'
-                              : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700'
+                              : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50 dark:bg-dark-card dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700'
                           }`}
                         >
                           {pageNum}
@@ -305,10 +337,10 @@ const OrderHistoryPage = () => {
                   <button
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === data.pages}
-                    className={`relative inline-flex items-center px-2 py-2 rounded-r-md border text-sm font-medium ${
+                    className={`relative inline-flex items-center mobile-p-2 rounded-r-md border mobile-text-sm font-medium mobile-touch-target ${
                       currentPage === data.pages
                         ? 'bg-gray-100 border-gray-300 text-gray-400 cursor-not-allowed dark:bg-gray-700 dark:border-gray-600 dark:text-gray-500'
-                        : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700'
+                        : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50 dark:bg-dark-card dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700'
                     }`}
                   >
                     <span className="sr-only">Next</span>

@@ -5,21 +5,21 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
   
   return (
-    <footer className="bg-primary text-white dark:bg-dark-card mt-auto pt-12 pb-6">
+    <footer className="bg-primary text-white dark:bg-dark-card mt-auto pt-8 sm:pt-12 pb-4 sm:pb-6">
       <div className="container-custom">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
           {/* Brand & About */}
-          <div>
-            <h4 className="text-xl font-semibold mb-4">MUMALIEFF</h4>
-            <p className="text-gray-300 mb-4">
+          <div className="text-center sm:text-left">
+            <h4 className="mobile-title font-semibold mb-3 sm:mb-4">MUMALIEFF</h4>
+            <p className="mobile-text text-gray-300 mb-4 leading-relaxed">
               Premium T-shirts and custom prints for the modern fashion enthusiast.
             </p>
-            <div className="flex space-x-4">
+            <div className="flex justify-center sm:justify-start space-x-4">
               <a 
                 href={process.env.REACT_APP_INSTAGRAM_URL || 'https://instagram.com'} 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="text-white hover:text-accent-gold"
+                className="mobile-touch-target text-white hover:text-accent-gold transition-colors duration-200"
                 aria-label="Instagram"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -30,7 +30,7 @@ const Footer = () => {
                 href={process.env.REACT_APP_TWITTER_URL || 'https://twitter.com'} 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="text-white hover:text-accent-gold"
+                className="mobile-touch-target text-white hover:text-accent-gold transition-colors duration-200"
                 aria-label="Twitter"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -41,7 +41,7 @@ const Footer = () => {
                 href={process.env.REACT_APP_FACEBOOK_URL || 'https://facebook.com'} 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="text-white hover:text-accent-gold"
+                className="mobile-touch-target text-white hover:text-accent-gold transition-colors duration-200"
                 aria-label="Facebook"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -53,61 +53,79 @@ const Footer = () => {
           
           {/* Quick Links */}
           <div>
-            <h4 className="text-xl font-semibold mb-4">Quick Links</h4>
+            <h4 className="mobile-title font-semibold mb-3 sm:mb-4">Quick Links</h4>
             <ul className="space-y-2 text-gray-300">
               <li>
-                <Link to="/products" className="hover:text-accent-gold">All Products</Link>
+                <Link to="/products" className="mobile-text hover:text-accent-gold transition-colors duration-200 block py-1">
+                  All Products
+                </Link>
               </li>
               <li>
-                <Link to="/products/category/Wear Your Conviction" className="hover:text-accent-gold">  Wear Your Conviction</Link>
+                <Link to="/products/category/Wear Your Conviction" className="mobile-text hover:text-accent-gold transition-colors duration-200 block py-1">
+                  Wear Your Conviction
+                </Link>
               </li>
               <li>
-                <Link to="/products/category/Customize Your Prints" className="hover:text-accent-gold">Customize Your Prints</Link>
+                <Link to="/products/category/Customize Your Prints" className="mobile-text hover:text-accent-gold transition-colors duration-200 block py-1">
+                  Customize Your Prints
+                </Link>
               </li>
               <li>
-                <Link to="/products?onSale=true" className="hover:text-accent-gold">Sale Items</Link>
+                <Link to="/products?onSale=true" className="mobile-text hover:text-accent-gold transition-colors duration-200 block py-1">
+                  Sale Items
+                </Link>
               </li>
             </ul>
           </div>
           
           {/* Customer Service */}
           <div>
-            <h4 className="text-xl font-semibold mb-4">Customer Service</h4>
+            <h4 className="mobile-title font-semibold mb-3 sm:mb-4">Customer Service</h4>
             <ul className="space-y-2 text-gray-300">
               <li>
-                <Link to="/contact" className="hover:text-accent-gold">Contact Us</Link>
+                <Link to="/contact" className="mobile-text hover:text-accent-gold transition-colors duration-200 block py-1">
+                  Contact Us
+                </Link>
               </li>
               <li>
-                <Link to="/shipping-policy" className="hover:text-accent-gold">Shipping Policy</Link>
+                <Link to="/shipping-policy" className="mobile-text hover:text-accent-gold transition-colors duration-200 block py-1">
+                  Shipping Policy
+                </Link>
               </li>
               <li>
-                <Link to="/return-policy" className="hover:text-accent-gold">Return Policy</Link>
+                <Link to="/return-policy" className="mobile-text hover:text-accent-gold transition-colors duration-200 block py-1">
+                  Return Policy
+                </Link>
               </li>
               <li>
-                <Link to="/faq" className="hover:text-accent-gold">FAQ</Link>
+                <Link to="/faq" className="mobile-text hover:text-accent-gold transition-colors duration-200 block py-1">
+                  FAQ
+                </Link>
               </li>
               <li>
-                <Link to="/size-guide" className="hover:text-accent-gold">Size Guide</Link>
+                <Link to="/size-guide" className="mobile-text hover:text-accent-gold transition-colors duration-200 block py-1">
+                  Size Guide
+                </Link>
               </li>
             </ul>
           </div>
           
           {/* Newsletter */}
-          <div>
-            <h4 className="text-xl font-semibold mb-4">Newsletter</h4>
-            <p className="text-gray-300 mb-4">
+          <div className="col-span-1 sm:col-span-2 lg:col-span-1">
+            <h4 className="mobile-title font-semibold mb-3 sm:mb-4">Newsletter</h4>
+            <p className="mobile-text text-gray-300 mb-4 leading-relaxed">
               Subscribe to get special offers, free giveaways, and new product notifications.
             </p>
-            <form className="flex">
+            <form className="flex flex-col sm:flex-row gap-2">
               <input
                 type="email"
                 placeholder="Your email"
-                className="flex-grow px-3 py-2 rounded-l-md text-black focus:outline-none focus:ring-1 focus:ring-accent-gold"
+                className="mobile-form-input flex-grow text-black focus:outline-none focus:ring-1 focus:ring-accent-gold"
                 aria-label="Email address"
               />
               <button
                 type="submit"
-                className="px-4 py-2 bg-accent-gold text-white rounded-r-md hover:bg-accent-gold-dark focus:outline-none focus:ring-2 focus:ring-accent-gold focus:ring-offset-2 focus:ring-offset-primary"
+                className="mobile-btn-primary bg-accent-gold text-white hover:bg-accent-gold-dark focus:outline-none focus:ring-2 focus:ring-accent-gold focus:ring-offset-2 focus:ring-offset-primary px-4 py-2 rounded-md font-medium transition-colors duration-200"
               >
                 Subscribe
               </button>
@@ -115,19 +133,19 @@ const Footer = () => {
           </div>
         </div>
         
-        <div className="mt-8 pt-8 border-t border-gray-800">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-400 text-sm mb-4 md:mb-0">
+        <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-gray-800">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+            <p className="mobile-text text-gray-400 text-center sm:text-left">
               &copy; {currentYear} Mumalieff. All rights reserved.
             </p>
-            <div className="flex space-x-6">
-              <Link to="/privacy-policy" className="text-gray-400 hover:text-white text-sm">
+            <div className="flex flex-wrap justify-center sm:justify-end gap-4 sm:gap-6">
+              <Link to="/privacy-policy" className="mobile-text text-gray-400 hover:text-white transition-colors duration-200">
                 Privacy Policy
               </Link>
-              <Link to="/terms-of-service" className="text-gray-400 hover:text-white text-sm">
+              <Link to="/terms-of-service" className="mobile-text text-gray-400 hover:text-white transition-colors duration-200">
                 Terms of Service
               </Link>
-              <Link to="/sitemap" className="text-gray-400 hover:text-white text-sm">
+              <Link to="/sitemap" className="mobile-text text-gray-400 hover:text-white transition-colors duration-200">
                 Sitemap
               </Link>
             </div>

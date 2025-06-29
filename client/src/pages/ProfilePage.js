@@ -166,16 +166,16 @@ const ProfilePage = () => {
   };
   
   return (
-    <div className="bg-gray-50 dark:bg-dark-bg py-8">
+    <div className="bg-gray-50 dark:bg-dark-bg py-6 sm:py-8">
       <div className="container-custom">
-        <h1 className="text-3xl font-semibold mb-6 dark:text-white">My Account</h1>
+        <h1 className="mobile-title font-semibold mb-4 sm:mb-6 dark:text-white">My Account</h1>
         
-        <div className="bg-white dark:bg-dark-card rounded-lg shadow-sm overflow-hidden">
-          {/* Tabs */}
-          <div className="flex border-b border-gray-200 dark:border-gray-700">
+        <div className="card overflow-hidden">
+          {/* Mobile Tabs */}
+          <div className="flex border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
             <button
               onClick={() => setActiveTab('profile')}
-              className={`px-6 py-3 text-sm font-medium ${
+              className={`flex-shrink-0 px-4 sm:px-6 py-3 mobile-text font-medium whitespace-nowrap ${
                 activeTab === 'profile'
                   ? 'text-primary border-b-2 border-primary dark:text-white dark:border-white'
                   : 'text-gray-500 hover:text-primary dark:text-gray-400 dark:hover:text-white'
@@ -185,7 +185,7 @@ const ProfilePage = () => {
             </button>
             <button
               onClick={() => setActiveTab('orders')}
-              className={`px-6 py-3 text-sm font-medium ${
+              className={`flex-shrink-0 px-4 sm:px-6 py-3 mobile-text font-medium whitespace-nowrap ${
                 activeTab === 'orders'
                   ? 'text-primary border-b-2 border-primary dark:text-white dark:border-white'
                   : 'text-gray-500 hover:text-primary dark:text-gray-400 dark:hover:text-white'
@@ -195,7 +195,7 @@ const ProfilePage = () => {
             </button>
             <button
               onClick={() => setActiveTab('addresses')}
-              className={`px-6 py-3 text-sm font-medium ${
+              className={`flex-shrink-0 px-4 sm:px-6 py-3 mobile-text font-medium whitespace-nowrap ${
                 activeTab === 'addresses'
                   ? 'text-primary border-b-2 border-primary dark:text-white dark:border-white'
                   : 'text-gray-500 hover:text-primary dark:text-gray-400 dark:hover:text-white'
@@ -205,11 +205,11 @@ const ProfilePage = () => {
             </button>
           </div>
           
-          <div className="p-6">
+          <div className="mobile-spacing">
             {/* Profile Tab */}
             {activeTab === 'profile' && (
               <div>
-                <h2 className="text-xl font-semibold mb-4 dark:text-white">My Profile</h2>
+                <h2 className="mobile-title font-semibold mb-4 dark:text-white">My Profile</h2>
                 
                 {profileLoading ? (
                   <Loader />
@@ -217,83 +217,83 @@ const ProfilePage = () => {
                   <form onSubmit={handleProfileSubmit} className="max-w-lg">
                     {errorMsg && <Message variant="error" className="mb-4">{errorMsg}</Message>}
                     
-                    <div className="mb-4">
+                    <div className="mobile-form-group">
                       <label htmlFor="firstName" className="form-label">First Name</label>
                       <input
                         type="text"
                         id="firstName"
                         value={firstName}
                         onChange={(e) => setFirstName(e.target.value)}
-                        className="form-input"
+                        className="mobile-form-input"
                         required
                       />
                     </div>
                     
-                    <div className="mb-4">
+                    <div className="mobile-form-group">
                       <label htmlFor="lastName" className="form-label">Last Name</label>
                       <input
                         type="text"
                         id="lastName"
                         value={lastName}
                         onChange={(e) => setLastName(e.target.value)}
-                        className="form-input"
+                        className="mobile-form-input"
                         required
                       />
                     </div>
                     
-                    <div className="mb-4">
+                    <div className="mobile-form-group">
                       <label htmlFor="email" className="form-label">Email Address</label>
                       <input
                         type="email"
                         id="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="form-input"
+                        className="mobile-form-input"
                         required
                       />
                     </div>
                     
-                    <div className="mb-4">
+                    <div className="mobile-form-group">
                       <label htmlFor="phone" className="form-label">Phone Number</label>
                       <input
                         type="tel"
                         id="phone"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
-                        className="form-input"
+                        className="mobile-form-input"
                       />
                     </div>
                     
-                    <div className="mb-4">
+                    <div className="mobile-form-group">
                       <label htmlFor="password" className="form-label">New Password</label>
                       <input
                         type="password"
                         id="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="form-input"
+                        className="mobile-form-input"
                         placeholder="Leave blank to keep current password"
                       />
-                      <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">
+                      <p className="mobile-text-xs text-gray-500 mt-1 dark:text-gray-400">
                         Password must be at least 6 characters
                       </p>
                     </div>
                     
-                    <div className="mb-6">
+                    <div className="mobile-form-group">
                       <label htmlFor="confirmPassword" className="form-label">Confirm New Password</label>
                       <input
                         type="password"
                         id="confirmPassword"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
-                        className="form-input"
+                        className="mobile-form-input"
                         placeholder="Leave blank to keep current password"
                       />
                     </div>
                     
                     <button
                       type="submit"
-                      className="btn btn-primary"
+                      className="mobile-btn-primary"
                       disabled={updateProfileMutation.isLoading}
                     >
                       {updateProfileMutation.isLoading ? 'Updating...' : 'Update Profile'}
@@ -303,10 +303,10 @@ const ProfilePage = () => {
               </div>
             )}
             
-            {/* Orders Tab */}
+            {/* Orders Tab - Mobile Optimized */}
             {activeTab === 'orders' && (
               <div>
-                <h2 className="text-xl font-semibold mb-4 dark:text-white">My Orders</h2>
+                <h2 className="mobile-title font-semibold mb-4 dark:text-white">My Orders</h2>
                 
                 {ordersLoading ? (
                   <Loader />
@@ -315,83 +315,143 @@ const ProfilePage = () => {
                     You have no orders yet. <Link to="/products" className="text-primary">Go Shopping</Link>
                   </Message>
                 ) : (
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                      <thead className="bg-gray-50 dark:bg-dark-bg">
-                        <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
-                            ID
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
-                            Date
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
-                            Total
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
-                            Paid
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
-                            Status
-                          </th>
-                          <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
-                            Actions
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200 dark:bg-dark-card dark:divide-gray-700">
-                        {ordersData?.orders.map((order) => (
-                          <tr key={order._id}>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">
-                              {order._id.substring(0, 10)}...
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">
+                  <div>
+                    {/* Mobile Order Cards */}
+                    <div className="block sm:hidden space-y-4">
+                      {ordersData?.orders.map((order) => (
+                        <div key={order._id} className="mobile-order-card">
+                          <div className="mobile-order-header">
+                            <div>
+                              <div className="mobile-order-id">Order ID</div>
+                              <div className="mobile-order-id-value">
+                                {order._id.substring(0, 10)}...
+                              </div>
+                            </div>
+                            <div className="mobile-order-total">
+                              <div className="mobile-order-total-label">Total</div>
+                              <div className="mobile-order-total-value">
+                                ₦{order.totalPrice.toLocaleString()}
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="mobile-order-meta">
+                            <div className="mobile-order-date">
                               {new Date(order.createdAt).toLocaleDateString()}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">
-                              ₦{order.totalPrice.toLocaleString()}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
+                            </div>
+                            <span className={`mobile-order-status ${
+                              order.status === 'Delivered'
+                                ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-400'
+                                : order.status === 'Cancelled'
+                                ? 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-400'
+                                : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-400'
+                            }`}>
+                              {order.status}
+                            </span>
+                          </div>
+                          
+                          <div className="mobile-order-actions">
+                            <div className="flex items-center space-x-2">
                               {order.isPaid ? (
-                                <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-success-light text-success">
-                                  Paid on {new Date(order.paidAt).toLocaleDateString()}
+                                <span className="mobile-payment-status bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-400">
+                                  Paid
                                 </span>
                               ) : (
-                                <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-error-light text-error">
+                                <span className="mobile-payment-status bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-400">
                                   Not Paid
                                 </span>
                               )}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                order.status === 'Delivered'
-                                  ? 'bg-success-light text-success'
-                                  : order.status === 'Cancelled'
-                                  ? 'bg-error-light text-error'
-                                  : 'bg-warning-light text-warning'
-                              }`}>
-                                {order.status}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                              <Link
-                                to={`/order/${order._id}`}
-                                className="text-primary hover:text-primary-light dark:text-accent-blue-light dark:hover:text-accent-blue"
-                              >
-                                Details
-                              </Link>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                            </div>
+                            <Link
+                              to={`/order/${order._id}`}
+                              className="mobile-text text-primary hover:text-primary-light dark:text-accent-blue-light dark:hover:text-accent-blue font-medium"
+                            >
+                              View Details →
+                            </Link>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                     
-                    {/* Pagination - implement if needed */}
-                    {ordersData?.pages > 1 && (
-                      <div className="flex justify-center mt-6">
-                        <p className="text-gray-500 dark:text-gray-400">Pagination will be implemented here</p>
-                      </div>
-                    )}
+                    {/* Desktop Table */}
+                    <div className="hidden sm:block overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead className="bg-gray-50 dark:bg-dark-bg">
+                          <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                              ID
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                              Date
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                              Total
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                              Paid
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                              Status
+                            </th>
+                            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                              Actions
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200 dark:bg-dark-card dark:divide-gray-700">
+                          {ordersData?.orders.map((order) => (
+                            <tr key={order._id}>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">
+                                {order._id.substring(0, 10)}...
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">
+                                {new Date(order.createdAt).toLocaleDateString()}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">
+                                ₦{order.totalPrice.toLocaleString()}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                {order.isPaid ? (
+                                  <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-success-light text-success">
+                                    Paid on {new Date(order.paidAt).toLocaleDateString()}
+                                  </span>
+                                ) : (
+                                  <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-error-light text-error">
+                                    Not Paid
+                                  </span>
+                                )}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                  order.status === 'Delivered'
+                                    ? 'bg-success-light text-success'
+                                    : order.status === 'Cancelled'
+                                    ? 'bg-error-light text-error'
+                                    : 'bg-warning-light text-warning'
+                                }`}>
+                                  {order.status}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <Link
+                                  to={`/order/${order._id}`}
+                                  className="text-primary hover:text-primary-light dark:text-accent-blue-light dark:hover:text-accent-blue"
+                                >
+                                  Details
+                                </Link>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                      
+                      {/* Pagination - implement if needed */}
+                      {ordersData?.pages > 1 && (
+                        <div className="flex justify-center mt-6">
+                          <p className="text-gray-500 dark:text-gray-400">Pagination will be implemented here</p>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
@@ -400,15 +460,15 @@ const ProfilePage = () => {
             {/* Addresses Tab */}
             {activeTab === 'addresses' && (
               <div>
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-semibold dark:text-white">My Addresses</h2>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+                  <h2 className="mobile-title font-semibold dark:text-white">My Addresses</h2>
                   {!showAddressForm && (
                     <button
                       onClick={() => {
                         resetAddressForm();
                         setShowAddressForm(true);
                       }}
-                      className="btn btn-primary"
+                      className="mobile-btn-primary sm:btn sm:btn-primary"
                     >
                       Add New Address
                     </button>
@@ -418,73 +478,73 @@ const ProfilePage = () => {
                 {profileLoading ? (
                   <Loader />
                 ) : showAddressForm ? (
-                  <div className="bg-gray-50 dark:bg-dark-bg p-4 rounded-lg mb-6">
-                    <h3 className="text-lg font-medium mb-4 dark:text-white">
+                  <div className="bg-gray-50 dark:bg-dark-bg mobile-spacing rounded-lg mb-6">
+                    <h3 className="mobile-title font-medium mb-4 dark:text-white">
                       {editingAddressId ? 'Edit Address' : 'Add New Address'}
                     </h3>
                     
                     <form onSubmit={handleAddressSubmit} className="max-w-lg">
-                      <div className="mb-4">
+                      <div className="mobile-form-group">
                         <label htmlFor="address" className="form-label">Street Address*</label>
                         <input
                           type="text"
                           id="address"
                           value={address}
                           onChange={(e) => setAddress(e.target.value)}
-                          className="form-input"
+                          className="mobile-form-input"
                           required
                         />
                       </div>
                       
-                      <div className="mb-4">
+                      <div className="mobile-form-group">
                         <label htmlFor="city" className="form-label">City*</label>
                         <input
                           type="text"
                           id="city"
                           value={city}
                           onChange={(e) => setCity(e.target.value)}
-                          className="form-input"
+                          className="mobile-form-input"
                           required
                         />
                       </div>
                       
-                      <div className="mb-4">
+                      <div className="mobile-form-group">
                         <label htmlFor="state" className="form-label">State*</label>
                         <input
                           type="text"
                           id="state"
                           value={state}
                           onChange={(e) => setState(e.target.value)}
-                          className="form-input"
+                          className="mobile-form-input"
                           required
                         />
                       </div>
                       
-                      <div className="mb-4">
+                      <div className="mobile-form-group">
                         <label htmlFor="postalCode" className="form-label">Postal Code*</label>
                         <input
                           type="text"
                           id="postalCode"
                           value={postalCode}
                           onChange={(e) => setPostalCode(e.target.value)}
-                          className="form-input"
+                          className="mobile-form-input"
                           required
                         />
                       </div>
                       
-                      <div className="mb-4">
+                      <div className="mobile-form-group">
                         <label htmlFor="country" className="form-label">Country*</label>
                         <input
                           type="text"
                           id="country"
                           value={country}
                           onChange={(e) => setCountry(e.target.value)}
-                          className="form-input"
+                          className="mobile-form-input"
                           required
                         />
                       </div>
                       
-                      <div className="mb-6">
+                      <div className="mobile-form-group">
                         <div className="flex items-center">
                           <input
                             type="checkbox"
@@ -493,16 +553,16 @@ const ProfilePage = () => {
                             onChange={(e) => setIsDefault(e.target.checked)}
                             className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded dark:bg-dark-bg dark:border-gray-600"
                           />
-                          <label htmlFor="isDefault" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                          <label htmlFor="isDefault" className="ml-2 block mobile-text text-gray-700 dark:text-gray-300">
                             Set as default address
                           </label>
                         </div>
                       </div>
                       
-                      <div className="flex space-x-4">
+                      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                         <button
                           type="submit"
-                          className="btn btn-primary"
+                          className="mobile-btn-primary sm:btn sm:btn-primary"
                           disabled={addAddressMutation.isLoading || updateAddressMutation.isLoading}
                         >
                           {addAddressMutation.isLoading || updateAddressMutation.isLoading
@@ -514,7 +574,7 @@ const ProfilePage = () => {
                         <button
                           type="button"
                           onClick={resetAddressForm}
-                          className="btn btn-secondary"
+                          className="mobile-btn-secondary sm:btn sm:btn-secondary"
                         >
                           Cancel
                         </button>
@@ -530,26 +590,26 @@ const ProfilePage = () => {
                     {profileData?.shippingAddresses?.map((addressItem) => (
                       <div 
                         key={addressItem._id} 
-                        className={`border rounded-lg p-4 ${
+                        className={`border rounded-lg mobile-spacing ${
                           addressItem.isDefault 
                             ? 'border-primary dark:border-accent-blue' 
                             : 'border-gray-200 dark:border-gray-700'
                         }`}
                       >
                         {addressItem.isDefault && (
-                          <div className="inline-block bg-primary text-white text-xs px-2 py-1 rounded mb-2 dark:bg-accent-blue">
+                          <div className="inline-block bg-primary text-white mobile-text-xs px-2 py-1 rounded mb-2 dark:bg-accent-blue">
                             Default
                           </div>
                         )}
                         
-                        <p className="text-gray-900 dark:text-white">{addressItem.address}</p>
-                        <p className="text-gray-900 dark:text-white">{addressItem.city}, {addressItem.state} {addressItem.postalCode}</p>
-                        <p className="text-gray-900 dark:text-white">{addressItem.country}</p>
+                        <p className="mobile-text text-gray-900 dark:text-white">{addressItem.address}</p>
+                        <p className="mobile-text text-gray-900 dark:text-white">{addressItem.city}, {addressItem.state} {addressItem.postalCode}</p>
+                        <p className="mobile-text text-gray-900 dark:text-white">{addressItem.country}</p>
                         
                         <div className="mt-4 flex space-x-2">
                           <button
                             onClick={() => handleEditAddress(addressItem)}
-                            className="text-sm text-primary hover:text-primary-light dark:text-accent-blue-light dark:hover:text-accent-blue"
+                            className="mobile-text text-primary hover:text-primary-light dark:text-accent-blue-light dark:hover:text-accent-blue font-medium"
                           >
                             Edit
                           </button>
