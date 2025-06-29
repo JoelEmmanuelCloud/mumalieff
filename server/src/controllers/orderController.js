@@ -464,7 +464,6 @@ const getDailySales = asyncHandler(async (req, res) => {
   try {
     const days = Number(req.query.days) || 7;
     
-    console.log(`Getting daily sales for ${days} days`);
     
     // Calculate dates in Lagos timezone to match your data
     const lagosTime = new Date().toLocaleString("en-US", {timeZone: "Africa/Lagos"});
@@ -479,8 +478,7 @@ const getDailySales = asyncHandler(async (req, res) => {
     const endDate = new Date(today);
     endDate.setHours(23, 59, 59, 999);
 
-    console.log('Date range:', { startDate, endDate });
-    console.log('Lagos time now:', today);
+
     
     // Get daily sales data - using createdAt directly without timezone conversion
     // since your data is already stored with proper timestamps
@@ -509,7 +507,6 @@ const getDailySales = asyncHandler(async (req, res) => {
       },
     ]);
     
-    console.log('Raw sales data from DB:', dailySalesData);
     
     // Create a complete array with all days, filling in missing days with 0 values
     const completeSalesData = [];
@@ -534,7 +531,6 @@ const getDailySales = asyncHandler(async (req, res) => {
       currentDate.setDate(currentDate.getDate() + 1);
     }
     
-    console.log('Complete sales data:', completeSalesData);
     
     // If requesting more than 7 days, group by weeks
     if (days > 7) {
@@ -554,7 +550,6 @@ const getDailySales = asyncHandler(async (req, res) => {
         weeklyData.push(weekSummary);
       }
       
-      console.log('Weekly data:', weeklyData);
       return res.json(weeklyData);
     }
     
