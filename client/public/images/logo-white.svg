@@ -1,11 +1,40 @@
-<?xml version="1.0" standalone="no"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN"
- "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
-<svg version="1.0" xmlns="http://www.w3.org/2000/svg"
- width="13374.000000pt" height="2321.000000pt" viewBox="0 0 13374.000000 2321.000000"
- preserveAspectRatio="xMidYMid meet">
-
-<g transform="translate(0.000000,2321.000000) scale(0.100000,-0.100000)"
-fill="#000000" stroke="none">
-</g>
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Creator: CorelDRAW 2021 (64-Bit) -->
+<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="25.9042in" height="4.49357in" version="1.1" style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
+viewBox="0 0 27641.88 4795"
+ xmlns:xlink="http://www.w3.org/1999/xlink"
+ xmlns:xodm="http://www.corel.com/coreldraw/odm/2003">
+ <defs>
+  <font id="FontID0" horiz-adv-x="781" font-variant="normal" style="fill-rule:nonzero" font-weight="700">
+	<font-face 
+		font-family="Futura Std Book">
+		<font-face-src>
+			<font-face-name name="FuturaStd-Bold"/>
+		</font-face-src>
+	</font-face>
+   <missing-glyph><path d="M0 0z"/></missing-glyph>
+   <glyph unicode="a" horiz-adv-x="682" d="M328 372c74.0005,0 117,-52.9999 117,-116 0,-65 -43,-115 -117,-115 -73.9998,0 -117,50.0002 -117,115 0,62.9997 43,116 117,116zm293 141l-182 0 0 -50.0002c-38,45.0002 -100,67.0003 -159,67.0003 -152,0 -257,-126 -257,-273 0,-146.999 107,-274 259,-274 60.0001,0 123,23.0002 155,73.9998l2.00028 0 0 -56.9997 182 0 0 513z"/>
+   <glyph unicode="e" horiz-adv-x="609" d="M207 331c11,52.9999 55.0001,81 108,81 49,0 93.9995,-31.9999 103,-81l-211 0zm379.999 -85.9999c0,175 -103,285 -281,285 -167,0 -284,-103 -284,-274 0,-177.001 127,-273 297,-273 58.9999,0 117,14.0004 164,43 46.9998,29.0003 82.9995,73.0004 97,133l-175 0c-19.9998,-34.0002 -47.9999,-47.0005 -87.0001,-47.0005 -74.9999,0 -114,40.0003 -114,114l383 0 0 19.0004z"/>
+   <glyph unicode="f" horiz-adv-x="387" d="M260 363l127 0 0 150 -127 0 0 83.0003c0,57.9998 16,85.9999 62.9997,85.9999 24.0003,0 43,-8.00036 63.9999,-17.0001l0 157c-24.9997,13.0003 -49.9994,18.0002 -77.9996,18.0002 -68.9998,0 -134,-29.0003 -179,-82.0001 -50.0002,-57.0004 -51.9997,-109 -51.9997,-180l0 -65 -64.0006 0 0 -150 64.0006 0 0 -363 182 0 0 363z"/>
+   <glyph unicode="i" horiz-adv-x="301" d="M242 513l-182 0 0 -513 182 0 0 513zm-90.9999 299c-56.0003,0 -102,-46.0004 -102,-102 0,-56.0003 45.9996,-102 102,-102 56.0003,0 102,45.9996 102,102 0,55.9995 -45.9996,102 -102,102z"/>
+   <glyph unicode="l" horiz-adv-x="301" d="M242 830l-182 0 0 -830 182 0 0 830z"/>
+   <glyph unicode="m" horiz-adv-x="988" d="M242 513l-182 0 0 -513 182 0 0 245c0,56.9997 0,144 81,144 81,0 81,-87.0001 81,-144l0 -245 182.001 0 0 245c0,60.9995 2.99967,140 87.0001,140 76.9994,0 74.9999,-87.0001 74.9999,-140l0 -245 182 0 0 327c0,118 -45.0002,203 -175,203 -70,0 -139,-34.0002 -173.999,-98.0001 -37.0006,68.0004 -101.001,98.0001 -175,98.0001 -66.0002,0 -119,-24.0003 -162,-81l-2.00028 0 0 63.9999z"/>
+  </font>
+  <style type="text/css">
+   <![CDATA[
+    @font-face { font-family:"Futura Std Book";font-variant:normal;font-weight:bold;src:url("#FontID0") format(svg)}
+    .fil0 {fill:#FAFAFA}
+    .fnt0 {font-weight:bold;font-size:5595.1px;font-family:'Futura Std Book'}
+   ]]>
+  </style>
+ </defs>
+ <g id="Layer_x0020_1">
+  <metadata id="CorelCorpID_0Corel-Layer"/>
+  <g id="_2038658804608">
+   <path class="fil0" d="M991.37 970.88l-991.37 0 0 2466.63 991.37 0 0 -1006.88c0,-310.39 0,-784.37 441.18,-784.37 441.19,0 441.19,474.18 441.19,784.37l0 1006.88 991.27 0 0 -1006.88c0,-332.19 16.4,-762.57 473.88,-762.57 419.48,0 408.59,473.89 408.59,762.57l0 56.27 6.18 0 0 1061.77c0,920.57 648.18,1203.76 1486.95,1203.76 838.77,0 1486.95,-283.19 1486.95,-1203.76l0 -1683.04 -991.27 0 0 1492.45c0,353.99 -87.2,604.58 -495.68,604.58 -408.49,0 -495.68,-250.59 -495.68,-604.58l0 -1492.45 -9.13 0c-29.46,-580.23 -286.43,-987.34 -950.22,-987.34 -381.29,0 -757.08,185.19 -947.77,533.78 -201.49,-370.39 -550.08,-533.78 -953.17,-533.78 -359.49,0 -648.18,130.7 -882.37,441.19l-10.9 0 0 -348.59z"/>
+   <text x="7163.82" y="4699.88"  class="fil0 fnt0">malieff</text>
+   <path class="fil0" d="M2864.06 4015.35l-2806.22 0 0 0.12c0,516.07 303.45,768.56 726.16,768.56l2080.06 0 0 -768.69z"/>
+  </g>
+ </g>
 </svg>
