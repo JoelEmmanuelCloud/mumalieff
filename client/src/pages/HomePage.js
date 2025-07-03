@@ -104,56 +104,76 @@ const HomePage = () => {
       {/* Categories Section */}
       <section className="mobile-p-6 bg-gray-100 dark:bg-dark-card">
         <div className="container-custom">
-          <h2 className="section-heading">
+          <h2 className="section-heading mb-8">
             Shop by Category
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 mobile-gap max-w-4xl mx-auto">
             {/* Wear Your Conviction Category */}
-            <div className="card fade-in">
-              <img 
-                src="/images/category-wear-conviction.jpg" 
-                alt="Wear Your Conviction"
-                className="w-full h-40 sm:h-48 md:h-60 object-cover"
-              />
+            <Link 
+              to="/products/category/Wear Your Conviction"
+              className="group block card hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border-2 border-transparent hover:border-primary/20"
+            >
               <div className="mobile-spacing">
-                <h3 className="mobile-title font-semibold mb-2 dark:text-white">
-                  Wear Your Conviction
-                </h3>
-                <p className="text-gray-600 mb-4 dark:text-gray-300 mobile-text-sm">
-                  Express your faith and find motivation with our meaningful designs.
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-12 h-12 bg-primary/10 dark:bg-primary/20 rounded-lg flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-primary dark:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                      </svg>
+                    </div>
+                    <h3 className="text-xl font-semibold dark:text-white group-hover:text-primary transition-colors">
+                      Wear Your Conviction
+                    </h3>
+                  </div>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400 group-hover:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+                <p className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
+                  Express your faith and find motivation with our meaningful designs that inspire and uplift.
                 </p>
-                <Link 
-                  to="/products/category/Wear Your Conviction" 
-                  className="inline-block text-primary font-medium hover:text-primary-light dark:text-white dark:hover:text-gray-300 mobile-text-sm"
-                >
-                  Shop Convictions →
-                </Link>
+                <div className="flex items-center space-x-2 text-primary font-medium group-hover:text-primary-light">
+                  <span>Shop Convictions</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
+                </div>
               </div>
-            </div>
+            </Link>
             
             {/* Customize Your Prints Category */}
-            <div className="card fade-in">
-              <img 
-                src="/images/category-custom-prints.jpg" 
-                alt="Customize Your Prints"
-                className="w-full h-40 sm:h-48 md:h-60 object-cover"
-              />
+            <Link 
+              to="/products/category/Customize Your Prints"
+              className="group block card hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border-2 border-transparent hover:border-accent-gold/20"
+            >
               <div className="mobile-spacing">
-                <h3 className="mobile-title font-semibold mb-2 dark:text-white">
-                  Customize Your Prints
-                </h3>
-                <p className="text-gray-600 mb-4 dark:text-gray-300 mobile-text-sm">
-                  Design your own unique t-shirt with our custom printing service.
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-12 h-12 bg-accent-gold/10 dark:bg-accent-gold/20 rounded-lg flex items-center justify-center group-hover:bg-accent-gold/20 transition-colors">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-accent-gold dark:text-accent-gold-light" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                      </svg>
+                    </div>
+                    <h3 className="text-xl font-semibold dark:text-white group-hover:text-accent-gold transition-colors">
+                      Customize Your Prints
+                    </h3>
+                  </div>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400 group-hover:text-accent-gold transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+                <p className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
+                  Design your own unique t-shirt with our custom printing service. Bring your vision to life.
                 </p>
-                <Link 
-                  to="/products/category/Customize Your Prints" 
-                  className="inline-block text-accent-gold font-medium hover:text-accent-gold-dark dark:text-accent-gold-light dark:hover:text-accent-gold mobile-text-sm"
-                >
-                  Create Your Design →
-                </Link>
+                <div className="flex items-center space-x-2 text-accent-gold font-medium group-hover:text-accent-gold-dark">
+                  <span>Create Your Design</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
+                </div>
               </div>
-            </div>
+            </Link>
           </div>
         </div>
       </section>
