@@ -78,6 +78,9 @@ const AdminDashboardPage = lazy(() =>
 const AdminProductListPage = lazy(() => 
   import(/* webpackChunkName: "admin" */ './pages/admin/ProductListPage')
 );
+const AdminProductCreatePage = lazy(() => 
+  import(/* webpackChunkName: "admin" */'./pages/admin/ProductCreatePage')
+)
 const AdminProductEditPage = lazy(() => 
   import(/* webpackChunkName: "admin" */ './pages/admin/ProductEditPage')
 );
@@ -248,6 +251,7 @@ function App() {
                       <Route path="/admin" element={<AdminDashboardPage />} />
                       <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
                       <Route path="/admin/products" element={<AdminProductListPage />} />
+                      <Route path="/admin/product/create" element={<AdminProductCreatePage />} />
                       <Route path="/admin/product/:id/edit" element={<AdminProductEditPage />} />
                       <Route path="/admin/orders" element={<AdminOrderListPage />} />
                       <Route path="/admin/users" element={<AdminUserListPage />} />

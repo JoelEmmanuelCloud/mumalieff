@@ -85,11 +85,10 @@ const ProductListPage = () => {
   };
   
   // Handle create product
-  const handleCreateProduct = () => {
-    if (window.confirm('Are you sure you want to create a new product?')) {
-      createProductMutation.mutate();
-    }
-  };
+ const handleCreateProduct = () => {
+  // Navigate to the create product page instead of trying to create immediately
+  navigate('/admin/product/create');
+};
   
   // Handle delete product
   const handleDeleteProduct = (id, productName) => {
