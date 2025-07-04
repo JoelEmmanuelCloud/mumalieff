@@ -1,28 +1,31 @@
 {
-    "short_name": "Mumalieff",
-    "name": "Mumalieff - Premium T-shirts & Custom Prints",
-    "icons": [
-      {
-        "src": "favicon.ico",
-        "sizes": "64x64 32x32 24x24 16x16",
-        "type": "image/x-icon"
-      },
-      {
-        "src": "images/logo/logo192.png",
-        "type": "image/png",
-        "sizes": "192x192",
-        "purpose": "any maskable"
-      },
-      {
-        "src": "images/logo/logo192.png",
-        "type": "image/png",
-        "sizes": "512x512",
-        "purpose": "any maskable"
-      }
-    ],
-    "start_url": ".",
-    "display": "standalone",
-    "theme_color": "#000000",
-    "background_color": "#ffffff",
-    "orientation": "portrait"
-  }
+  "short_name": "Mumalieff",
+  "name": "Mumalieff - Premium T-shirts & Custom Prints",
+  "description": "Shop premium quality t-shirts and create custom designs in Nigeria",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "images/logo/logo192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "images/logo/logo512.png",
+      "type": "image/png", 
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff",
+  "orientation": "portrait",
+  "scope": "/",
+  "categories": ["shopping", "lifestyle"]
+}
