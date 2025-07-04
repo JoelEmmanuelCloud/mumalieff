@@ -27,8 +27,13 @@ const {
 
 const { protect, admin } = require('../middleware/authMiddleware');
 
-// Public routes
-router.route('/').get(getProducts);
+// Main products route - FIXED: Combined GET and POST in one route definition
+router
+  .route('/')
+  .get(getProducts)
+  .post(protect, admin, createProduct);
+
+// Public routes for specific product queries
 router.route('/top').get(getTopProducts);
 router.route('/featured').get(getFeaturedProducts);
 router.route('/sale').get(getSaleProducts);
@@ -37,21 +42,31 @@ router.route('/design-styles').get(getDesignStyles);
 router.route('/design-style/:style').get(getProductsByDesignStyle);
 
 // Review routes - Enhanced with verification
-router.route('/:id/reviews').get(getProductReviews).post(protect, createProductReview);
-router.route('/:productId/reviews/:reviewId').put(protect, updateProductReview).delete(protect, deleteProductReview);
-router.route('/:productId/reviews/:reviewId/helpful').post(protect, markReviewHelpful).delete(protect, unmarkReviewHelpful);
+router
+  .route('/:id/reviews')
+  .get(getProductReviews)
+  .post(protect, createProductReview);
+
+router
+  .route('/:productId/reviews/:reviewId')
+  .put(protect, updateProductReview)
+  .delete(protect, deleteProductReview);
+
+router
+  .route('/:productId/reviews/:reviewId/helpful')
+  .post(protect, markReviewHelpful)
+  .delete(protect, unmarkReviewHelpful);
 
 // Protected routes
 router.route('/custom-order').post(protect, submitCustomDesignOrder);
 router.route('/review-eligibility').get(protect, getReviewEligibility);
 router.route('/:id/verify-purchase').get(protect, verifyProductPurchase);
 
-// Admin routes
-router.route('/').post(protect, admin, createProduct);
+// Admin routes for custom orders
 router.route('/admin/custom-orders').get(protect, admin, getCustomDesignOrders);
 router.route('/admin/custom-orders/:id/status').put(protect, admin, updateCustomOrderStatus);
 
-// Product CRUD routes
+// Individual product CRUD routes - Keep this at the end to avoid conflicts
 router
   .route('/:id')
   .get(getProductById)
