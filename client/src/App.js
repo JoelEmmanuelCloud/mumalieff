@@ -15,11 +15,11 @@ import MobileNavigation from './components/layout/MobileNavigation';
 import ErrorBoundary from './components/common/ErrorBoundary';
 import PerformanceMonitor from './components/common/PerformanceMonitor';
 
-// SEO Components
+// SEO Components - FIXED IMPORTS
 import { OrganizationSchema, WebsiteSchema } from './components/SEO/SEOHelmet';
 
 // Analytics
-import { trackPerformance, trackPageView } from './utils/analytics';
+import { trackPerformance, trackPageView, initializeAnalytics } from './utils/analytics';
 
 // Optimized lazy loading with preloading
 const HomePage = lazy(() => 
@@ -79,8 +79,8 @@ const AdminProductListPage = lazy(() =>
   import(/* webpackChunkName: "admin" */ './pages/admin/ProductListPage')
 );
 const AdminProductCreatePage = lazy(() => 
-  import(/* webpackChunkName: "admin" */'./pages/admin/ProductCreatePage')
-)
+  import(/* webpackChunkName: "admin" */ './pages/admin/ProductCreatePage')
+);
 const AdminProductEditPage = lazy(() => 
   import(/* webpackChunkName: "admin" */ './pages/admin/ProductEditPage')
 );
@@ -143,6 +143,11 @@ const PageLoader = ({ isAdminPage = false }) => (
 function App() {
   const location = useLocation();
 
+  // Initialize analytics on app start
+  useEffect(() => {
+    initializeAnalytics();
+  }, []);
+
   // Track page views
   useEffect(() => {
     trackPageView(document.title, window.location.href);
@@ -194,7 +199,7 @@ function App() {
       <HelmetProvider>
         <QueryClientProvider client={queryClient}>
           <div className="antialiased">
-            {/* Global Schema Markup */}
+            {/* Global Schema Markup - FIXED: Render as JSX components */}
             <OrganizationSchema />
             <WebsiteSchema />
             

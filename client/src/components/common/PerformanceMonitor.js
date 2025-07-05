@@ -1,5 +1,6 @@
-// src/components/common/PerformanceMonitor.js
+// src/components/common/PerformanceMonitor.js - Fixed version
 import { useEffect } from 'react';
+import { trackPerformance, trackException, isAnalyticsAvailable } from '../../utils/analytics';
 
 const PerformanceMonitor = () => {
   useEffect(() => {
@@ -8,67 +9,29 @@ const PerformanceMonitor = () => {
       return;
     }
 
-    // Check if gtag is available
-    const hasGtag = typeof window !== 'undefined' && window.gtag;
-
     // Monitor Core Web Vitals
     const monitorWebVitals = async () => {
       try {
         const { getCLS, getFID, getLCP, getFCP, getTTFB } = await import('web-vitals');
         
         getCLS((metric) => {
-          if (hasGtag) {
-            window.gtag('event', 'web_vitals', {
-              name: 'CLS',
-              value: Math.round(metric.value * 1000),
-              event_category: 'Performance',
-              custom_parameter_1: metric.id
-            });
-          }
+          trackPerformance('CLS', metric.value * 1000, 'Web Vitals');
         });
 
         getFID((metric) => {
-          if (hasGtag) {
-            window.gtag('event', 'web_vitals', {
-              name: 'FID',
-              value: Math.round(metric.value),
-              event_category: 'Performance',
-              custom_parameter_1: metric.id
-            });
-          }
+          trackPerformance('FID', metric.value, 'Web Vitals');
         });
 
         getLCP((metric) => {
-          if (hasGtag) {
-            window.gtag('event', 'web_vitals', {
-              name: 'LCP',
-              value: Math.round(metric.value),
-              event_category: 'Performance',
-              custom_parameter_1: metric.id
-            });
-          }
+          trackPerformance('LCP', metric.value, 'Web Vitals');
         });
 
         getFCP((metric) => {
-          if (hasGtag) {
-            window.gtag('event', 'web_vitals', {
-              name: 'FCP',
-              value: Math.round(metric.value),
-              event_category: 'Performance',
-              custom_parameter_1: metric.id
-            });
-          }
+          trackPerformance('FCP', metric.value, 'Web Vitals');
         });
 
         getTTFB((metric) => {
-          if (hasGtag) {
-            window.gtag('event', 'web_vitals', {
-              name: 'TTFB',
-              value: Math.round(metric.value),
-              event_category: 'Performance',
-              custom_parameter_1: metric.id
-            });
-          }
+          trackPerformance('TTFB', metric.value, 'Web Vitals');
         });
       } catch (error) {
         console.warn('Web Vitals monitoring failed:', error);
@@ -77,104 +40,96 @@ const PerformanceMonitor = () => {
 
     // Monitor page load performance
     const monitorPageLoad = () => {
-      if ('performance' in window) {
+      if (!('performance' in window)) return;
+
+      try {
         const observer = new PerformanceObserver((list) => {
-          const entries = list.getEntries();
-          entries.forEach((entry) => {
-            if (entry.entryType === 'navigation') {
-              const loadTime = entry.loadEventEnd - entry.fetchStart;
-              const domContentLoaded = entry.domContentLoadedEventEnd - entry.fetchStart;
-              
-              if (hasGtag) {
-                window.gtag('event', 'page_load_time', {
-                  value: Math.round(loadTime),
-                  event_category: 'Performance',
-                  custom_parameter_1: 'total_load_time'
-                });
+          try {
+            const entries = list.getEntries();
+            entries.forEach((entry) => {
+              if (entry.entryType === 'navigation') {
+                const loadTime = entry.loadEventEnd - entry.fetchStart;
+                const domContentLoaded = entry.domContentLoadedEventEnd - entry.fetchStart;
                 
-                window.gtag('event', 'dom_content_loaded', {
-                  value: Math.round(domContentLoaded),
-                  event_category: 'Performance',
-                  custom_parameter_1: 'dom_ready_time'
-                });
+                trackPerformance('page_load_time', loadTime);
+                trackPerformance('dom_content_loaded', domContentLoaded);
               }
-            }
-          });
+            });
+          } catch (error) {
+            console.warn('Performance entry processing error:', error);
+          }
         });
         
-        try {
-          observer.observe({ entryTypes: ['navigation'] });
-        } catch (error) {
-          console.warn('Performance observer failed:', error);
-        }
+        observer.observe({ entryTypes: ['navigation'] });
         
         return () => {
           try {
             observer.disconnect();
           } catch (error) {
-            // Observer may already be disconnected
+            // Silent fail - observer may already be disconnected
           }
         };
+      } catch (error) {
+        console.warn('Performance observer setup failed:', error);
+        return () => {}; // Return empty cleanup function
       }
     };
 
     // Monitor resource loading performance
     const monitorResources = () => {
-      if ('performance' in window) {
+      if (!('performance' in window)) return;
+
+      try {
         const observer = new PerformanceObserver((list) => {
-          const entries = list.getEntries();
-          entries.forEach((entry) => {
-            if (entry.entryType === 'resource') {
-              // Monitor slow resources (> 1 second)
-              if (entry.duration > 1000) {
-                if (hasGtag) {
-                  window.gtag('event', 'slow_resource', {
-                    value: Math.round(entry.duration),
-                    event_category: 'Performance',
-                    custom_parameter_1: entry.name.split('/').pop() || 'unknown'
-                  });
-                }
+          try {
+            const entries = list.getEntries();
+            entries.forEach((entry) => {
+              if (entry.entryType === 'resource' && entry.duration > 1000) {
+                // Monitor slow resources (> 1 second)
+                trackPerformance('slow_resource', entry.duration, 'Performance');
               }
-            }
-          });
+            });
+          } catch (error) {
+            console.warn('Resource entry processing error:', error);
+          }
         });
         
-        try {
-          observer.observe({ entryTypes: ['resource'] });
-        } catch (error) {
-          console.warn('Resource observer failed:', error);
-        }
+        observer.observe({ entryTypes: ['resource'] });
         
         return () => {
           try {
             observer.disconnect();
           } catch (error) {
-            // Observer may already be disconnected
+            // Silent fail
           }
         };
+      } catch (error) {
+        console.warn('Resource observer setup failed:', error);
+        return () => {};
       }
     };
 
     // Monitor JavaScript errors
     const monitorErrors = () => {
       const handleError = (event) => {
-        if (hasGtag) {
-          window.gtag('event', 'javascript_error', {
-            event_category: 'Error',
-            event_label: event.error?.message || 'Unknown error',
-            custom_parameter_1: event.filename || 'unknown_file',
-            custom_parameter_2: event.lineno || 0
-          });
+        try {
+          trackException(
+            event.error?.message || 'Unknown error',
+            false // Non-fatal
+          );
+        } catch (error) {
+          console.warn('Error tracking failed:', error);
         }
       };
 
       const handleUnhandledRejection = (event) => {
-        if (hasGtag) {
-          window.gtag('event', 'unhandled_promise_rejection', {
-            event_category: 'Error',
-            event_label: event.reason?.message || 'Promise rejection',
-            custom_parameter_1: 'promise_rejection'
-          });
+        try {
+          trackException(
+            event.reason?.message || 'Promise rejection',
+            false
+          );
+        } catch (error) {
+          console.warn('Promise rejection tracking failed:', error);
         }
       };
 
@@ -190,20 +145,22 @@ const PerformanceMonitor = () => {
     // Monitor network status
     const monitorNetwork = () => {
       const handleOnline = () => {
-        if (hasGtag) {
-          window.gtag('event', 'network_status', {
-            event_category: 'Network',
-            event_label: 'online'
-          });
+        try {
+          if (isAnalyticsAvailable()) {
+            trackPerformance('network_online', 1, 'Network');
+          }
+        } catch (error) {
+          console.warn('Network online tracking failed:', error);
         }
       };
 
       const handleOffline = () => {
-        if (hasGtag) {
-          window.gtag('event', 'network_status', {
-            event_category: 'Network',
-            event_label: 'offline'
-          });
+        try {
+          if (isAnalyticsAvailable()) {
+            trackPerformance('network_offline', 1, 'Network');
+          }
+        } catch (error) {
+          console.warn('Network offline tracking failed:', error);
         }
       };
 
@@ -216,55 +173,77 @@ const PerformanceMonitor = () => {
       };
     };
 
-    // Initialize all monitoring
-    const cleanup = [];
+    // Initialize all monitoring with proper cleanup handling
+    const cleanupFunctions = [];
     
+    // Start monitoring
     monitorWebVitals();
-    cleanup.push(monitorPageLoad());
-    cleanup.push(monitorResources());
-    cleanup.push(monitorErrors());
-    cleanup.push(monitorNetwork());
+    
+    // Collect cleanup functions, ensuring they're functions
+    const pageLoadCleanup = monitorPageLoad();
+    if (typeof pageLoadCleanup === 'function') {
+      cleanupFunctions.push(pageLoadCleanup);
+    }
+    
+    const resourceCleanup = monitorResources();
+    if (typeof resourceCleanup === 'function') {
+      cleanupFunctions.push(resourceCleanup);
+    }
+    
+    const errorCleanup = monitorErrors();
+    if (typeof errorCleanup === 'function') {
+      cleanupFunctions.push(errorCleanup);
+    }
+    
+    const networkCleanup = monitorNetwork();
+    if (typeof networkCleanup === 'function') {
+      cleanupFunctions.push(networkCleanup);
+    }
 
-    // Report initial performance metrics
-    setTimeout(() => {
-      if ('performance' in window && hasGtag) {
-        const perfData = performance.getEntriesByType('navigation')[0];
-        if (perfData) {
-          const metrics = {
-            dns_lookup: perfData.domainLookupEnd - perfData.domainLookupStart,
-            tcp_connect: perfData.connectEnd - perfData.connectStart,
-            ssl_negotiation: perfData.secureConnectionStart > 0 ? 
-              perfData.connectEnd - perfData.secureConnectionStart : 0,
-            server_response: perfData.responseStart - perfData.requestStart,
-            dom_processing: perfData.domComplete - perfData.domLoading
-          };
+    // Report initial performance metrics after a delay
+    const timeoutId = setTimeout(() => {
+      try {
+        if ('performance' in window && isAnalyticsAvailable()) {
+          const perfData = performance.getEntriesByType('navigation')[0];
+          if (perfData) {
+            const metrics = {
+              dns_lookup: perfData.domainLookupEnd - perfData.domainLookupStart,
+              tcp_connect: perfData.connectEnd - perfData.connectStart,
+              ssl_negotiation: perfData.secureConnectionStart > 0 ? 
+                perfData.connectEnd - perfData.secureConnectionStart : 0,
+              server_response: perfData.responseStart - perfData.requestStart,
+              dom_processing: perfData.domComplete - perfData.domLoading
+            };
 
-          Object.entries(metrics).forEach(([name, value]) => {
-            if (value > 0) {
-              window.gtag('event', 'performance_timing', {
-                value: Math.round(value),
-                event_category: 'Performance',
-                custom_parameter_1: name
-              });
-            }
-          });
+            Object.entries(metrics).forEach(([name, value]) => {
+              if (value > 0) {
+                trackPerformance(name, value, 'Performance Timing');
+              }
+            });
+          }
         }
+      } catch (error) {
+        console.warn('Initial performance metrics failed:', error);
       }
     }, 2000);
 
     // Cleanup function
     return () => {
-      cleanup.forEach(cleanupFn => {
-        if (typeof cleanupFn === 'function') {
-          try {
+      // Clear timeout
+      clearTimeout(timeoutId);
+      
+      // Run all cleanup functions safely
+      cleanupFunctions.forEach(cleanupFn => {
+        try {
+          if (typeof cleanupFn === 'function') {
             cleanupFn();
-          } catch (error) {
-            console.warn('Cleanup error:', error);
           }
+        } catch (error) {
+          console.warn('Cleanup error:', error);
         }
       });
     };
-  }, []);
+  }, []); // Empty dependency array - run once on mount
 
   // This component doesn't render anything
   return null;
