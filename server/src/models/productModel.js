@@ -13,9 +13,8 @@ const reviewSchema = mongoose.Schema(
     verified: { 
       type: Boolean, 
       default: false,
-      index: true // Index for filtering verified reviews
+      index: true
     },
-    // Reference to the order that enables this review
     order: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Order',
@@ -26,12 +25,10 @@ const reviewSchema = mongoose.Schema(
       required: true,
       index: true
     },
-    // Helpful votes (for future enhancement)
     helpfulVotes: {
       type: Number,
       default: 0
     },
-    // Users who found this review helpful
     helpfulUsers: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
@@ -39,7 +36,6 @@ const reviewSchema = mongoose.Schema(
   },
   { 
     timestamps: true,
-    // Add indexes for better query performance
     indexes: [
       { user: 1, createdAt: -1 },
       { rating: -1 },
@@ -48,7 +44,6 @@ const reviewSchema = mongoose.Schema(
   }
 );
 
-// Pre-save middleware to ensure purchase verification
 reviewSchema.pre('save', async function(next) {
   if (this.isNew && !this.order) {
     return next(new Error('Order reference is required for reviews'));
@@ -56,12 +51,10 @@ reviewSchema.pre('save', async function(next) {
   next();
 });
 
-// Instance method to check if review can be edited
 reviewSchema.methods.canBeEditedBy = function(userId) {
   return this.user.toString() === userId.toString();
 };
 
-// Instance method to mark review as helpful
 reviewSchema.methods.markHelpful = function(userId) {
   if (!this.helpfulUsers.includes(userId)) {
     this.helpfulUsers.push(userId);
@@ -71,7 +64,6 @@ reviewSchema.methods.markHelpful = function(userId) {
   return false;
 };
 
-// Instance method to unmark review as helpful
 reviewSchema.methods.unmarkHelpful = function(userId) {
   const index = this.helpfulUsers.indexOf(userId);
   if (index > -1) {
@@ -108,13 +100,11 @@ const productSchema = mongoose.Schema(
         isPrimary: { type: Boolean, default: false },
       },
     ],
-    // Updated category system - only two main categories
     category: {
       type: String,
       required: [true, 'Please specify a category'],
       enum: ['Customize Your Prints', 'Wear Your Conviction'],
     },
-    // Design styles for "Wear Your Conviction" category - simplified to two types
     designStyle: {
       type: String,
       enum: [
@@ -134,7 +124,6 @@ const productSchema = mongoose.Schema(
       type: String,
       maxlength: [200, 'Short description cannot exceed 200 characters'],
     },
-    // Message/conviction behind the design (for Wear Your Conviction products)
     convictionMessage: {
       type: String,
       maxlength: [500, 'Conviction message cannot exceed 500 characters'],
@@ -187,7 +176,6 @@ const productSchema = mongoose.Schema(
       enum: ['Cotton', 'Polyester', 'Cotton Blend', 'Bamboo', 'Linen', 'Other'],
       default: 'Cotton'
     },
-    // Customization settings - mainly for "Customize Your Prints"
     allowCustomization: {
       type: Boolean,
       default: function() {
@@ -209,7 +197,6 @@ const productSchema = mongoose.Schema(
         enum: ['Front', 'Back', 'Left Chest', 'Right Chest', 'Left Sleeve', 'Right Sleeve']
       }]
     },
-    // For base products in "Customize Your Prints"
     isBaseProduct: {
       type: Boolean,
       default: function() {
@@ -217,7 +204,7 @@ const productSchema = mongoose.Schema(
       }
     },
     tags: [{ type: String, lowercase: true }],
-    reviews: [reviewSchema], // Enhanced review schema
+    reviews: [reviewSchema],
     rating: {
       type: Number,
       required: true,
@@ -231,7 +218,6 @@ const productSchema = mongoose.Schema(
       default: 0,
       min: 0,
     },
-    // Review statistics for better performance
     verifiedReviewsCount: {
       type: Number,
       default: 0,
@@ -275,15 +261,12 @@ const productSchema = mongoose.Schema(
       default: 0,
       min: 0,
     },
-    // SEO fields
     metaTitle: { type: String, maxlength: 60 },
     metaDescription: { type: String, maxlength: 160 },
-    // Design inspiration/story (for Wear Your Conviction)
     designInspiration: {
       type: String,
       maxlength: [1000, 'Design inspiration cannot exceed 1000 characters']
     },
-    // Artist/designer credit
     designerCredit: {
       name: { type: String },
       portfolio: { type: String },
@@ -295,7 +278,6 @@ const productSchema = mongoose.Schema(
   }
 );
 
-// Indexes for better performance
 productSchema.index({ name: 'text', description: 'text', tags: 'text', convictionMessage: 'text' });
 productSchema.index({ category: 1, isActive: 1 });
 productSchema.index({ category: 1, designStyle: 1, isActive: 1 });
@@ -308,7 +290,6 @@ productSchema.index({ createdAt: -1 });
 productSchema.index({ price: 1 });
 productSchema.index({ verifiedReviewsCount: -1 });
 
-// Virtual for discount percentage
 productSchema.virtual('discountPercentage').get(function() {
   if (this.isSale && this.salePrice) {
     return Math.round(((this.price - this.salePrice) / this.price) * 100);
@@ -316,30 +297,25 @@ productSchema.virtual('discountPercentage').get(function() {
   return 0;
 });
 
-// Virtual for current effective price
 productSchema.virtual('effectivePrice').get(function() {
   return this.isSale && this.salePrice ? this.salePrice : this.price;
 });
 
-// Virtual for stock status
 productSchema.virtual('stockStatus').get(function() {
   if (this.countInStock === 0) return 'Out of Stock';
   if (this.countInStock <= this.lowStockThreshold) return 'Low Stock';
   return 'In Stock';
 });
 
-// Virtual for primary image
 productSchema.virtual('primaryImage').get(function() {
   const primary = this.images.find(img => img.isPrimary);
   return primary || this.images[0] || null;
 });
 
-// Virtual for verified reviews percentage
 productSchema.virtual('verifiedReviewsPercentage').get(function() {
   return this.numReviews > 0 ? Math.round((this.verifiedReviewsCount / this.numReviews) * 100) : 0;
 });
 
-// Pre-save middleware to generate slug
 productSchema.pre('save', function(next) {
   if (this.isModified('name') || this.isNew) {
     this.slug = this.name
@@ -356,10 +332,8 @@ productSchema.pre('save', function(next) {
   next();
 });
 
-// Pre-save middleware to calculate review statistics
 productSchema.pre('save', function(next) {
   if (this.isModified('reviews')) {
-    // Calculate verified reviews count and average
     const verifiedReviews = this.reviews.filter(review => review.verified);
     this.verifiedReviewsCount = verifiedReviews.length;
     
@@ -372,7 +346,6 @@ productSchema.pre('save', function(next) {
   next();
 });
 
-// Pre-save middleware to set default values based on category
 productSchema.pre('save', function(next) {
   if (this.isNew || this.isModified('category')) {
     if (this.category === 'Customize Your Prints') {
@@ -392,7 +365,6 @@ productSchema.pre('save', function(next) {
   next();
 });
 
-// Static method to find products by category
 productSchema.statics.findByCategory = function(category, options = {}) {
   const query = { category, isActive: true };
   
@@ -402,7 +374,6 @@ productSchema.statics.findByCategory = function(category, options = {}) {
     .skip(options.skip || 0);
 };
 
-// Static method to find products by design style (within Wear Your Conviction)
 productSchema.statics.findByDesignStyle = function(designStyle, options = {}) {
   const query = { 
     category: 'Wear Your Conviction',
@@ -416,7 +387,6 @@ productSchema.statics.findByDesignStyle = function(designStyle, options = {}) {
     .skip(options.skip || 0);
 };
 
-// Static method to find base products for customization
 productSchema.statics.findBaseProducts = function(limit = 10) {
   return this.find({ 
     category: 'Customize Your Prints',
@@ -427,7 +397,6 @@ productSchema.statics.findBaseProducts = function(limit = 10) {
   .limit(limit);
 };
 
-// Static method to find conviction products
 productSchema.statics.findConvictionProducts = function(options = {}) {
   const query = { 
     category: 'Wear Your Conviction',
@@ -444,7 +413,6 @@ productSchema.statics.findConvictionProducts = function(options = {}) {
     .skip(options.skip || 0);
 };
 
-// Static method for search across both categories
 productSchema.statics.search = function(searchTerm, options = {}) {
   const searchRegex = new RegExp(searchTerm, 'i');
   
@@ -468,13 +436,10 @@ productSchema.statics.search = function(searchTerm, options = {}) {
     .skip(options.skip || 0);
 };
 
-// Instance method to check if user can review this product
 productSchema.methods.canUserReview = async function(userId) {
-  // Check if user already reviewed
   const hasReviewed = this.reviews.some(review => review.user.toString() === userId.toString());
   if (hasReviewed) return { canReview: false, reason: 'Already reviewed' };
   
-  // Check if user has purchased and received this product
   const Order = mongoose.model('Order');
   const hasPurchased = await Order.findOne({
     user: userId,
@@ -489,7 +454,6 @@ productSchema.methods.canUserReview = async function(userId) {
   return { canReview: true, orderId: hasPurchased._id };
 };
 
-// Instance method to get review summary
 productSchema.methods.getReviewSummary = function() {
   const summary = {
     total: this.numReviews,
@@ -506,7 +470,6 @@ productSchema.methods.getReviewSummary = function() {
   return summary;
 };
 
-// Set virtuals to true when converting to JSON
 productSchema.set('toJSON', { virtuals: true });
 productSchema.set('toObject', { virtuals: true });
 

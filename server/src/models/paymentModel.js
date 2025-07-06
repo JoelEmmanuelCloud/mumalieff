@@ -37,7 +37,6 @@ const paymentSchema = mongoose.Schema(
       required: true,
       unique: true,
     },
-    // Store complete Paystack transaction response - FIXED
     paymentGatewayResponse: {
       id: Number,
       domain: String,
@@ -67,7 +66,6 @@ const paymentSchema = mongoose.Schema(
           }
         ],
       },
-      // Card authorization details (for card payments)
       authorization: {
         authorization_code: String,
         bin: String,
@@ -113,7 +111,6 @@ const paymentSchema = mongoose.Schema(
         stamp_duty_fee: Number,
         total_fees: Number,
       },
-      // FIXED: Changed log structure to be more flexible
       log: {
         start_time: Number,
         time_spent: Number,
@@ -122,22 +119,18 @@ const paymentSchema = mongoose.Schema(
         success: Boolean,
         mobile: Boolean,
         input: [mongoose.Schema.Types.Mixed],
-        // FIXED: Use Mixed type instead of strict object structure
         history: [mongoose.Schema.Types.Mixed],
       },
     },
-    // Legacy field for backward compatibility - maps to paymentGatewayResponse
     paystackData: {
       type: mongoose.Schema.Types.Mixed,
     },
-    // Failure details
     failureReason: {
       type: String,
     },
     gatewayResponse: {
       type: String,
     },
-    // Webhook verification
     webhookVerified: {
       type: Boolean,
       default: false,
@@ -152,7 +145,6 @@ const paymentSchema = mongoose.Schema(
         },
       }
     ],
-    // Payment timing
     initiatedAt: {
       type: Date,
       default: Date.now,
@@ -163,7 +155,6 @@ const paymentSchema = mongoose.Schema(
     abandonedAt: {
       type: Date,
     },
-    // Retry information
     retryCount: {
       type: Number,
       default: 0,
@@ -171,7 +162,6 @@ const paymentSchema = mongoose.Schema(
     lastRetryAt: {
       type: Date,
     },
-    // Customer information at time of payment
     customerEmail: {
       type: String,
       required: true,
@@ -179,11 +169,9 @@ const paymentSchema = mongoose.Schema(
     customerPhone: {
       type: String,
     },
-    // Split payment info (for marketplace scenarios)
     splitPayment: {
       type: mongoose.Schema.Types.Mixed,
     },
-    // Dispute information
     disputes: [
       {
         id: String,
@@ -207,7 +195,6 @@ const paymentSchema = mongoose.Schema(
         updatedAt: Date,
       }
     ],
-    // Refund information
     refunds: [
       {
         id: String,
@@ -227,7 +214,6 @@ const paymentSchema = mongoose.Schema(
         updatedAt: Date,
       }
     ],
-    // Additional metadata
     notes: {
       type: String,
     },
@@ -238,7 +224,6 @@ const paymentSchema = mongoose.Schema(
   }
 );
 
-// Indexes for efficient queries
 paymentSchema.index({ order: 1 });
 paymentSchema.index({ user: 1 });
 paymentSchema.index({ status: 1 });
@@ -247,55 +232,46 @@ paymentSchema.index({ customerEmail: 1 });
 paymentSchema.index({ paidAt: 1 });
 paymentSchema.index({ createdAt: 1 });
 
-// Compound indexes
 paymentSchema.index({ user: 1, status: 1 });
 paymentSchema.index({ order: 1, status: 1 });
 paymentSchema.index({ status: 1, createdAt: -1 });
 
-// Virtual for payment success
 paymentSchema.virtual('isSuccessful').get(function () {
   return this.status === 'success';
 });
 
-// Virtual for total amount in naira (from kobo)
 paymentSchema.virtual('amountInNaira').get(function () {
   return this.amount / 100;
 });
 
-// Virtual for fees in naira
 paymentSchema.virtual('feesInNaira').get(function () {
   return this.paymentGatewayResponse?.fees_breakdown?.total_fees ? 
     this.paymentGatewayResponse.fees_breakdown.total_fees / 100 : 0;
 });
 
-// Virtual for net amount (amount minus fees)
 paymentSchema.virtual('netAmount').get(function () {
   const fees = this.paymentGatewayResponse?.fees_breakdown?.total_fees || 0;
   return (this.amount - fees) / 100;
 });
 
-// Virtual for payment channel
 paymentSchema.virtual('paymentChannel').get(function () {
   return this.paymentGatewayResponse?.channel || 'unknown';
 });
 
-// Static method to find payments by order
 paymentSchema.statics.findByOrder = function (orderId) {
   return this.find({ order: orderId }).sort({ createdAt: -1 });
 };
 
-// Static method to find successful payment for order
 paymentSchema.statics.findSuccessfulPayment = function (orderId) {
   return this.findOne({ order: orderId, status: 'success' });
 };
 
-// Static method to get payment analytics
 paymentSchema.statics.getAnalytics = function (startDate, endDate) {
   return this.aggregate([
     {
       $match: {
         createdAt: {
-          $gte: startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // Default to last 30 days
+          $gte: startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
           $lte: endDate || new Date(),
         },
       },
@@ -311,7 +287,6 @@ paymentSchema.statics.getAnalytics = function (startDate, endDate) {
   ]);
 };
 
-// Static method to get channel analytics
 paymentSchema.statics.getChannelAnalytics = function (startDate, endDate) {
   return this.aggregate([
     {
@@ -337,7 +312,6 @@ paymentSchema.statics.getChannelAnalytics = function (startDate, endDate) {
   ]);
 };
 
-// Static method to get revenue analytics
 paymentSchema.statics.getRevenueAnalytics = function (startDate, endDate) {
   return this.aggregate([
     {
@@ -367,19 +341,14 @@ paymentSchema.statics.getRevenueAnalytics = function (startDate, endDate) {
   ]);
 };
 
-// FIXED: Instance method to mark as successful with better error handling
 paymentSchema.methods.markAsSuccessful = function (paystackResponse) {
   this.status = 'success';
   this.paidAt = new Date();
   
-  // FIXED: Safely assign the Paystack response to handle complex nested structures
   try {
-    // Create a deep copy to avoid reference issues
     this.paymentGatewayResponse = JSON.parse(JSON.stringify(paystackResponse));
-    this.paystackData = JSON.parse(JSON.stringify(paystackResponse)); // For backward compatibility
+    this.paystackData = JSON.parse(JSON.stringify(paystackResponse));
   } catch (error) {
-    console.error('Error serializing Paystack response:', error);
-    // Fallback: use the original response (may cause cast errors but preserves data)
     this.paymentGatewayResponse = paystackResponse;
     this.paystackData = paystackResponse;
   }
@@ -389,7 +358,6 @@ paymentSchema.methods.markAsSuccessful = function (paystackResponse) {
   return this.save();
 };
 
-// Instance method to mark as failed
 paymentSchema.methods.markAsFailed = function (reason, gatewayResponse) {
   this.status = 'failed';
   this.failureReason = reason;
@@ -397,14 +365,12 @@ paymentSchema.methods.markAsFailed = function (reason, gatewayResponse) {
   return this.save();
 };
 
-// Instance method to mark as abandoned
 paymentSchema.methods.markAsAbandoned = function () {
   this.status = 'abandoned';
   this.abandonedAt = new Date();
   return this.save();
 };
 
-// Instance method to add webhook event
 paymentSchema.methods.addWebhookEvent = function (event, data) {
   this.webhookEvents.push({
     event,
@@ -414,16 +380,13 @@ paymentSchema.methods.addWebhookEvent = function (event, data) {
   return this.save();
 };
 
-// Instance method to add dispute
 paymentSchema.methods.addDispute = function (disputeData) {
   this.disputes.push(disputeData);
   return this.save();
 };
 
-// Instance method to add refund
 paymentSchema.methods.addRefund = function (refundData) {
   this.refunds.push(refundData);
-  // If fully refunded, update status
   const totalRefunded = this.refunds.reduce((sum, refund) => {
     return refund.status === 'processed' ? sum + refund.amount : sum;
   }, 0);
@@ -435,26 +398,22 @@ paymentSchema.methods.addRefund = function (refundData) {
   return this.save();
 };
 
-// Instance method to retry payment
 paymentSchema.methods.incrementRetry = function () {
   this.retryCount += 1;
   this.lastRetryAt = new Date();
   return this.save();
 };
 
-// Instance method to get customer's payment history
 paymentSchema.methods.getCustomerPaymentHistory = function () {
   return this.constructor.find({ 
     customerEmail: this.customerEmail 
   }).sort({ createdAt: -1 });
 };
 
-// Instance method to check if payment is retryable
 paymentSchema.methods.isRetryable = function () {
   return ['failed', 'abandoned'].includes(this.status) && this.retryCount < 3;
 };
 
-// Instance method to get payment summary
 paymentSchema.methods.getPaymentSummary = function () {
   return {
     id: this._id,
@@ -473,24 +432,19 @@ paymentSchema.methods.getPaymentSummary = function () {
   };
 };
 
-// FIXED: Pre-save middleware with better error handling
 paymentSchema.pre('save', function (next) {
-  // Set customer email from gateway response if not already set
   if (this.paymentGatewayResponse?.customer?.email && !this.customerEmail) {
     this.customerEmail = this.paymentGatewayResponse.customer.email;
   }
   
-  // Set customer phone from gateway response if not already set
   if (this.paymentGatewayResponse?.customer?.phone && !this.customerPhone) {
     this.customerPhone = this.paymentGatewayResponse.customer.phone;
   }
   
-  // Sync paystackData with paymentGatewayResponse for backward compatibility
   if (this.paymentGatewayResponse && this.isModified('paymentGatewayResponse')) {
     try {
       this.paystackData = JSON.parse(JSON.stringify(this.paymentGatewayResponse));
     } catch (error) {
-      console.error('Error syncing paystackData:', error);
       this.paystackData = this.paymentGatewayResponse;
     }
   }
@@ -498,7 +452,6 @@ paymentSchema.pre('save', function (next) {
   next();
 });
 
-// Pre-save middleware to validate amount
 paymentSchema.pre('save', function (next) {
   if (this.amount <= 0) {
     next(new Error('Payment amount must be greater than 0'));

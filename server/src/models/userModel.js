@@ -25,13 +25,13 @@ const userSchema = mongoose.Schema(
       type: String,
       required: [true, 'Please add a password'],
       minlength: [6, 'Password must be at least 6 characters'],
-      select: false, // Don't return password by default
+      select: false, 
     },
     phone: {
       type: String,
       validate: {
         validator: function(v) {
-          // Basic phone validation
+         
           return /^\+?[\d\s-]{10,15}$/.test(v);
         },
         message: props => `${props.value} is not a valid phone number!`
@@ -72,21 +72,20 @@ const userSchema = mongoose.Schema(
   }
 );
 
-// Virtual for full name
+
 userSchema.virtual('fullName').get(function() {
   return `${this.firstName} ${this.lastName}`;
 });
 
-// Ensure virtual fields are serialized
 userSchema.set('toJSON', { virtuals: true });
 userSchema.set('toObject', { virtuals: true });
 
-// Method to check if password matches
+
 userSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-// Before saving, hash the password if it's modified
+
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) {
     next();

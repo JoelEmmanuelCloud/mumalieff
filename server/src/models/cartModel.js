@@ -1,5 +1,3 @@
-// server/src/models/cartModel
-
 const mongoose = require('mongoose');
 
 const cartSchema = mongoose.Schema(
@@ -51,7 +49,6 @@ const cartSchema = mongoose.Schema(
   }
 );
 
-// Index for efficient queries
 cartSchema.index({ user: 1 });
 cartSchema.index({ lastUpdated: 1 });
 cartSchema.index({ remindersSent: 1 });

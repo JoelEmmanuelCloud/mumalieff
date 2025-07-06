@@ -18,33 +18,21 @@ const {
   webhookRateLimit
 } = require('../middleware/webhookMiddleware');
 
-// @desc    Initialize Paystack payment
-// @route   POST /api/payments/paystack/initialize
-// @access  Private
 router.post('/paystack/initialize', protect, initializePaystack);
 
-// @desc    Verify Paystack payment
-// @route   GET /api/payments/paystack/verify/:reference
-// @access  Private
 router.get('/paystack/verify/:reference', protect, verifyPaystack);
 
-// @desc    Handle Paystack webhook
-// @route   POST /api/payments/paystack/webhook
-// @access  Public (but verified via signature)
-// Note: Webhook route should use raw body parser and signature verification
 router.post('/paystack/webhook', 
-  express.raw({ type: 'application/json' }), // Parse as raw buffer first
+  express.raw({ type: 'application/json' }),
   webhookRateLimit(),
   webhookTimeout(30000),
   (req, res, next) => {
-    // Convert buffer to string and parse JSON
     try {
       const rawBody = req.body.toString();
       req.body = JSON.parse(rawBody);
       req.rawBody = rawBody;
       next();
     } catch (error) {
-      console.error('Error parsing webhook body:', error);
       return res.status(400).json({
         success: false,
         message: 'Invalid JSON body'
@@ -57,24 +45,12 @@ router.post('/paystack/webhook',
   paystackWebhook
 );
 
-// @desc    Get payment history for logged in user
-// @route   GET /api/payments/history
-// @access  Private
 router.get('/history', protect, getPaymentHistory);
 
-// @desc    Get payments for a specific order
-// @route   GET /api/payments/order/:orderId
-// @access  Private
 router.get('/order/:orderId', protect, getOrderPayments);
 
-// @desc    Get payment analytics (Admin only)
-// @route   GET /api/payments/analytics
-// @access  Private/Admin
 router.get('/analytics', protect, admin, getPaymentAnalytics);
 
-// @desc    Get payment statistics (Admin only)
-// @route   GET /api/payments/stats
-// @access  Private/Admin
 router.get('/stats', protect, admin, async (req, res) => {
   try {
     const { startDate, endDate } = req.query;
@@ -100,7 +76,6 @@ router.get('/stats', protect, admin, async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Error fetching payment stats:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch payment statistics'
@@ -108,9 +83,6 @@ router.get('/stats', protect, admin, async (req, res) => {
   }
 });
 
-// @desc    Retry failed payment
-// @route   POST /api/payments/retry/:orderId
-// @access  Private
 router.post('/retry/:orderId', protect, async (req, res) => {
   try {
     const Order = require('../models/orderModel');
@@ -123,7 +95,6 @@ router.post('/retry/:orderId', protect, async (req, res) => {
       });
     }
     
-    // Check if order belongs to user
     if (order.user.toString() !== req.user._id.toString()) {
       return res.status(401).json({
         success: false,
@@ -145,7 +116,6 @@ router.post('/retry/:orderId', protect, async (req, res) => {
       });
     }
     
-    // Initialize new payment
     const paymentData = {
       email: req.user.email,
       amount: order.totalPrice,
@@ -153,12 +123,10 @@ router.post('/retry/:orderId', protect, async (req, res) => {
       callbackUrl: `${req.protocol}://${req.get('host')}/order/${order._id}`
     };
     
-    // Use the existing initialize payment function
     req.body = paymentData;
     await initializePaystack(req, res);
     
   } catch (error) {
-    console.error('Error retrying payment:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to retry payment'
@@ -166,9 +134,6 @@ router.post('/retry/:orderId', protect, async (req, res) => {
   }
 });
 
-// @desc    Cancel payment
-// @route   POST /api/payments/cancel/:orderId
-// @access  Private
 router.post('/cancel/:orderId', protect, async (req, res) => {
   try {
     const Payment = require('../models/paymentModel');
@@ -195,7 +160,6 @@ router.post('/cancel/:orderId', protect, async (req, res) => {
     });
     
   } catch (error) {
-    console.error('Error cancelling payment:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to cancel payment'
@@ -203,9 +167,6 @@ router.post('/cancel/:orderId', protect, async (req, res) => {
   }
 });
 
-// @desc    Get payment methods/channels
-// @route   GET /api/payments/methods
-// @access  Public
 router.get('/methods', (req, res) => {
   const paymentMethods = [
     {

@@ -1,19 +1,11 @@
-/**
- * Payment Utilities
- * Helper functions for payment processing
- */
-
-// Convert Naira to Kobo (Paystack uses kobo as the smallest unit)
 const nairaToKobo = (nairaAmount) => {
   return Math.round(nairaAmount * 100);
 };
 
-// Convert Kobo to Naira
 const koboToNaira = (koboAmount) => {
   return koboAmount / 100;
 };
 
-// Format currency for display
 const formatCurrency = (amount, currency = 'NGN', locale = 'en-NG') => {
   const formatter = new Intl.NumberFormat(locale, {
     style: 'currency',
@@ -24,29 +16,22 @@ const formatCurrency = (amount, currency = 'NGN', locale = 'en-NG') => {
   return formatter.format(amount);
 };
 
-// Format amount without currency symbol
 const formatAmount = (amount) => {
   return new Intl.NumberFormat('en-NG').format(amount);
 };
 
-// Generate unique payment reference
 const generatePaymentReference = (prefix = 'MLF') => {
   const timestamp = Date.now().toString(36).toUpperCase();
   const random = Math.random().toString(36).substr(2, 9).toUpperCase();
   return `${prefix}_${timestamp}_${random}`;
 };
 
-// Validate Nigerian phone number
 const validateNigerianPhone = (phone) => {
-  // Remove all non-digit characters
   const cleanPhone = phone.replace(/\D/g, '');
-  
-  // Check if it's a valid Nigerian number
   const nigerianPattern = /^(\+234|234|0)([789][01])\d{8}$/;
   return nigerianPattern.test(cleanPhone);
 };
 
-// Format Nigerian phone number
 const formatNigerianPhone = (phone) => {
   const cleanPhone = phone.replace(/\D/g, '');
   
@@ -58,21 +43,18 @@ const formatNigerianPhone = (phone) => {
     return `+234${cleanPhone}`;
   }
   
-  return phone; // Return original if can't format
+  return phone;
 };
 
-// Validate email
 const validateEmail = (email) => {
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailPattern.test(email);
 };
 
-// Calculate VAT (7.5% for Nigeria)
 const calculateVAT = (amount, vatRate = 0.075) => {
   return Math.round(amount * vatRate);
 };
 
-// Calculate shipping cost based on location and weight
 const calculateShipping = (location, weight = 1, baseRate = 1000) => {
   const locationMultipliers = {
     'Lagos': 1.0,
@@ -91,18 +73,15 @@ const calculateShipping = (location, weight = 1, baseRate = 1000) => {
   return Math.round(baseRate * multiplier * weightMultiplier);
 };
 
-// Get free shipping threshold
 const getFreeShippingThreshold = () => {
-  return 50000; // ₦50,000
+  return 50000;
 };
 
-// Check if order qualifies for free shipping
 const qualifiesForFreeShipping = (orderAmount, threshold = null) => {
   const freeShippingThreshold = threshold || getFreeShippingThreshold();
   return orderAmount >= freeShippingThreshold;
 };
 
-// Payment status helpers
 const getPaymentStatusColor = (status) => {
   const statusColors = {
     'pending': 'warning',
@@ -127,7 +106,6 @@ const getPaymentStatusText = (status) => {
   return statusTexts[status] || 'Unknown';
 };
 
-// Payment channel helpers
 const getPaymentChannelIcon = (channel) => {
   const channelIcons = {
     'card': '💳',
@@ -152,12 +130,11 @@ const getPaymentChannelName = (channel) => {
   return channelNames[channel] || 'Unknown';
 };
 
-// Discount calculations
 const calculateDiscount = (amount, discountType, discountValue) => {
   if (discountType === 'percentage') {
     return Math.round((amount * discountValue) / 100);
   } else if (discountType === 'fixed') {
-    return Math.min(discountValue, amount); // Don't exceed the total amount
+    return Math.min(discountValue, amount);
   }
   return 0;
 };
@@ -184,14 +161,11 @@ const applyPromoCode = (amount, promoCode, promoCodes = {}) => {
   };
 };
 
-// Order total calculations
 const calculateOrderTotals = (items, shippingLocation = 'Lagos', promoCode = null) => {
-  // Calculate items total
   const itemsPrice = items.reduce((total, item) => {
     return total + (item.price * item.qty);
   }, 0);
   
-  // Calculate shipping
   const totalWeight = items.reduce((weight, item) => weight + (item.weight || 1) * item.qty, 0);
   let shippingPrice = 0;
   
@@ -199,13 +173,9 @@ const calculateOrderTotals = (items, shippingLocation = 'Lagos', promoCode = nul
     shippingPrice = calculateShipping(shippingLocation, totalWeight);
   }
   
-  // Calculate subtotal before tax and discount
   const subtotal = itemsPrice + shippingPrice;
+  const taxPrice = calculateVAT(itemsPrice);
   
-  // Calculate tax (VAT)
-  const taxPrice = calculateVAT(itemsPrice); // Tax only on items, not shipping
-  
-  // Apply promo code if provided
   let discount = 0;
   let appliedPromoCode = null;
   
@@ -215,11 +185,10 @@ const calculateOrderTotals = (items, shippingLocation = 'Lagos', promoCode = nul
       discount = promoResult.discount;
       appliedPromoCode = promoResult.promoCode;
     } catch (error) {
-      console.warn('Promo code error:', error.message);
+      // Silently fail
     }
   }
   
-  // Calculate final total
   const totalPrice = itemsPrice + shippingPrice + taxPrice - discount;
   
   return {
@@ -227,7 +196,7 @@ const calculateOrderTotals = (items, shippingLocation = 'Lagos', promoCode = nul
     shippingPrice,
     taxPrice,
     discount,
-    totalPrice: Math.max(0, totalPrice), // Ensure total is never negative
+    totalPrice: Math.max(0, totalPrice),
     promoCode: appliedPromoCode,
     breakdown: {
       subtotal: itemsPrice,
@@ -239,7 +208,6 @@ const calculateOrderTotals = (items, shippingLocation = 'Lagos', promoCode = nul
   };
 };
 
-// Payment validation
 const validatePaymentData = (paymentData) => {
   const errors = [];
   
@@ -269,7 +237,6 @@ const validatePaymentData = (paymentData) => {
   };
 };
 
-// Bank code mappings for Nigerian banks
 const getNigerianBanks = () => {
   return [
     { code: '044', name: 'Access Bank' },
@@ -298,7 +265,6 @@ const getNigerianBanks = () => {
   ];
 };
 
-// Error handling helpers
 const getPaymentErrorMessage = (errorCode) => {
   const errorMessages = {
     'insufficient_funds': 'Insufficient funds. Please check your account balance.',
@@ -333,7 +299,6 @@ const getPaymentSuggestion = (errorCode) => {
   return suggestions[errorCode] || 'Contact support if the problem persists.';
 };
 
-// Webhook event handlers
 const isWebhookEventRelevant = (eventType) => {
   const relevantEvents = [
     'charge.success',
@@ -348,7 +313,6 @@ const isWebhookEventRelevant = (eventType) => {
   return relevantEvents.includes(eventType);
 };
 
-// Payment analytics helpers
 const groupPaymentsByPeriod = (payments, period = 'day') => {
   const grouped = {};
   
@@ -400,46 +364,30 @@ const groupPaymentsByPeriod = (payments, period = 'day') => {
   return Object.values(grouped);
 };
 
-// Export all utilities
 module.exports = {
-  // Currency functions
   nairaToKobo,
   koboToNaira,
   formatCurrency,
   formatAmount,
-  
-  // Payment processing
   generatePaymentReference,
   validatePaymentData,
   calculateOrderTotals,
-  
-  // Validation
   validateNigerianPhone,
   formatNigerianPhone,
   validateEmail,
-  
-  // Calculations
   calculateVAT,
   calculateShipping,
   calculateDiscount,
   applyPromoCode,
   qualifiesForFreeShipping,
   getFreeShippingThreshold,
-  
-  // Status and channel helpers
   getPaymentStatusColor,
   getPaymentStatusText,
   getPaymentChannelIcon,
   getPaymentChannelName,
-  
-  // Error handling
   getPaymentErrorMessage,
   getPaymentSuggestion,
-  
-  // Banks and webhooks
   getNigerianBanks,
   isWebhookEventRelevant,
-  
-  // Analytics
   groupPaymentsByPeriod
 };

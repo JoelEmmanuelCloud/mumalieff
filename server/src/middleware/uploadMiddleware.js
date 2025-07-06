@@ -1,7 +1,7 @@
 const path = require('path');
 const multer = require('multer');
 
-// Set up multer storage
+
 const storage = multer.diskStorage({
   destination(req, file, cb) {
     cb(null, 'uploads/');
@@ -15,7 +15,7 @@ const storage = multer.diskStorage({
   },
 });
 
-// Check file type
+
 function checkFileType(file, cb) {
   const filetypes = /jpeg|jpg|png|gif|svg/;
   const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
@@ -28,11 +28,10 @@ function checkFileType(file, cb) {
   }
 }
 
-// Initialize multer upload
 const upload = multer({
   storage,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB file size limit
+    fileSize: 3 * 1024 * 1024,
   },
   fileFilter: function (req, file, cb) {
     checkFileType(file, cb);

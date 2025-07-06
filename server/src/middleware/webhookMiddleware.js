@@ -1,9 +1,5 @@
 const crypto = require('crypto');
 
-/**
- * Middleware to verify Paystack webhook signatures
- * This ensures that webhooks are actually coming from Paystack
- */
 const verifyPaystackWebhook = (req, res, next) => {
   try {
     const signature = req.headers['x-paystack-signature'];
@@ -18,35 +14,26 @@ const verifyPaystackWebhook = (req, res, next) => {
     const secretKey = process.env.PAYSTACK_SECRET_KEY;
     
     if (!secretKey) {
-      console.error('PAYSTACK_SECRET_KEY not set in environment variables');
       return res.status(500).json({
         success: false,
         message: 'Server configuration error'
       });
     }
 
-    // Create hash of the request body
     const hash = crypto
       .createHmac('sha512', secretKey)
       .update(JSON.stringify(req.body))
       .digest('hex');
 
-    // Verify signature
     if (hash !== signature) {
-      console.log('Webhook signature verification failed');
-      console.log('Expected:', hash);
-      console.log('Received:', signature);
-      
       return res.status(401).json({
         success: false,
         message: 'Invalid signature'
       });
     }
 
-    // Signature is valid, proceed to the next middleware
     next();
   } catch (error) {
-    console.error('Webhook verification error:', error);
     return res.status(500).json({
       success: false,
       message: 'Webhook verification failed'
@@ -54,10 +41,6 @@ const verifyPaystackWebhook = (req, res, next) => {
   }
 };
 
-/**
- * Middleware to parse raw body for webhook verification
- * This is needed because crypto.createHmac needs the raw body, not parsed JSON
- */
 const rawBodyParser = (req, res, next) => {
   let rawBody = '';
   
@@ -71,7 +54,6 @@ const rawBodyParser = (req, res, next) => {
       req.rawBody = rawBody;
       next();
     } catch (error) {
-      console.error('Error parsing webhook body:', error);
       return res.status(400).json({
         success: false,
         message: 'Invalid JSON body'
@@ -80,9 +62,6 @@ const rawBodyParser = (req, res, next) => {
   });
 };
 
-/**
- * Enhanced webhook verification that uses raw body
- */
 const verifyPaystackWebhookWithRawBody = (req, res, next) => {
   try {
     const signature = req.headers['x-paystack-signature'];
@@ -97,14 +76,12 @@ const verifyPaystackWebhookWithRawBody = (req, res, next) => {
     const secretKey = process.env.PAYSTACK_SECRET_KEY;
     
     if (!secretKey) {
-      console.error('PAYSTACK_SECRET_KEY not set in environment variables');
       return res.status(500).json({
         success: false,
         message: 'Server configuration error'
       });
     }
 
-    // Use raw body for hash calculation
     const bodyToHash = req.rawBody || JSON.stringify(req.body);
     
     const hash = crypto
@@ -113,21 +90,14 @@ const verifyPaystackWebhookWithRawBody = (req, res, next) => {
       .digest('hex');
 
     if (hash !== signature) {
-      console.log('Webhook signature verification failed');
-      console.log('Body length:', bodyToHash.length);
-      console.log('Expected:', hash);
-      console.log('Received:', signature);
-      
       return res.status(401).json({
         success: false,
         message: 'Invalid signature'
       });
     }
 
-    console.log('Webhook signature verified successfully');
     next();
   } catch (error) {
-    console.error('Webhook verification error:', error);
     return res.status(500).json({
       success: false,
       message: 'Webhook verification failed'
@@ -135,27 +105,10 @@ const verifyPaystackWebhookWithRawBody = (req, res, next) => {
   }
 };
 
-/**
- * Middleware to log webhook events for debugging
- */
 const logWebhookEvent = (req, res, next) => {
-  const event = req.body;
-  
-  console.log('=== Webhook Event Received ===');
-  console.log('Event Type:', event.event);
-  console.log('Event ID:', event.data?.id);
-  console.log('Reference:', event.data?.reference);
-  console.log('Status:', event.data?.status);
-  console.log('Amount:', event.data?.amount);
-  console.log('Timestamp:', new Date().toISOString());
-  console.log('==============================');
-  
   next();
 };
 
-/**
- * Middleware to validate webhook event structure
- */
 const validateWebhookEvent = (req, res, next) => {
   const event = req.body;
   
@@ -166,7 +119,6 @@ const validateWebhookEvent = (req, res, next) => {
     });
   }
   
-  // List of supported events
   const supportedEvents = [
     'charge.success',
     'charge.dispute.create',
@@ -178,8 +130,6 @@ const validateWebhookEvent = (req, res, next) => {
   ];
   
   if (!supportedEvents.includes(event.event)) {
-    console.log(`Unsupported webhook event: ${event.event}`);
-    // Return 200 to acknowledge receipt even for unsupported events
     return res.status(200).json({
       success: true,
       message: 'Event acknowledged but not processed'
@@ -189,14 +139,10 @@ const validateWebhookEvent = (req, res, next) => {
   next();
 };
 
-/**
- * Middleware to handle webhook timeouts and retries
- */
 const webhookTimeout = (timeoutMs = 30000) => {
   return (req, res, next) => {
     const timeout = setTimeout(() => {
       if (!res.headersSent) {
-        console.error('Webhook processing timeout');
         res.status(408).json({
           success: false,
           message: 'Webhook processing timeout'
@@ -204,7 +150,6 @@ const webhookTimeout = (timeoutMs = 30000) => {
       }
     }, timeoutMs);
     
-    // Clear timeout when response is sent
     res.on('finish', () => {
       clearTimeout(timeout);
     });
@@ -213,13 +158,10 @@ const webhookTimeout = (timeoutMs = 30000) => {
   };
 };
 
-/**
- * Rate limiting for webhooks (prevent spam)
- */
 const webhookRateLimit = () => {
   const attempts = new Map();
-  const RATE_LIMIT = 10; // Max 10 webhooks per minute per IP
-  const WINDOW_MS = 60 * 1000; // 1 minute
+  const RATE_LIMIT = 10;
+  const WINDOW_MS = 60 * 1000;
   
   return (req, res, next) => {
     const ip = req.ip || req.connection.remoteAddress;
@@ -231,7 +173,6 @@ const webhookRateLimit = () => {
     
     const ipAttempts = attempts.get(ip);
     
-    // Remove old attempts outside the window
     const validAttempts = ipAttempts.filter(time => now - time < WINDOW_MS);
     
     if (validAttempts.length >= RATE_LIMIT) {

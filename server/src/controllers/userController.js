@@ -1,11 +1,6 @@
 const asyncHandler = require('express-async-handler');
 const User = require('../models/userModel');
 
-/**
- * @desc    Get user profile
- * @route   GET /api/users/profile
- * @access  Private
- */
 const getUserProfile = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
 
@@ -27,11 +22,6 @@ const getUserProfile = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * @desc    Update user profile
- * @route   PUT /api/users/profile
- * @access  Private
- */
 const updateUserProfile = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
 
@@ -41,14 +31,12 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     user.email = req.body.email || user.email;
     user.phone = req.body.phone || user.phone;
     
-    // Only update password if it's provided
     if (req.body.password) {
       user.password = req.body.password;
     }
 
     const updatedUser = await user.save();
 
-    // Create new JWT token
     const token = generateToken(updatedUser._id);
 
     res.json({
@@ -67,11 +55,6 @@ const updateUserProfile = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * @desc    Add shipping address
- * @route   POST /api/users/shipping
- * @access  Private
- */
 const addShippingAddress = asyncHandler(async (req, res) => {
   const { address, city, state, postalCode, country, isDefault } = req.body;
 
@@ -87,7 +70,6 @@ const addShippingAddress = asyncHandler(async (req, res) => {
       isDefault: isDefault || false,
     };
 
-    // If this address is set as default, unset any previous default address
     if (newAddress.isDefault) {
       user.shippingAddresses.forEach((addr) => {
         addr.isDefault = false;
@@ -107,11 +89,6 @@ const addShippingAddress = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * @desc    Change required password
- * @route   PUT /api/users/change-password
- * @access  Private
- */
 const changeAdminPassword = asyncHandler(async (req, res) => {
     const { currentPassword, newPassword } = req.body;
     
@@ -127,18 +104,15 @@ const changeAdminPassword = asyncHandler(async (req, res) => {
       throw new Error('User not found');
     }
     
-    // Verify current password
     if (!(await user.matchPassword(currentPassword))) {
       res.status(401);
       throw new Error('Current password is incorrect');
     }
     
-    // Update password and reset requirePasswordChange flag
     user.password = newPassword;
     user.requirePasswordChange = false;
     await user.save();
     
-    // Generate new token
     const token = generateToken(user._id);
     
     res.json({
@@ -153,13 +127,7 @@ const changeAdminPassword = asyncHandler(async (req, res) => {
       token,
     });
   });
-  
 
-/**
- * @desc    Update shipping address
- * @route   PUT /api/users/shipping/:id
- * @access  Private
- */
 const updateShippingAddress = asyncHandler(async (req, res) => {
   const { address, city, state, postalCode, country, isDefault } = req.body;
   const addressId = req.params.id;
@@ -176,14 +144,12 @@ const updateShippingAddress = asyncHandler(async (req, res) => {
       throw new Error('Shipping address not found');
     }
 
-    // If this address is being set as default, unset any previous default
     if (isDefault) {
       user.shippingAddresses.forEach((addr) => {
         addr.isDefault = false;
       });
     }
 
-    // Update the address
     user.shippingAddresses[addressIndex] = {
       ...user.shippingAddresses[addressIndex],
       address: address || user.shippingAddresses[addressIndex].address,
@@ -192,7 +158,7 @@ const updateShippingAddress = asyncHandler(async (req, res) => {
       postalCode: postalCode || user.shippingAddresses[addressIndex].postalCode,
       country: country || user.shippingAddresses[addressIndex].country,
       isDefault: isDefault !== undefined ? isDefault : user.shippingAddresses[addressIndex].isDefault,
-      _id: user.shippingAddresses[addressIndex]._id, // Preserve the original ID
+      _id: user.shippingAddresses[addressIndex]._id,
     };
 
     await user.save();
@@ -207,11 +173,6 @@ const updateShippingAddress = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * @desc    Delete user
- * @route   DELETE /api/users/:id
- * @access  Private/Admin
- */
 const deleteUser = asyncHandler(async (req, res) => {
   const user = await User.findById(req.params.id);
 
@@ -229,11 +190,6 @@ const deleteUser = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * @desc    Get user by ID
- * @route   GET /api/users/:id
- * @access  Private/Admin
- */
 const getUserById = asyncHandler(async (req, res) => {
   const user = await User.findById(req.params.id).select('-password');
 
@@ -245,17 +201,11 @@ const getUserById = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * @desc    Get all users with search and order count
- * @route   GET /api/users
- * @access  Private/Admin
- */
 const getUsers = asyncHandler(async (req, res) => {
   const pageSize = 10;
   const page = Number(req.query.pageNumber) || 1;
   const keyword = req.query.keyword;
 
-  // Build search query
   let query = {};
   if (keyword) {
     query = {
@@ -269,7 +219,6 @@ const getUsers = asyncHandler(async (req, res) => {
 
   const count = await User.countDocuments(query);
   
-  // Get users with order count aggregation
   const users = await User.aggregate([
     { $match: query },
     {
@@ -289,7 +238,7 @@ const getUsers = asyncHandler(async (req, res) => {
     {
       $project: {
         password: 0,
-        orders: 0 // Don't include the full orders array
+        orders: 0
       }
     },
     { $sort: { createdAt: -1 } },
@@ -305,11 +254,6 @@ const getUsers = asyncHandler(async (req, res) => {
   });
 });
 
-/**
- * @desc    Update user (Admin) - Enhanced with isActive field
- * @route   PUT /api/users/:id
- * @access  Private/Admin
- */
 const updateUser = asyncHandler(async (req, res) => {
   const user = await User.findById(req.params.id);
 
@@ -339,18 +283,12 @@ const updateUser = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * @desc    Add product to wishlist
- * @route   POST /api/users/wishlist
- * @access  Private
- */
 const addToWishlist = asyncHandler(async (req, res) => {
   const { productId } = req.body;
   
   const user = await User.findById(req.user._id);
 
   if (user) {
-    // Check if product is already in wishlist
     const alreadyInWishlist = user.wishlist.find(
       (id) => id.toString() === productId
     );
@@ -373,11 +311,6 @@ const addToWishlist = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * @desc    Remove product from wishlist
- * @route   DELETE /api/users/wishlist/:productId
- * @access  Private
- */
 const removeFromWishlist = asyncHandler(async (req, res) => {
   const productId = req.params.productId;
   
@@ -400,11 +333,6 @@ const removeFromWishlist = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * @desc    Get user wishlist
- * @route   GET /api/users/wishlist
- * @access  Private
- */
 const getWishlist = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id).populate('wishlist');
 

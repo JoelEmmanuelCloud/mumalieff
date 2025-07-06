@@ -2,21 +2,15 @@ const asyncHandler = require('express-async-handler');
 const cloudinary = require('cloudinary').v2;
 const fs = require('fs');
 const util = require('util');
-const sharp = require('sharp'); // For image processing
+const sharp = require('sharp');
 const unlinkFile = util.promisify(fs.unlink);
 
-// Configure Cloudinary
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-/**
- * @desc    Upload file to Cloudinary with enhanced processing
- * @route   POST /api/upload
- * @access  Private
- */
 const uploadImage = asyncHandler(async (req, res) => {
   try {
     if (!req.file) {
@@ -27,11 +21,9 @@ const uploadImage = asyncHandler(async (req, res) => {
     const uploadType = req.query.uploadType || 'product';
     let folder, transformation = {};
 
-    // Determine folder and transformations based on upload type
     switch (uploadType) {
       case 'custom-design':
         folder = 'mumalieff/custom-designs';
-        // Optimize for printing - high quality, specific DPI
         transformation = {
           quality: 'auto:best',
           format: 'png',
@@ -67,41 +59,28 @@ const uploadImage = asyncHandler(async (req, res) => {
         };
     }
 
-    // Additional processing for custom designs
     if (uploadType === 'custom-design') {
-      // Check image dimensions and quality for printing
       try {
         const metadata = await sharp(req.file.path).metadata();
         
-        // Validate minimum dimensions for quality printing
         if (metadata.width < 300 || metadata.height < 300) {
           await unlinkFile(req.file.path);
           res.status(400);
           throw new Error('Image resolution too low for quality printing. Minimum 300x300 pixels required.');
         }
 
-        // Check DPI if available
-        if (metadata.density && metadata.density < 150) {
-          console.warn('Image DPI is below recommended 300 DPI for printing');
-        }
-
-        // Add metadata to transformation
         transformation.context = `width=${metadata.width}|height=${metadata.height}|format=${metadata.format}`;
         
       } catch (sharpError) {
-        console.error('Image processing error:', sharpError);
         // Continue with upload even if Sharp processing fails
       }
     }
 
-    // Upload file to Cloudinary
     const result = await cloudinary.uploader.upload(req.file.path, {
       folder,
       resource_type: 'auto',
       ...transformation,
-      // Add tags based on upload type
       tags: [uploadType, 'mumalieff'],
-      // Add context for better organization
       context: {
         upload_type: uploadType,
         uploaded_at: new Date().toISOString(),
@@ -109,10 +88,8 @@ const uploadImage = asyncHandler(async (req, res) => {
       }
     });
 
-    // Delete file from server after upload
     await unlinkFile(req.file.path);
 
-    // Return enhanced response with additional metadata
     const response = {
       url: result.secure_url,
       publicId: result.public_id,
@@ -123,11 +100,10 @@ const uploadImage = asyncHandler(async (req, res) => {
       uploadType
     };
 
-    // Add print-specific information for custom designs
     if (uploadType === 'custom-design') {
       response.printQuality = {
         recommendedDPI: 300,
-        currentEstimatedDPI: result.width > 1000 ? 300 : Math.round((result.width / 3.33)), // Rough estimate
+        currentEstimatedDPI: result.width > 1000 ? 300 : Math.round((result.width / 3.33)),
         printReady: result.width >= 1000 && result.height >= 1000,
         maxPrintSize: {
           inches: {
@@ -145,7 +121,6 @@ const uploadImage = asyncHandler(async (req, res) => {
     res.json(response);
 
   } catch (error) {
-    // Delete file from server if upload fails
     if (req.file) {
       await unlinkFile(req.file.path).catch(() => {});
     }
@@ -155,11 +130,6 @@ const uploadImage = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * @desc    Upload multiple files for product gallery
- * @route   POST /api/upload/multiple
- * @access  Private/Admin
- */
 const uploadMultipleImages = asyncHandler(async (req, res) => {
   try {
     if (!req.files || req.files.length === 0) {
@@ -190,7 +160,6 @@ const uploadMultipleImages = asyncHandler(async (req, res) => {
           }
         });
 
-        // Delete file from server after upload
         await unlinkFile(file.path);
 
         return {
@@ -199,10 +168,9 @@ const uploadMultipleImages = asyncHandler(async (req, res) => {
           format: result.format,
           width: result.width,
           height: result.height,
-          isPrimary: index === 0 // First image is primary
+          isPrimary: index === 0
         };
       } catch (error) {
-        // Delete file from server if upload fails
         await unlinkFile(file.path).catch(() => {});
         throw error;
       }
@@ -212,7 +180,6 @@ const uploadMultipleImages = asyncHandler(async (req, res) => {
     res.json({ images: uploadResults });
 
   } catch (error) {
-    // Clean up any remaining files
     if (req.files) {
       await Promise.all(
         req.files.map(file => unlinkFile(file.path).catch(() => {}))
@@ -224,16 +191,10 @@ const uploadMultipleImages = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * @desc    Delete file from Cloudinary
- * @route   DELETE /api/upload/:publicId
- * @access  Private/Admin
- */
 const deleteImage = asyncHandler(async (req, res) => {
   const { publicId } = req.params;
 
   try {
-    // Delete image from Cloudinary
     const result = await cloudinary.uploader.destroy(publicId);
 
     if (result.result === 'ok') {
@@ -248,11 +209,6 @@ const deleteImage = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * @desc    Validate custom design for printing
- * @route   POST /api/upload/validate-design
- * @access  Private
- */
 const validateDesignForPrinting = asyncHandler(async (req, res) => {
   try {
     if (!req.file) {
@@ -260,7 +216,6 @@ const validateDesignForPrinting = asyncHandler(async (req, res) => {
       throw new Error('No file uploaded for validation');
     }
 
-    // Process image with Sharp for detailed analysis
     const metadata = await sharp(req.file.path).metadata();
     
     const validation = {
@@ -278,29 +233,24 @@ const validateDesignForPrinting = asyncHandler(async (req, res) => {
       }
     };
 
-    // Check minimum dimensions
     if (metadata.width < 300 || metadata.height < 300) {
       validation.errors.push('Image resolution too low. Minimum 300x300 pixels required for quality printing.');
       validation.isValid = false;
     }
 
-    // Check for optimal dimensions
     if (metadata.width < 1000 || metadata.height < 1000) {
       validation.warnings.push('For best print quality, we recommend images of at least 1000x1000 pixels.');
     }
 
-    // Check DPI/density
     if (metadata.density && metadata.density < 200) {
       validation.warnings.push('Image DPI is below recommended 300 DPI. Print quality may be affected.');
     }
 
-    // Check file format
     if (!['png', 'jpeg', 'jpg', 'svg'].includes(metadata.format.toLowerCase())) {
       validation.errors.push('Unsupported file format. Please use PNG, JPEG, or SVG.');
       validation.isValid = false;
     }
 
-    // Recommendations based on analysis
     if (metadata.format === 'jpeg' && !metadata.hasAlpha) {
       validation.recommendations.push('Consider using PNG format for designs with transparency.');
     }
@@ -309,7 +259,6 @@ const validateDesignForPrinting = asyncHandler(async (req, res) => {
       validation.recommendations.push('Great! Your image has transparency support.');
     }
 
-    // Calculate estimated print sizes
     const dpi = metadata.density || 300;
     validation.estimatedPrintSizes = {
       atCurrentDPI: {
@@ -326,13 +275,11 @@ const validateDesignForPrinting = asyncHandler(async (req, res) => {
       }
     };
 
-    // Clean up uploaded file
     await unlinkFile(req.file.path);
 
     res.json(validation);
 
   } catch (error) {
-    // Clean up uploaded file
     if (req.file) {
       await unlinkFile(req.file.path).catch(() => {});
     }
@@ -342,11 +289,6 @@ const validateDesignForPrinting = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * @desc    Get upload guidelines and requirements
- * @route   GET /api/upload/guidelines
- * @access  Public
- */
 const getUploadGuidelines = asyncHandler(async (req, res) => {
   const guidelines = {
     customDesigns: {

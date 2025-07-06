@@ -17,12 +17,10 @@ const {
 const { protect, admin } = require('../middleware/authMiddleware');
 
 
-// Protected routes
 router.route('/profile')
   .get(protect, getUserProfile)
   .put(protect, updateUserProfile);
 
-// New password change route
 router.route('/change-password').put(protect, changeAdminPassword);
 
 router.route('/shipping')
@@ -38,7 +36,7 @@ router.route('/wishlist')
 router.route('/wishlist/:productId')
   .delete(protect, removeFromWishlist);
 
-// Admin routes
+
 router.route('/')
   .get(protect, admin, getUsers);
 

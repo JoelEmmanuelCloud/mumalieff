@@ -43,7 +43,7 @@ const customOrderSchema = mongoose.Schema(
         default: 'Digital Print'
       },
       colors: [{
-        type: String // Colors used in the design
+        type: String
       }],
       dimensions: {
         width: Number,
@@ -116,15 +116,15 @@ const customOrderSchema = mongoose.Schema(
     status: {
       type: String,
       enum: [
-        'pending',           // Order received, waiting for review
-        'design_review',     // Design being reviewed by team
-        'approved',          // Design approved, ready for production
-        'in_production',     // Currently being printed/made
-        'quality_check',     // Finished, undergoing quality control
-        'shipped',           // Shipped to customer
-        'delivered',         // Delivered to customer
-        'cancelled',         // Order cancelled
-        'revision_needed'    // Design needs revision
+        'pending',
+        'design_review',
+        'approved',
+        'in_production',
+        'quality_check',
+        'shipped',
+        'delivered',
+        'cancelled',
+        'revision_needed'
       ],
       default: 'pending'
     },
@@ -241,12 +241,10 @@ const customOrderSchema = mongoose.Schema(
   }
 );
 
-// Indexes for better performance
 customOrderSchema.index({ user: 1, createdAt: -1 });
 customOrderSchema.index({ status: 1, createdAt: -1 });
 customOrderSchema.index({ 'timeline.estimatedCompletion': 1 });
 
-// Pre-save middleware to generate order number
 customOrderSchema.pre('save', function(next) {
   if (this.isNew && !this.orderNumber) {
     const timestamp = Date.now().toString(36).toUpperCase();
@@ -256,11 +254,10 @@ customOrderSchema.pre('save', function(next) {
   next();
 });
 
-// Pre-save middleware to calculate pricing
 customOrderSchema.pre('save', function(next) {
   if (this.isModified('quantity') || this.isModified('pricing.basePrice') || this.isModified('pricing.customizationPrice') || this.isModified('pricing.rushOrderFee')) {
     const subtotal = (this.pricing.basePrice + this.pricing.customizationPrice + this.pricing.rushOrderFee) * this.quantity;
-    const tax = subtotal * 0.075; // 7.5% VAT
+    const tax = subtotal * 0.075;
     
     this.pricing.subtotal = subtotal;
     this.pricing.tax = tax;
@@ -269,7 +266,6 @@ customOrderSchema.pre('save', function(next) {
   next();
 });
 
-// Pre-save middleware to update status history
 customOrderSchema.pre('save', function(next) {
   if (this.isModified('status') && !this.isNew) {
     this.statusHistory.push({
@@ -278,7 +274,6 @@ customOrderSchema.pre('save', function(next) {
       notes: this.adminNotes
     });
     
-    // Update timeline based on status
     switch (this.status) {
       case 'approved':
         this.timeline.designApproved = new Date();
@@ -301,7 +296,6 @@ customOrderSchema.pre('save', function(next) {
   next();
 });
 
-// Virtual for order age in days
 customOrderSchema.virtual('orderAge').get(function() {
   const now = new Date();
   const diffTime = Math.abs(now - this.createdAt);
@@ -309,7 +303,6 @@ customOrderSchema.virtual('orderAge').get(function() {
   return diffDays;
 });
 
-// Virtual for days until estimated completion
 customOrderSchema.virtual('daysUntilCompletion').get(function() {
   if (!this.timeline.estimatedCompletion) return null;
   
@@ -319,7 +312,6 @@ customOrderSchema.virtual('daysUntilCompletion').get(function() {
   return diffDays;
 });
 
-// Virtual for order progress percentage
 customOrderSchema.virtual('progressPercentage').get(function() {
   const statusProgress = {
     'pending': 10,
@@ -336,7 +328,6 @@ customOrderSchema.virtual('progressPercentage').get(function() {
   return statusProgress[this.status] || 0;
 });
 
-// Method to update status with history
 customOrderSchema.methods.updateStatus = function(newStatus, notes = '', updatedBy = null) {
   this.status = newStatus;
   this.adminNotes = notes;
@@ -351,7 +342,6 @@ customOrderSchema.methods.updateStatus = function(newStatus, notes = '', updated
   return this.save();
 };
 
-// Method to calculate estimated completion date
 customOrderSchema.methods.calculateEstimatedCompletion = function() {
   const baseProductionDays = this.isRushOrder ? this.rushOrderDays : this.estimatedCompletionDays;
   const estimatedDate = new Date();
@@ -361,7 +351,6 @@ customOrderSchema.methods.calculateEstimatedCompletion = function() {
   return estimatedDate;
 };
 
-// Static method to get orders by status
 customOrderSchema.statics.findByStatus = function(status, options = {}) {
   return this.find({ status, isActive: true })
     .populate('user', 'name email phone')
@@ -371,7 +360,6 @@ customOrderSchema.statics.findByStatus = function(status, options = {}) {
     .skip(options.skip || 0);
 };
 
-// Static method to get overdue orders
 customOrderSchema.statics.findOverdueOrders = function() {
   const today = new Date();
   return this.find({
@@ -384,7 +372,6 @@ customOrderSchema.statics.findOverdueOrders = function() {
   .sort({ 'timeline.estimatedCompletion': 1 });
 };
 
-// Static method to get orders requiring attention
 customOrderSchema.statics.findOrdersRequiringAttention = function() {
   return this.find({
     status: { $in: ['pending', 'design_review', 'revision_needed'] },
@@ -395,7 +382,6 @@ customOrderSchema.statics.findOrdersRequiringAttention = function() {
   .sort({ createdAt: 1 });
 };
 
-// Set virtuals to true when converting to JSON
 customOrderSchema.set('toJSON', { virtuals: true });
 customOrderSchema.set('toObject', { virtuals: true });
 

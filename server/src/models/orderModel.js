@@ -134,7 +134,6 @@ const orderSchema = mongoose.Schema(
       type: Number,
       default: 0.0,
     },
-    // Additional fields for better order management
     estimatedDeliveryDate: {
       type: Date,
     },
@@ -156,13 +155,10 @@ const orderSchema = mongoose.Schema(
   }
 );
 
-// Indexes for better performance
 orderSchema.index({ user: 1, createdAt: -1 });
 orderSchema.index({ status: 1 });
 orderSchema.index({ isPaid: 1 });
 
-
-// Pre-save middleware to generate order number
 orderSchema.pre('save', function(next) {
   if (this.isNew && !this.orderNumber) {
     const timestamp = Date.now().toString(36).toUpperCase();
@@ -172,9 +168,7 @@ orderSchema.pre('save', function(next) {
   next();
 });
 
-// Calculate the total amount before saving
 orderSchema.pre('save', function(next) {
-  // Calculate total if it's not already set or if relevant fields are modified
   if (!this.totalPrice || this.isModified('orderItems') || this.isModified('shippingPrice') || this.isModified('taxPrice') || this.isModified('discount')) {
     this.totalPrice = (
       this.itemsPrice + 
@@ -186,7 +180,6 @@ orderSchema.pre('save', function(next) {
   next();
 });
 
-// Virtual for order age in days
 orderSchema.virtual('orderAge').get(function() {
   const now = new Date();
   const diffTime = Math.abs(now - this.createdAt);
@@ -194,7 +187,6 @@ orderSchema.virtual('orderAge').get(function() {
   return diffDays;
 });
 
-// Virtual for order status color (for UI)
 orderSchema.virtual('statusColor').get(function() {
   const statusColors = {
     'Pending': 'warning',
@@ -206,7 +198,6 @@ orderSchema.virtual('statusColor').get(function() {
   return statusColors[this.status] || 'default';
 });
 
-// Static method to find orders by user with pagination
 orderSchema.statics.findByUser = function(userId, options = {}) {
   const { page = 1, limit = 10, status, isPaid } = options;
   const skip = (page - 1) * limit;
@@ -222,7 +213,6 @@ orderSchema.statics.findByUser = function(userId, options = {}) {
     .populate('user', 'name email');
 };
 
-// Static method to get order statistics
 orderSchema.statics.getOrderStats = function(startDate, endDate) {
   const matchStage = {};
   if (startDate || endDate) {
@@ -250,14 +240,12 @@ orderSchema.statics.getOrderStats = function(startDate, endDate) {
   ]);
 };
 
-// Instance method to mark as paid
 orderSchema.methods.markAsPaid = function(paymentResult) {
   this.isPaid = true;
   this.paidAt = new Date();
   this.paymentResult = paymentResult;
   this.paymentReference = paymentResult.reference;
   
-  // Auto-update status if still pending
   if (this.status === 'Pending') {
     this.status = 'Processing';
   }
@@ -265,7 +253,6 @@ orderSchema.methods.markAsPaid = function(paymentResult) {
   return this.save();
 };
 
-// Instance method to update status with validation
 orderSchema.methods.updateStatus = function(newStatus, options = {}) {
   const validTransitions = {
     'Pending': ['Processing', 'Cancelled'],
@@ -301,21 +288,18 @@ orderSchema.methods.updateStatus = function(newStatus, options = {}) {
   return this.save();
 };
 
-// Instance method to calculate refund amount
 orderSchema.methods.calculateRefundAmount = function() {
   if (!this.isPaid) return 0;
   
-  // Simple refund logic - can be enhanced based on business rules
   if (this.status === 'Pending' || this.status === 'Processing') {
-    return this.totalPrice; // Full refund
+    return this.totalPrice;
   } else if (this.status === 'Shipped') {
-    return this.totalPrice - this.shippingPrice; // Refund minus shipping
+    return this.totalPrice - this.shippingPrice;
   }
   
-  return 0; // No refund for delivered orders
+  return 0;
 };
 
-// Set virtuals to be included in JSON
 orderSchema.set('toJSON', { virtuals: true });
 orderSchema.set('toObject', { virtuals: true });
 

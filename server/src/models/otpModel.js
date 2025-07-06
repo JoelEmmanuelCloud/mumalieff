@@ -1,4 +1,3 @@
-// server/src/models/otpModel.js
 const mongoose = require('mongoose');
 
 const otpSchema = mongoose.Schema(
@@ -18,7 +17,7 @@ const otpSchema = mongoose.Schema(
       enum: ['registration', 'login', 'forgot_password'],
     },
     userData: {
-      // Store registration data temporarily
+   
       firstName: String,
       lastName: String,
       password: String,
@@ -36,7 +35,7 @@ const otpSchema = mongoose.Schema(
     expiresAt: {
       type: Date,
       default: Date.now,
-      expires: 600, // 10 minutes
+      expires: 600, 
     },
   },
   {
