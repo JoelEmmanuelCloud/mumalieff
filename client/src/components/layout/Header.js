@@ -1,4 +1,3 @@
-// Component/layout/Header component with responsive navigation, search, and user menu
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -16,7 +15,6 @@ const Header = () => {
   const [searchKeyword, setSearchKeyword] = useState('');
   const [isScrolled, setIsScrolled] = useState(false);
   
-  // Track scroll position to add shadow to header
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
@@ -26,17 +24,17 @@ const Header = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
   
-  // Close menus when clicked outside
+
   useEffect(() => {
     const handleClickOutside = (e) => {
-      // Close mobile navigation menu
+     
       if (isMenuOpen && 
           !e.target.closest('#mobile-nav') && 
           !e.target.closest('#mobile-menu-button')) {
         setIsMenuOpen(false);
       }
       
-      // Close user dropdown menu
+    
       if (isUserMenuOpen && 
           !e.target.closest('#user-menu') && 
           !e.target.closest('#user-menu-button')) {
@@ -48,7 +46,7 @@ const Header = () => {
     return () => document.removeEventListener('click', handleClickOutside);
   }, [isMenuOpen, isUserMenuOpen]);
   
-  // Close menus on window resize to prevent layout issues
+
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 768) {
@@ -60,17 +58,16 @@ const Header = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
   
-  // Handle search submit
+
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     if (searchKeyword.trim()) {
       navigate(`/products/search/${searchKeyword}`);
       setSearchKeyword('');
-      setIsMenuOpen(false); // Close mobile menu after search
+      setIsMenuOpen(false); 
     }
   };
   
-  // Log out handler
   const handleLogout = () => {
     logout();
     navigate('/');
@@ -78,7 +75,6 @@ const Header = () => {
     setIsMenuOpen(false);
   };
   
-  // Calculate total items in cart
   const cartItemsCount = cartItems.reduce((acc, item) => acc + item.qty, 0);
   
   return (

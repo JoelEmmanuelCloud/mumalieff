@@ -1,5 +1,3 @@
-//Component/layout/Mobile mobile navigation bar with links to Home, Shop, Custom Design, Cart, and Account/Login.
-// It includes icons, active state styling, and cart item count.
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
@@ -10,10 +8,8 @@ const MobileNavigation = () => {
   const { cartItems } = useCart();
   const { isAuthenticated } = useAuth();
   
-  // Calculate total items in cart
   const cartItemsCount = cartItems.reduce((acc, item) => acc + item.qty, 0);
   
-  // Check if path is active
   const isActive = (path) => {
     if (path === '/') {
       return location.pathname === '/';

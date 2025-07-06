@@ -20,7 +20,6 @@ const AdminLayout = ({ children }) => {
     navigate('/login');
   };
   
-  // Check if path is active - improved to handle nested routes
   const isActive = (path) => {
     if (path === '/admin/dashboard') {
       return location.pathname === path;
@@ -186,7 +185,7 @@ const AdminLayout = ({ children }) => {
         className={`transition-all duration-300 ease-in-out ${
           isSidebarOpen ? 'lg:ml-64' : 'ml-0'
         }`}
-        style={{ paddingTop: '64px' }} // Account for fixed header height
+        style={{ paddingTop: '64px' }} 
       >
         <div className="min-h-screen bg-gray-50 dark:bg-dark-bg">
           {children}

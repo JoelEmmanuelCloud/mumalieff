@@ -1,6 +1,4 @@
-// src/components/common/Loader.js
 import React from 'react';
-
 const Loader = ({ size = 'medium', className = '' }) => {
   const sizeClasses = {
     small: 'w-6 h-6',
@@ -27,7 +25,7 @@ const Loader = ({ size = 'medium', className = '' }) => {
   );
 };
 
-// Spinner variant for different use cases
+
 export const Spinner = ({ size = 'medium', className = '' }) => {
   const sizeClasses = {
     small: 'w-6 h-6',
@@ -54,7 +52,7 @@ export const Spinner = ({ size = 'medium', className = '' }) => {
   );
 };
 
-// Full screen loader
+
 export const FullScreenLoader = ({ message = 'Loading...', size = 'large' }) => {
   const sizeClasses = {
     small: 'w-6 h-6',
@@ -82,7 +80,7 @@ export const FullScreenLoader = ({ message = 'Loading...', size = 'large' }) => 
   );
 };
 
-// Page loader with backdrop
+
 export const PageLoader = ({ message = 'Loading page...', size = 'large' }) => {
   const sizeClasses = {
     small: 'w-6 h-6',
@@ -110,7 +108,7 @@ export const PageLoader = ({ message = 'Loading page...', size = 'large' }) => {
   );
 };
 
-// Button loader (inline, no padding)
+
 export const ButtonLoader = ({ size = 'small' }) => {
   const sizeClasses = {
     small: 'w-4 h-4',

@@ -17,27 +17,26 @@ const OTPInput = ({ length = 6, onComplete, disabled = false, error = false }) =
     newOtp[index] = element.value;
     setOtp(newOtp);
 
-    // Move to next input if current field is filled
     if (element.value && index < length - 1) {
       inputRefs.current[index + 1].focus();
     }
 
-    // Call onComplete when all fields are filled
+
     if (newOtp.every(digit => digit !== '') && onComplete) {
       onComplete(newOtp.join(''));
     }
   };
 
   const handleKeyDown = (e, index) => {
-    // Move to previous input on backspace
+
     if (e.key === 'Backspace' && !otp[index] && index > 0) {
       inputRefs.current[index - 1].focus();
     }
-    // Move to next input on arrow right
+
     if (e.key === 'ArrowRight' && index < length - 1) {
       inputRefs.current[index + 1].focus();
     }
-    // Move to previous input on arrow left
+  
     if (e.key === 'ArrowLeft' && index > 0) {
       inputRefs.current[index - 1].focus();
     }
@@ -57,12 +56,12 @@ const OTPInput = ({ length = 6, onComplete, disabled = false, error = false }) =
       });
       setOtp(newOtp);
       
-      // Focus on the next empty input or the last input
+      
       const nextEmptyIndex = newOtp.findIndex(digit => digit === '');
       const focusIndex = nextEmptyIndex === -1 ? length - 1 : nextEmptyIndex;
       inputRefs.current[focusIndex]?.focus();
       
-      // Call onComplete if all fields are filled
+   
       if (newOtp.every(digit => digit !== '') && onComplete) {
         onComplete(newOtp.join(''));
       }
@@ -106,7 +105,6 @@ const OTPInput = ({ length = 6, onComplete, disabled = false, error = false }) =
         ))}
       </div>
       
-      {/* Clear button */}
       {otp.some(digit => digit !== '') && (
         <button
           type="button"

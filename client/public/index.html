@@ -3,7 +3,6 @@
   <head>
     <meta charset="utf-8" />
     
-    <!-- Favicon and App Icons -->
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
@@ -11,10 +10,8 @@
     <meta name="msapplication-TileColor" content="#000000">
     <meta name="theme-color" content="#000000" />
     
-    <!-- Viewport and Mobile Optimization -->
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     
-    <!-- Primary SEO Meta Tags -->
     <title>Mumalieff | Premium T-shirts & Custom Prints Nigeria</title>
     <meta name="title" content="Mumalieff | Premium T-shirts & Custom Prints Nigeria" />
     <meta 
@@ -29,17 +26,14 @@
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     <meta name="googlebot" content="index, follow" />
     
-    <!-- Geographic and Language Tags -->
     <meta name="geo.region" content="NG" />
     <meta name="geo.country" content="Nigeria" />
     <meta name="language" content="English" />
     <meta name="geo.placename" content="Nigeria" />
     
-    <!-- Cache Control -->
     <meta http-equiv="Cache-Control" content="public, max-age=31536000" />
     <meta name="revisit-after" content="7 days" />
     
-    <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://mumalieff.com/" />
     <meta property="og:title" content="Mumalieff | Premium T-shirts & Custom Prints Nigeria" />
@@ -50,7 +44,6 @@
     <meta property="og:site_name" content="Mumalieff" />
     <meta property="og:locale" content="en_NG" />
     
-    <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
     <meta property="twitter:url" content="https://mumalieff.com/" />
     <meta property="twitter:title" content="Mumalieff | Premium T-shirts & Custom Prints Nigeria" />
@@ -59,10 +52,8 @@
     <meta name="twitter:creator" content="@mumalieff" />
     <meta name="twitter:site" content="@mumalieff" />
     
-    <!-- Canonical URL -->
     <link rel="canonical" href="https://mumalieff.com/" />
     
-    <!-- DNS Prefetch and Preconnect for Performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="preconnect" href="https://res.cloudinary.com" />
@@ -70,8 +61,6 @@
     <link rel="dns-prefetch" href="https://res.cloudinary.com" />
     <link rel="dns-prefetch" href="https://api.paystack.co" />
   
-    
-    <!-- Google Fonts with Performance Optimization -->
     <link 
       href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" 
       rel="stylesheet"
@@ -85,7 +74,6 @@
       />
     </noscript>
     
-    <!-- Business Schema Markup -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -125,7 +113,6 @@
     }
     </script>
     
-    <!-- Website Schema Markup -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -145,9 +132,7 @@
     }
     </script>
     
-    <!-- Critical CSS Inline -->
     <style>
-      /* Critical CSS for above-the-fold content */
       body { 
         margin: 0; 
         font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
@@ -178,7 +163,6 @@
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
       }
-      /* Hide loading screen when content loads */
       .app-loaded .loading-screen {
         display: none;
       }
@@ -186,12 +170,10 @@
   </head>
   
   <body>
-    <!-- Loading Screen -->
     <div class="loading-screen">
       <div class="loading-spinner"></div>
     </div>
     
-    <!-- No JavaScript Fallback -->
     <noscript>
       <div style="padding: 20px; text-align: center; background: #f0f0f0;">
         <h1>Mumalieff - Premium T-shirts & Custom Prints</h1>
@@ -200,47 +182,28 @@
       </div>
     </noscript>
     
-    <!-- React App Root -->
     <div id="root"></div>
     
-    <!-- Performance Monitoring Script -->
     <script>
-      // Basic performance monitoring
       window.addEventListener('load', function() {
-        // Hide loading screen when app loads
         document.body.classList.add('app-loaded');
         
-        // Basic performance logging (optional)
         if ('performance' in window) {
           const perfData = performance.getEntriesByType('navigation')[0];
-          console.log('Page Load Time:', perfData.loadEventEnd - perfData.fetchStart, 'ms');
         }
       });
       
-      // Service Worker Registration for PWA
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', function() {
           navigator.serviceWorker.register('/sw.js')
             .then(function(registration) {
-              console.log('SW registered: ', registration);
             })
             .catch(function(registrationError) {
-              console.log('SW registration failed: ', registrationError);
             });
         });
       }
     </script>
     
-    <!-- Paystack Inline Script - Loaded Asynchronously -->
     <script src="https://js.paystack.co/v1/inline.js" async></script>
-    
-    <!-- Google Analytics or Other Analytics (Replace with your tracking ID) -->
-    <!-- <script async src="https://www.googletagmanager.com/gtag/js?id=GA_TRACKING_ID"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'GA_TRACKING_ID');
-    </script> -->
   </body>
 </html>

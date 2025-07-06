@@ -1,5 +1,4 @@
 import React from 'react';
-
 const Message = ({ variant = 'info', children, dismissible = false, onDismiss }) => {
   const baseClasses = 'flex items-center justify-between py-3 px-4 rounded-md mb-4';
   

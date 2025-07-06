@@ -1,4 +1,3 @@
-// src/components/common/ErrorBoundary.js
 import React from 'react';
 
 class ErrorBoundary extends React.Component {
@@ -8,20 +7,19 @@ class ErrorBoundary extends React.Component {
   }
 
   static getDerivedStateFromError(error) {
-    // Update state so the next render will show the fallback UI
+ 
     return { hasError: true };
   }
 
   componentDidCatch(error, errorInfo) {
-    // Log the error for debugging
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
+
     
     this.setState({
       error: error,
       errorInfo: errorInfo
     });
 
-    // Send to analytics if available (with proper check)
+ 
     if (typeof window !== 'undefined' && window.gtag) {
       window.gtag('event', 'exception', {
         description: error?.message || 'Component error',
@@ -32,7 +30,7 @@ class ErrorBoundary extends React.Component {
 
   render() {
     if (this.state.hasError) {
-      // Custom error UI
+    
       return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-dark-bg">
           <div className="max-w-md mx-auto text-center p-6">
@@ -96,7 +94,7 @@ class ErrorBoundary extends React.Component {
       );
     }
 
-    // Return children if no error
+
     return this.props.children;
   }
 }

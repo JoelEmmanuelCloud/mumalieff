@@ -1,15 +1,14 @@
-// src/components/common/PerformanceMonitor.js - Fixed version
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { trackPerformance, trackException, isAnalyticsAvailable } from '../../utils/analytics';
 
 const PerformanceMonitor = () => {
   useEffect(() => {
-    // Only monitor performance in production
+
     if (process.env.NODE_ENV !== 'production') {
       return;
     }
 
-    // Monitor Core Web Vitals
+
     const monitorWebVitals = async () => {
       try {
         const { getCLS, getFID, getLCP, getFCP, getTTFB } = await import('web-vitals');
@@ -38,7 +37,7 @@ const PerformanceMonitor = () => {
       }
     };
 
-    // Monitor page load performance
+
     const monitorPageLoad = () => {
       if (!('performance' in window)) return;
 
@@ -66,16 +65,16 @@ const PerformanceMonitor = () => {
           try {
             observer.disconnect();
           } catch (error) {
-            // Silent fail - observer may already be disconnected
+       
           }
         };
       } catch (error) {
         console.warn('Performance observer setup failed:', error);
-        return () => {}; // Return empty cleanup function
+        return () => {};
       }
     };
 
-    // Monitor resource loading performance
+   
     const monitorResources = () => {
       if (!('performance' in window)) return;
 
@@ -85,7 +84,7 @@ const PerformanceMonitor = () => {
             const entries = list.getEntries();
             entries.forEach((entry) => {
               if (entry.entryType === 'resource' && entry.duration > 1000) {
-                // Monitor slow resources (> 1 second)
+           
                 trackPerformance('slow_resource', entry.duration, 'Performance');
               }
             });
@@ -100,7 +99,7 @@ const PerformanceMonitor = () => {
           try {
             observer.disconnect();
           } catch (error) {
-            // Silent fail
+  
           }
         };
       } catch (error) {
@@ -109,13 +108,12 @@ const PerformanceMonitor = () => {
       }
     };
 
-    // Monitor JavaScript errors
     const monitorErrors = () => {
       const handleError = (event) => {
         try {
           trackException(
             event.error?.message || 'Unknown error',
-            false // Non-fatal
+            false 
           );
         } catch (error) {
           console.warn('Error tracking failed:', error);
@@ -142,7 +140,6 @@ const PerformanceMonitor = () => {
       };
     };
 
-    // Monitor network status
     const monitorNetwork = () => {
       const handleOnline = () => {
         try {
@@ -173,13 +170,10 @@ const PerformanceMonitor = () => {
       };
     };
 
-    // Initialize all monitoring with proper cleanup handling
     const cleanupFunctions = [];
-    
-    // Start monitoring
+  
     monitorWebVitals();
     
-    // Collect cleanup functions, ensuring they're functions
     const pageLoadCleanup = monitorPageLoad();
     if (typeof pageLoadCleanup === 'function') {
       cleanupFunctions.push(pageLoadCleanup);
@@ -200,7 +194,6 @@ const PerformanceMonitor = () => {
       cleanupFunctions.push(networkCleanup);
     }
 
-    // Report initial performance metrics after a delay
     const timeoutId = setTimeout(() => {
       try {
         if ('performance' in window && isAnalyticsAvailable()) {
@@ -227,12 +220,11 @@ const PerformanceMonitor = () => {
       }
     }, 2000);
 
-    // Cleanup function
     return () => {
-      // Clear timeout
+   
       clearTimeout(timeoutId);
       
-      // Run all cleanup functions safely
+ 
       cleanupFunctions.forEach(cleanupFn => {
         try {
           if (typeof cleanupFn === 'function') {
@@ -243,9 +235,9 @@ const PerformanceMonitor = () => {
         }
       });
     };
-  }, []); // Empty dependency array - run once on mount
+  }, []); 
 
-  // This component doesn't render anything
+
   return null;
 };
 
