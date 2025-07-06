@@ -2,17 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Base styles */
 @layer base {
   html {
     @apply text-gray-900 scroll-smooth;
-    /* Prevent horizontal overflow */
     overflow-x: hidden;
   }
   
   body {
     @apply font-sans text-base antialiased;
-    /* Prevent horizontal overflow and ensure proper mobile behavior */
     overflow-x: hidden;
     min-height: 100vh;
     width: 100%;
@@ -20,12 +17,10 @@
     padding: 0;
   }
   
-  /* Ensure all elements use border-box sizing */
   *, *::before, *::after {
     box-sizing: border-box;
   }
   
-  /* Root container should never overflow */
   #root {
     width: 100%;
     min-height: 100vh;
@@ -34,7 +29,6 @@
   
   h1, h2, h3, h4, h5, h6 {
     @apply font-display font-semibold leading-tight;
-    /* Ensure headings wrap on mobile */
     word-wrap: break-word;
     hyphens: auto;
   }
@@ -63,39 +57,32 @@
     @apply text-sm sm:text-base md:text-lg;
   }
   
-  /* Dark mode body */
   .dark body {
     @apply bg-dark-bg text-dark-text;
   }
 
-  /* Make all images responsive by default */
   img {
     max-width: 100%;
     height: auto;
   }
 
-  /* Ensure tables are responsive */
   table {
     width: 100%;
     table-layout: fixed;
   }
 }
 
-/* Custom utility classes */
 @layer components {
-  /* Container with better mobile padding */
   .container-custom {
     @apply container mx-auto px-3 sm:px-4 md:px-6 lg:px-8 max-w-7xl;
     width: 100%;
   }
   
-  /* Buttons with better mobile touch targets */
   .btn {
     @apply inline-flex items-center justify-center px-3 py-2 sm:px-4 sm:py-2 border border-transparent 
     rounded-md shadow-sm text-sm font-medium 
     focus:outline-none focus:ring-2 focus:ring-offset-2 
     transition-colors duration-200;
-    /* Ensure minimum touch target size for mobile */
     min-height: 44px;
     min-width: 44px;
   }
@@ -134,13 +121,11 @@
     @apply btn bg-gray-300 text-gray-500 cursor-not-allowed;
   }
   
-  /* Form controls with better mobile sizing */
   .form-input {
     @apply block w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-md shadow-sm 
     placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary 
     dark:bg-dark-card dark:border-gray-600 dark:text-dark-text;
-    /* Better mobile input sizing */
-    font-size: 16px; /* Prevents zoom on iOS */
+    font-size: 16px;
     min-height: 44px;
   }
   
@@ -152,14 +137,12 @@
     @apply mt-1 text-sm text-error;
   }
   
-  /* Cards with proper mobile spacing */
   .card {
     @apply bg-white rounded-lg shadow-soft overflow-hidden 
     dark:bg-dark-card;
     width: 100%;
   }
   
-  /* Enhanced product cards with mobile-first design */
   .product-card {
     @apply card transition-transform duration-300 hover:-translate-y-1;
     width: 100%;
@@ -167,24 +150,22 @@
     overflow: hidden;
   }
   
-  /* Mobile-optimized product card styles - Compact design for mobile */
   .mobile-product-card {
     @apply w-full max-w-full bg-white rounded-md shadow-sm overflow-hidden
     transition-all duration-300 hover:shadow-md hover:-translate-y-1
     dark:bg-dark-card;
-    /* Smaller overall size on mobile */
   }
   
   .mobile-product-image {
     @apply relative overflow-hidden bg-gray-100 rounded-t-md;
-    aspect-ratio: 1/1; /* Square aspect ratio for mobile - more compact */
+    aspect-ratio: 1/1;
     width: 100%;
   }
   
   .mobile-badge {
     @apply absolute top-1 left-1 z-10 px-1.5 py-0.5 text-xs font-bold rounded
     text-white uppercase tracking-wide;
-    font-size: 8px; /* Smaller badge text */
+    font-size: 8px;
   }
   
   .mobile-wishlist-btn {
@@ -197,26 +178,26 @@
   .mobile-quick-add-overlay {
     @apply absolute bottom-0 left-0 right-0 bg-black/80 text-white p-2 
     transition-transform duration-300;
-    font-size: 11px; /* Smaller overlay text */
+    font-size: 11px;
   }
   
   .mobile-card-content {
-    @apply p-2 sm:p-3; /* Reduced padding for mobile */
+    @apply p-2 sm:p-3;
   }
   
   .mobile-product-title {
     @apply text-xs sm:text-sm font-medium text-gray-900 mb-1 line-clamp-2
     dark:text-dark-text;
-    line-height: 1.3; /* Tighter line height */
+    line-height: 1.3;
   }
   
   .mobile-star {
-    @apply w-2.5 h-2.5 sm:w-3 sm:h-3; /* Smaller stars on mobile */
+    @apply w-2.5 h-2.5 sm:w-3 sm:h-3;
   }
   
   .mobile-review-count {
     @apply text-xs text-gray-500 dark:text-gray-400;
-    font-size: 10px; /* Extra small review count */
+    font-size: 10px;
   }
   
   .mobile-sale-price {
@@ -225,7 +206,7 @@
   
   .mobile-original-price {
     @apply text-gray-400 line-through dark:text-gray-500;
-    font-size: 10px; /* Smaller crossed-out price */
+    font-size: 10px;
   }
   
   .mobile-price {
@@ -234,10 +215,9 @@
   
   .mobile-stock-indicator {
     @apply font-medium;
-    font-size: 10px; /* Smaller stock indicator */
+    font-size: 10px;
   }
   
-  /* Enhanced product grid for better mobile display */
   .product-grid {
     @apply grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4 md:gap-6;
   }
@@ -247,25 +227,20 @@
     gap-3 sm:gap-4 md:gap-6;
   }
   
-  /* Section headings with better mobile sizing */
   .section-heading {
     @apply text-xl sm:text-2xl font-semibold text-primary mb-4 sm:mb-6 dark:text-dark-text;
   }
   
-  /* Mobile navigation with safe area support */
   .mobile-bottom-nav {
     @apply fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-2 
     dark:bg-dark-card dark:border-gray-800 z-50 md:hidden;
-    /* Safe area support for newer phones */
     padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
   }
   
-  /* Touch friendly elements */
   .touch-target {
     @apply min-h-[44px] min-w-[44px] flex items-center justify-center;
   }
   
-  /* Mobile-first typography */
   .mobile-text {
     @apply text-sm sm:text-base;
   }
@@ -274,7 +249,6 @@
     @apply text-lg sm:text-xl md:text-2xl;
   }
   
-  /* Mobile-friendly spacing */
   .mobile-spacing {
     @apply p-3 sm:p-4 md:p-6;
   }
@@ -283,7 +257,6 @@
     @apply gap-2 sm:gap-4 md:gap-6;
   }
   
-  /* Animations */
   .fade-in {
     @apply animate-fade-in;
   }
@@ -292,7 +265,6 @@
     @apply animate-slide-in;
   }
   
-  /* Page transitions */
   .page-enter {
     @apply opacity-0;
   }
@@ -309,7 +281,6 @@
     @apply opacity-0 transition-opacity duration-300;
   }
 
-  /* Mobile-specific layout helpers */
   .mobile-full-width {
     @apply w-full max-w-full;
   }
@@ -318,13 +289,11 @@
     @apply w-full max-w-full px-3 sm:px-4;
   }
   
-  /* Fix for common mobile layout issues */
   .mobile-safe {
     max-width: 100vw;
     overflow-x: hidden;
   }
 
-  /* Mobile-optimized cart item styles */
   .mobile-cart-item {
     @apply flex gap-3 p-3 border-b border-gray-100 dark:border-gray-700 last:border-b-0;
   }
@@ -365,7 +334,7 @@
   .mobile-quantity-input {
     @apply w-12 h-8 border-0 bg-white dark:bg-dark-card text-center text-sm font-medium 
     text-gray-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-primary;
-    font-size: 16px; /* Prevent zoom on iOS */
+    font-size: 16px;
   }
   
   .mobile-remove-btn {
@@ -373,7 +342,6 @@
     rounded-md transition-all duration-200 active:scale-95;
   }
   
-  /* Mobile order card styles */
   .mobile-order-card {
     @apply bg-white dark:bg-dark-card border-b border-gray-200 dark:border-gray-700 p-4 space-y-3;
   }
@@ -422,12 +390,10 @@
     @apply text-xs px-2 py-1 rounded-full font-medium;
   }
   
-  /* Enhanced touch targets for mobile */
   .mobile-touch-enhanced {
     @apply min-h-[48px] min-w-[48px] flex items-center justify-center;
   }
   
-  /* Better spacing for mobile forms */
   .mobile-form-group {
     @apply space-y-2 mb-4;
   }
@@ -437,10 +403,9 @@
     bg-white dark:bg-dark-card text-gray-900 dark:text-white
     focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent
     placeholder-gray-400 dark:placeholder-gray-500;
-    font-size: 16px; /* Prevent zoom on iOS */
+    font-size: 16px;
   }
   
-  /* Mobile-first button improvements */
   .mobile-btn-primary {
     @apply w-full py-3 px-4 bg-primary text-white font-medium rounded-lg
     hover:bg-primary-light focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2
@@ -459,14 +424,12 @@
     font-size: 16px;
   }
   
-  /* Mobile sticky elements */
   .mobile-sticky-bottom {
     @apply fixed bottom-0 left-0 right-0 bg-white dark:bg-dark-card border-t border-gray-200 dark:border-gray-700 
     p-4 z-50 md:relative md:border-t-0 md:p-0 md:bg-transparent md:dark:bg-transparent;
     padding-bottom: calc(1rem + env(safe-area-inset-bottom));
   }
   
-  /* Enhanced mobile navigation */
   .mobile-nav-item {
     @apply flex-1 flex flex-col items-center justify-center py-2 px-1 text-xs font-medium
     text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-accent-blue-light
@@ -482,7 +445,6 @@
     @apply w-5 h-5 mb-1;
   }
   
-  /* Mobile-optimized alerts and messages */
   .mobile-alert {
     @apply p-3 rounded-lg border text-sm;
   }
@@ -507,7 +469,6 @@
     text-red-700 dark:text-red-300;
   }
   
-  /* Mobile table alternatives */
   .mobile-table-card {
     @apply bg-white dark:bg-dark-card rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 
     overflow-hidden mb-3;
@@ -529,7 +490,6 @@
     @apply text-sm font-medium text-gray-900 dark:text-white text-right;
   }
   
-  /* Loading states for mobile */
   .mobile-skeleton {
     @apply animate-pulse bg-gray-200 dark:bg-gray-700 rounded;
   }
@@ -547,18 +507,16 @@
   }
 }
 
-/* Custom styles that don't fit into components or utilities */
 @layer utilities {
   .scrollbar-hide {
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
   
   .scrollbar-hide::-webkit-scrollbar {
-    display: none; /* Chrome, Safari, Opera */
+    display: none;
   }
   
-  /* Text truncate for multiple lines */
   .line-clamp-2 {
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -573,13 +531,11 @@
     overflow: hidden;
   }
 
-  /* Prevent horizontal scroll */
   .no-overflow {
     overflow-x: hidden;
     max-width: 100vw;
   }
 
-  /* Mobile-first responsive utilities */
   .mobile-text-xs { @apply text-xs sm:text-sm; }
   .mobile-text-sm { @apply text-sm sm:text-base; }
   .mobile-text-base { @apply text-base sm:text-lg; }
@@ -593,69 +549,60 @@
   .mobile-m-4 { @apply m-3 sm:m-4 md:m-6; }
   .mobile-m-6 { @apply m-4 sm:m-6 md:m-8; }
   
-  /* Additional mobile layout fixes */
   .mobile-container-fix {
     max-width: 100vw;
     overflow-x: hidden;
   }
   
-  /* Better touch targets */
   .mobile-touch-target {
     @apply min-h-[44px] min-w-[44px];
   }
   
-  /* Safe area for newer phones */
   .mobile-safe-area {
     padding-bottom: env(safe-area-inset-bottom);
   }
 }
 
-/* Mobile-specific media queries for fine-tuning */
 @media (max-width: 640px) {
-  /* Ensure no element exceeds screen width */
   * {
     max-width: 100vw;
   }
   
-  /* Fix common mobile issues */
   .container, .container-fluid {
     padding-left: 12px;
     padding-right: 12px;
   }
   
-  /* Make sure flex items don't overflow */
   .flex > * {
     min-width: 0;
     flex-shrink: 1;
   }
   
-  /* Better mobile button spacing */
   button, .btn {
     margin: 2px;
   }
   
-  /* Compact mobile product cards */
   .mobile-product-card {
-    font-size: 12px; /* Smaller base font size */
-    border-radius: 6px; /* Smaller border radius */
+    font-size: 12px;
+    border-radius: 6px;
   }
   
   .mobile-badge {
     @apply top-1 left-1 px-1 py-0.5;
-    font-size: 7px; /* Very small badge text */
+    font-size: 7px;
     border-radius: 3px;
   }
   
   .mobile-wishlist-btn {
-    @apply w-6 h-6 top-1 right-1; /* Even smaller wishlist button */
+    @apply w-6 h-6 top-1 right-1;
   }
   
   .mobile-wishlist-btn svg {
-    @apply w-3 h-3; /* Smaller icon */
+    @apply w-3 h-3;
   }
   
   .mobile-card-content {
-    @apply p-1.5; /* Minimal padding */
+    @apply p-1.5;
   }
   
   .mobile-quick-add-overlay {
@@ -664,20 +611,18 @@
   }
   
   .mobile-star {
-    @apply w-2 h-2; /* Tiny stars */
+    @apply w-2 h-2;
   }
   
   .mobile-product-title {
-    font-size: 11px; /* Smaller title */
+    font-size: 11px;
     margin-bottom: 4px;
   }
   
-  /* Even tighter grid spacing on mobile */
   .mobile-product-grid {
-    @apply gap-1.5; /* Minimal gap between products */
+    @apply gap-1.5;
   }
   
-  /* Smaller rating and price section */
   .mobile-review-count {
     font-size: 9px;
   }
@@ -698,7 +643,6 @@
     font-size: 9px;
   }
 
-  /* Mobile cart and order optimizations */
   .mobile-cart-image {
     @apply w-14 h-14;
   }
@@ -739,27 +683,24 @@
   }
 }
 
-/* iPhone X and newer safe area support */
 @supports (padding: max(0px)) {
   .mobile-bottom-nav {
     padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
   }
 }
 
-/* Additional responsive improvements for product images */
 @media (max-width: 480px) {
   .mobile-product-image {
-    aspect-ratio: 1/1; /* Keep square aspect ratio on very small screens */
+    aspect-ratio: 1/1;
     border-radius: 6px 6px 0 0;
   }
   
-  /* Ultra-compact for very small screens */
   .mobile-product-card {
     border-radius: 4px;
   }
   
   .mobile-card-content {
-    @apply p-1; /* Minimal padding on tiny screens */
+    @apply p-1;
   }
   
   .mobile-product-title {
@@ -767,13 +708,11 @@
     line-height: 1.2;
   }
   
-  /* Stack price and stock vertically on tiny screens */
   .mobile-price-section {
     @apply flex-col items-start space-y-1;
   }
 }
 
-/* Landscape phone optimizations */
 @media (max-height: 500px) and (orientation: landscape) {
   .mobile-sticky-bottom {
     @apply relative p-2;
@@ -794,7 +733,6 @@
   }
 }
 
-/* High contrast mode support */
 @media (prefers-contrast: high) {
   .mobile-cart-item {
     @apply border-gray-400 dark:border-gray-300;
@@ -813,7 +751,6 @@
   }
 }
 
-/* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
   .mobile-cart-image img,
   .mobile-quantity-btn,
@@ -828,7 +765,6 @@
   }
 }
 
-/* Print styles for order history */
 @media print {
   .mobile-order-card {
     @apply border border-gray-400 break-inside-avoid;
@@ -841,7 +777,6 @@
   }
 }
 
-/* High DPI screen optimizations */
 @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
   .mobile-product-image img {
     image-rendering: -webkit-optimize-contrast;
