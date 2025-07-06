@@ -11,7 +11,6 @@ const ProductListPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // State for filters
   const [currentPage, setCurrentPage] = useState(1);
   const [sort, setSort] = useState('newest');
   const [filters, setFilters] = useState({
@@ -23,7 +22,6 @@ const ProductListPage = () => {
     onSale: false,
   });
   
-  // Parse query parameters
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const page = parseInt(searchParams.get('page')) || 1;
@@ -39,10 +37,8 @@ const ProductListPage = () => {
       onSale,
     });
     
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.search]);
   
-  // Fetch products with filters
   const { data, isLoading, error } = useQuery(
     ['products', currentPage, category, keyword, sort, filters],
     () => getProducts({
@@ -57,7 +53,6 @@ const ProductListPage = () => {
     }
   );
   
-  // Apply filters handler
   const applyFilters = () => {
     const searchParams = new URLSearchParams();
     
@@ -76,7 +71,6 @@ const ProductListPage = () => {
     );
   };
   
-  // Reset filters handler
   const resetFilters = () => {
     setFilters({
       minPrice: '',
@@ -92,7 +86,6 @@ const ProductListPage = () => {
     navigate(location.pathname, { replace: true });
   };
   
-  // Handle page change
   const handlePageChange = (page) => {
     setCurrentPage(page);
     
@@ -107,7 +100,6 @@ const ProductListPage = () => {
       { replace: true }
     );
     
-    // Scroll to top
     window.scrollTo(0, 0);
   };
   
@@ -119,11 +111,9 @@ const ProductListPage = () => {
         </h1>
         
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Filters sidebar - This can be expanded later */}
           <div className="lg:w-1/4 bg-white dark:bg-dark-card p-4 rounded-lg shadow-sm h-fit">
             <h2 className="text-lg font-semibold mb-4 dark:text-white">Filters</h2>
             
-            {/* Filter UI will go here */}
             <div className="space-y-6">
               <p className="text-gray-500 dark:text-gray-400">
                 Filter options will be implemented here
@@ -146,9 +136,7 @@ const ProductListPage = () => {
             </div>
           </div>
           
-          {/* Product grid */}
           <div className="lg:w-3/4">
-            {/* Sort and results info */}
             <div className="bg-white dark:bg-dark-card p-4 rounded-lg shadow-sm mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
                 {data && (
@@ -176,7 +164,6 @@ const ProductListPage = () => {
               </div>
             </div>
             
-            {/* Products */}
             {isLoading ? (
               <Loader />
             ) : error ? (
@@ -193,7 +180,6 @@ const ProductListPage = () => {
                   ))}
                 </div>
                 
-                {/* Pagination */}
                 {data?.pages > 1 && (
                   <div className="flex justify-center mt-8">
                     <div className="flex">

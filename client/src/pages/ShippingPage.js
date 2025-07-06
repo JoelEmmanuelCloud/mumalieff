@@ -10,7 +10,6 @@ const ShippingPage = () => {
   const navigate = useNavigate();
   const { shippingAddress, saveShippingAddress } = useCart();
   
-  // Form state
   const [address, setAddress] = useState(shippingAddress.address || '');
   const [city, setCity] = useState(shippingAddress.city || '');
   const [state, setState] = useState(shippingAddress.state || '');
@@ -18,10 +17,8 @@ const ShippingPage = () => {
   const [country, setCountry] = useState(shippingAddress.country || 'Nigeria');
   const [selectedAddressId, setSelectedAddressId] = useState('');
   
-  // Fetch user profile to get saved addresses
   const { data: userData, isLoading } = useQuery('userProfile', getUserProfile);
   
-  // Pre-fill form with default address if available
   useEffect(() => {
     if (userData && userData.shippingAddresses) {
       const defaultAddress = userData.shippingAddresses.find(addr => addr.isDefault);
@@ -37,7 +34,6 @@ const ShippingPage = () => {
     }
   }, [userData, shippingAddress]);
   
-  // Handle saved address selection
   const handleAddressSelect = (addressId) => {
     const selectedAddress = userData.shippingAddresses.find(addr => addr._id === addressId);
     
@@ -51,7 +47,6 @@ const ShippingPage = () => {
     }
   };
   
-  // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
     
@@ -70,7 +65,6 @@ const ShippingPage = () => {
     <div className="bg-gray-50 dark:bg-dark-bg py-8">
       <div className="container-custom">
         <div className="max-w-2xl mx-auto">
-          {/* Checkout Steps */}
           <div className="flex justify-between mb-8">
             <div className="w-1/3 text-center">
               <div className="relative">
@@ -105,7 +99,6 @@ const ShippingPage = () => {
               <Loader />
             ) : (
               <>
-                {/* Saved Addresses */}
                 {userData?.shippingAddresses && userData.shippingAddresses.length > 0 && (
                   <div className="mb-6">
                     <h2 className="text-lg font-medium mb-3 dark:text-white">Saved Addresses</h2>
@@ -134,7 +127,6 @@ const ShippingPage = () => {
                   </div>
                 )}
                 
-                {/* Shipping Form */}
                 <form onSubmit={handleSubmit}>
                   <div className="mb-4">
                     <label htmlFor="address" className="form-label">Address</label>

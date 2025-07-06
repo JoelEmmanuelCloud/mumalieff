@@ -11,7 +11,6 @@ const AdminPasswordChangePage = () => {
   const { user, isAuthenticated, isAdmin, requirePasswordChange, changePassword, changePasswordLoading } = useAuth();
   const navigate = useNavigate();
   
-  // Redirect if not an admin or no password change required
   useEffect(() => {
     if (!isAuthenticated || !isAdmin) {
       navigate('/login');
@@ -24,7 +23,7 @@ const AdminPasswordChangePage = () => {
     e.preventDefault();
     setError('');
     
-    // Validate passwords
+   
     if (newPassword !== confirmPassword) {
       setError('New passwords do not match');
       return;
@@ -37,9 +36,9 @@ const AdminPasswordChangePage = () => {
     
     try {
       await changePassword(currentPassword, newPassword);
-      // The redirect happens in the AuthContext after successful password change
+    
     } catch (err) {
-      // Error handling is done in the mutation
+ 
     }
   };
   

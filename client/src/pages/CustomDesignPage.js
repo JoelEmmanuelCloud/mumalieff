@@ -14,11 +14,9 @@ const CustomDesignPage = () => {
   const location = useLocation();
   const { addToCart } = useCart();
   
-  // Get productId from query params if exists
   const searchParams = new URLSearchParams(location.search);
   const productId = searchParams.get('productId');
   
-  // State
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedSize, setSelectedSize] = useState('');
   const [selectedColor, setSelectedColor] = useState('');
@@ -28,7 +26,6 @@ const CustomDesignPage = () => {
   const [designPlacement, setDesignPlacement] = useState('front');
   const [designSize, setDesignSize] = useState('medium');
   
-  // Fetch specific product if productId is provided
   const {
     data: product,
     isLoading: productLoading,
@@ -46,7 +43,6 @@ const CustomDesignPage = () => {
     },
   });
   
-  // Fetch customizable products if no productId is provided
   const {
     data: products,
     isLoading: productsLoading,
@@ -59,7 +55,6 @@ const CustomDesignPage = () => {
     }
   );
   
-  // Upload image mutation
   const uploadMutation = useMutation(
     (file) => {
       const formData = new FormData();
@@ -75,7 +70,6 @@ const CustomDesignPage = () => {
           return;
         }
         
-        // Add to cart with custom design
         addToCart(
           selectedProduct,
           quantity,
@@ -103,13 +97,11 @@ const CustomDesignPage = () => {
     const file = e.target.files[0];
     if (!file) return;
     
-    // Check file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
+    if (file.size > 3 * 1024 * 1024) {
       toast.error('File size should be less than 5MB');
       return;
     }
     
-    // Check file type
     const validTypes = ['image/jpeg', 'image/png', 'image/svg+xml'];
     if (!validTypes.includes(file.type)) {
       toast.error('File type should be JPEG, PNG, or SVG');
@@ -118,7 +110,6 @@ const CustomDesignPage = () => {
     
     setDesignFile(file);
     
-    // Create preview URL
     const reader = new FileReader();
     reader.onload = () => {
       setDesignPreview(reader.result);
@@ -126,7 +117,6 @@ const CustomDesignPage = () => {
     reader.readAsDataURL(file);
   };
   
-  // Handle product selection
   const handleProductSelect = (product) => {
     setSelectedProduct(product);
     if (product.sizes && product.sizes.length > 0) {
@@ -136,11 +126,9 @@ const CustomDesignPage = () => {
       setSelectedColor(product.colors[0].name);
     }
     
-    // Scroll to customization section
     document.getElementById('customization-section').scrollIntoView({ behavior: 'smooth' });
   };
   
-  // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
     
@@ -163,12 +151,10 @@ const CustomDesignPage = () => {
       toast.error('Please upload a design');
       return;
     }
-    
-    // Upload design and add to cart (handled by mutation)
+ 
     uploadMutation.mutate(designFile);
   };
   
-  // Loading states
   const isLoading = productId ? productLoading : productsLoading;
   const error = productId ? productError : productsError;
   
@@ -185,7 +171,6 @@ const CustomDesignPage = () => {
           </Message>
         ) : (
           <>
-            {/* Product Selection Section */}
             {!productId && (
               <div className="mb-12">
                 <h2 className="text-xl font-semibold mb-4 dark:text-white">Choose a Product to Customize</h2>
@@ -212,7 +197,6 @@ const CustomDesignPage = () => {
               </div>
             )}
             
-            {/* Customization Section */}
             <div id="customization-section" className="bg-white dark:bg-dark-card rounded-lg shadow-sm p-6">
               <h2 className="text-xl font-semibold mb-6 dark:text-white">Design Your Custom T-Shirt</h2>
               
@@ -220,17 +204,15 @@ const CustomDesignPage = () => {
                 <Message>Please select a product from above to start customizing</Message>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  {/* Preview Section */}
+  
                   <div>
                     <div className="aspect-w-3 aspect-h-4 bg-gray-100 dark:bg-dark-bg rounded-lg overflow-hidden mb-4 relative">
-                      {/* T-shirt base image */}
                       <img
                         src={selectedProduct?.images[0]?.url || '/images/placeholder.jpg'}
                         alt={selectedProduct?.name}
                         className="object-contain object-center w-full h-full"
                       />
                       
-                      {/* Design preview overlay */}
                       {designPreview && (
                         <div className={`absolute ${
                           designPlacement === 'front' ? 'inset-0 flex items-center justify-center' :
@@ -267,11 +249,10 @@ const CustomDesignPage = () => {
                       </div>
                     )}
                   </div>
-                  
-                  {/* Customization Form */}
+                 
                   <div>
                     <form onSubmit={handleSubmit}>
-                      {/* Size Selection */}
+                    
                       {selectedProduct?.sizes.length > 0 && (
                         <div className="mb-4">
                           <label className="form-label">Size</label>
@@ -297,7 +278,6 @@ const CustomDesignPage = () => {
                         </div>
                       )}
                       
-                      {/* Color Selection */}
                       {selectedProduct?.colors.length > 0 && (
                         <div className="mb-4">
                           <label className="form-label">Color</label>
@@ -320,7 +300,6 @@ const CustomDesignPage = () => {
                         </div>
                       )}
                       
-                      {/* Quantity */}
                       <div className="mb-4">
                         <label className="form-label">Quantity</label>
                         <div className="flex items-center">
@@ -349,7 +328,6 @@ const CustomDesignPage = () => {
                         </div>
                       </div>
                       
-                      {/* Design Upload */}
                       <div className="mb-4">
                         <label className="form-label">Upload Your Design</label>
                         <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-md">
@@ -397,7 +375,6 @@ const CustomDesignPage = () => {
                         )}
                       </div>
                       
-                      {/* Design Placement */}
                       <div className="mb-4">
                         <label className="form-label">Design Placement</label>
                         <div className="grid grid-cols-2 gap-3 mt-1">
@@ -448,7 +425,6 @@ const CustomDesignPage = () => {
                         </div>
                       </div>
                       
-                      {/* Design Size */}
                       <div className="mb-6">
                         <label className="form-label">Design Size</label>
                         <div className="grid grid-cols-3 gap-3 mt-1">
@@ -488,7 +464,6 @@ const CustomDesignPage = () => {
                         </div>
                       </div>
                       
-                      {/* Submit Button */}
                       <button
                         type="submit"
                         className="btn btn-primary w-full py-3"
@@ -506,7 +481,6 @@ const CustomDesignPage = () => {
               )}
             </div>
             
-            {/* Design Tips Section */}
             <div className="mt-12 bg-white dark:bg-dark-card rounded-lg shadow-sm p-6">
               <h2 className="text-xl font-semibold mb-4 dark:text-white">Design Tips</h2>
               

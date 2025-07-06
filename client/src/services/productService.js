@@ -1,12 +1,10 @@
-// productService.js for two-category system with verified reviews
 import api from './apiConfig';
 
-// Get all products with filters - updated for new category system
 export const getProducts = async (params = {}) => {
   const {
     keyword,
     pageNumber = 1,
-    category, // Now either 'Customize Your Prints' or 'Wear Your Conviction'
+    category,
     minPrice,
     maxPrice,
     size,
@@ -14,7 +12,7 @@ export const getProducts = async (params = {}) => {
     sort,
     featured,
     onSale,
-    designStyle, // New filter for design styles within categories
+    designStyle,
     allowCustomization
   } = params;
 
@@ -36,7 +34,6 @@ export const getProducts = async (params = {}) => {
   return response.data;
 };
 
-// Get customizable products (for Customize Your Prints)
 export const getCustomizableProducts = async (params = {}) => {
   const customizableParams = {
     ...params,
@@ -46,7 +43,6 @@ export const getCustomizableProducts = async (params = {}) => {
   return getProducts(customizableParams);
 };
 
-// Get pre-designed products (for Wear Your Conviction)
 export const getPreDesignedProducts = async (params = {}) => {
   const preDesignedParams = {
     ...params,
@@ -55,7 +51,6 @@ export const getPreDesignedProducts = async (params = {}) => {
   return getProducts(preDesignedParams);
 };
 
-// Get products by design style (within Wear Your Conviction)
 export const getProductsByDesignStyle = async (designStyle, params = {}) => {
   const styleParams = {
     ...params,
@@ -65,43 +60,36 @@ export const getProductsByDesignStyle = async (designStyle, params = {}) => {
   return getProducts(styleParams);
 };
 
-// Get product by ID
 export const getProductById = async (id) => {
   const response = await api.get(`/products/${id}`);
   return response.data;
 };
 
-// Get top rated products
 export const getTopProducts = async (limit = 5) => {
   const response = await api.get(`/products/top?limit=${limit}`);
   return response.data;
 };
 
-// Get featured products
 export const getFeaturedProducts = async (limit = 6) => {
   const response = await api.get(`/products/featured?limit=${limit}`);
   return response.data;
 };
 
-// Get sale products
 export const getSaleProducts = async (limit = 6) => {
   const response = await api.get(`/products/sale?limit=${limit}`);
   return response.data;
 };
 
-// Get featured products from Wear Your Conviction category
 export const getFeaturedConvictionProducts = async (limit = 6) => {
   const response = await api.get(`/products/featured?limit=${limit}&category=${encodeURIComponent('Wear Your Conviction')}`);
   return response.data;
 };
 
-// Get base products for customization
 export const getBaseProductsForCustomization = async (limit = 10) => {
   const response = await api.get(`/products/base-for-customization?limit=${limit}`);
   return response.data;
 };
 
-// Enhanced Review operations with purchase verification
 export const createProductReview = async (productId, reviewData) => {
   const response = await api.post(`/products/${productId}/reviews`, reviewData);
   return response.data;
@@ -122,13 +110,11 @@ export const getProductReviews = async (productId, params = {}) => {
   return response.data;
 };
 
-// Get user's review eligibility
 export const getReviewEligibility = async () => {
   const response = await api.get('/products/review-eligibility');
   return response.data;
 };
 
-// Mark review as helpful
 export const markReviewHelpful = async (productId, reviewId) => {
   const response = await api.post(`/products/${productId}/reviews/${reviewId}/helpful`);
   return response.data;
@@ -139,37 +125,31 @@ export const unmarkReviewHelpful = async (productId, reviewId) => {
   return response.data;
 };
 
-// Verify product purchase
 export const verifyProductPurchase = async (productId) => {
   const response = await api.get(`/products/${productId}/verify-purchase`);
   return response.data;
 };
 
-// Submit custom design order
 export const submitCustomDesignOrder = async (orderData) => {
   const response = await api.post('/products/custom-order', orderData);
   return response.data;
 };
 
-// Admin: Create product
 export const createProduct = async (productData) => {
   const response = await api.post('/products', productData);
   return response.data;
 };
 
-// Admin: Update product
 export const updateProduct = async (id, productData) => {
   const response = await api.put(`/products/${id}`, productData);
   return response.data;
 };
 
-// Admin: Delete product
 export const deleteProduct = async (id) => {
   const response = await api.delete(`/products/${id}`);
   return response.data;
 };
 
-// Admin: Get custom design orders
 export const getCustomDesignOrders = async (params = {}) => {
   const { pageNumber = 1, status, dateFrom, dateTo } = params;
   let url = `/admin/custom-orders?pageNumber=${pageNumber}`;
@@ -182,7 +162,6 @@ export const getCustomDesignOrders = async (params = {}) => {
   return response.data;
 };
 
-// Admin: Update custom design order status
 export const updateCustomOrderStatus = async (orderId, status, notes = '') => {
   const response = await api.put(`/admin/custom-orders/${orderId}/status`, {
     status,

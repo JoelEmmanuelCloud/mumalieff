@@ -1,4 +1,3 @@
-// components/SEO/SEOHelmet.js - Comprehensive SEO component
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useLocation } from 'react-router-dom';
@@ -19,19 +18,16 @@ const SEOHelmet = ({
   const location = useLocation();
   const currentUrl = `https://mumalieff.com${location.pathname}`;
   
-  // Default values
   const defaultTitle = 'Mumalieff | Premium T-shirts & Custom Prints Nigeria';
   const defaultDescription = 'Shop premium quality t-shirts and create custom designs at Mumalieff. Express your faith with our meaningful collections. Fast delivery across Nigeria.';
   const defaultImage = 'https://mumalieff.com/images/og-image.jpg';
   const defaultKeywords = 't-shirts Nigeria, custom t-shirts, premium clothing, faith-based apparel, custom prints, Nigerian fashion, online clothing store';
 
-  // Use provided values or defaults
   const pageTitle = title || defaultTitle;
   const pageDescription = description || defaultDescription;
   const pageImage = image || defaultImage;
   const pageKeywords = keywords || defaultKeywords;
 
-  // Generate structured data
   const generateStructuredData = () => {
     const baseData = {
       "@context": "https://schema.org",
@@ -42,7 +38,6 @@ const SEOHelmet = ({
       "image": pageImage
     };
 
-    // Add product-specific schema
     if (product && type === 'product') {
       return {
         ...baseData,
@@ -76,7 +71,6 @@ const SEOHelmet = ({
       };
     }
 
-    // Add breadcrumbs if provided
     if (breadcrumbs.length > 0) {
       const breadcrumbData = {
         "@context": "https://schema.org",
@@ -99,14 +93,12 @@ const SEOHelmet = ({
 
   return (
     <Helmet>
-      {/* Basic Meta Tags */}
       <title>{pageTitle}</title>
       <meta name="description" content={pageDescription} />
       <meta name="keywords" content={pageKeywords} />
       <meta name="author" content={author} />
       <link rel="canonical" href={currentUrl} />
 
-      {/* Open Graph Tags */}
       <meta property="og:title" content={pageTitle} />
       <meta property="og:description" content={pageDescription} />
       <meta property="og:image" content={pageImage} />
@@ -115,18 +107,15 @@ const SEOHelmet = ({
       <meta property="og:site_name" content="Mumalieff" />
       <meta property="og:locale" content="en_NG" />
 
-      {/* Twitter Card Tags */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={pageTitle} />
       <meta name="twitter:description" content={pageDescription} />
       <meta name="twitter:image" content={pageImage} />
       <meta name="twitter:site" content="@mumalieff" />
 
-      {/* Additional Meta Tags */}
       {publishedTime && <meta property="article:published_time" content={publishedTime} />}
       {modifiedTime && <meta property="article:modified_time" content={modifiedTime} />}
 
-      {/* Structured Data */}
       {Array.isArray(structuredData) ? 
         structuredData.map((data, index) => (
           <script key={index} type="application/ld+json">
@@ -143,7 +132,6 @@ const SEOHelmet = ({
   );
 };
 
-// Product Page SEO Component
 export const ProductSEO = ({ product }) => {
   if (!product) return null;
 
@@ -171,7 +159,6 @@ export const ProductSEO = ({ product }) => {
   );
 };
 
-// Category Page SEO Component
 export const CategorySEO = ({ category, products = [] }) => {
   const title = `${category} T-shirts | Premium Collection | Mumalieff`;
   const description = `Shop our ${category} collection of premium t-shirts. ${products.length} unique designs available. Express your style with Mumalieff's quality clothing.`;
@@ -193,7 +180,6 @@ export const CategorySEO = ({ category, products = [] }) => {
   );
 };
 
-// Search Results SEO Component
 export const SearchSEO = ({ query, resultCount }) => {
   const title = `Search Results for "${query}" | Mumalieff`;
   const description = `Found ${resultCount} t-shirts matching "${query}". Shop premium quality clothing at Mumalieff with fast delivery across Nigeria.`;
@@ -208,7 +194,6 @@ export const SearchSEO = ({ query, resultCount }) => {
   );
 };
 
-// Blog/Article SEO Component
 export const ArticleSEO = ({ article }) => {
   if (!article) return null;
 
@@ -232,7 +217,6 @@ export const ArticleSEO = ({ article }) => {
   );
 };
 
-// Organization Schema Component
 export const OrganizationSchema = () => {
   const organizationData = {
     "@context": "https://schema.org",
@@ -242,7 +226,7 @@ export const OrganizationSchema = () => {
     "url": "https://mumalieff.com",
     "logo": "https://mumalieff.com/images/logo/logo192.png",
     "image": "https://mumalieff.com/images/og-image.jpg",
-    "telephone": "+234-XXX-XXX-XXXX",
+    "telephone": "+234- 809 388 0315",
     "email": "support@mumalieff.com",
     "address": {
       "@type": "PostalAddress",
@@ -281,7 +265,6 @@ export const OrganizationSchema = () => {
   );
 };
 
-// Website Schema Component
 export const WebsiteSchema = () => {
   const websiteData = {
     "@context": "https://schema.org",
@@ -309,7 +292,6 @@ export const WebsiteSchema = () => {
   );
 };
 
-// SEO Utils
 export const generateSitemap = (pages) => {
   const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -334,7 +316,6 @@ Allow: /
 
 Sitemap: https://mumalieff.com/sitemap.xml
 
-# Block access to admin and API routes
 Disallow: /admin/
 Disallow: /api/
 Disallow: /_next/

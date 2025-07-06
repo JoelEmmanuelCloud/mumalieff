@@ -12,7 +12,6 @@ const ProfilePage = () => {
   const { user, updateProfile } = useAuth();
   const [activeTab, setActiveTab] = useState('profile');
   
-  // Profile form state
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -21,7 +20,6 @@ const ProfilePage = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   
-  // Address form state
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [editingAddressId, setEditingAddressId] = useState(null);
   const [address, setAddress] = useState('');
@@ -31,27 +29,22 @@ const ProfilePage = () => {
   const [country, setCountry] = useState('Nigeria');
   const [isDefault, setIsDefault] = useState(false);
   
-  // Fetch user profile
   const { 
     data: profileData, 
     isLoading: profileLoading, 
     refetch: refetchProfile 
   } = useQuery('userProfile', getUserProfile);
   
-  // Fetch orders
   const { 
     data: ordersData, 
     isLoading: ordersLoading 
   } = useQuery('myOrders', () => getMyOrders());
   
-  // Update profile mutation
   const updateProfileMutation = useMutation(updateUserProfile, {
     onSuccess: (data) => {
-      // Update auth context
       updateProfile(data);
       refetchProfile();
       toast.success('Profile updated successfully');
-      // Clear password fields
       setPassword('');
       setConfirmPassword('');
     },
@@ -60,7 +53,6 @@ const ProfilePage = () => {
     },
   });
   
-  // Add shipping address mutation
   const addAddressMutation = useMutation(addShippingAddress, {
     onSuccess: () => {
       toast.success('Address added successfully');
@@ -72,7 +64,6 @@ const ProfilePage = () => {
     },
   });
   
-  // Update shipping address mutation
   const updateAddressMutation = useMutation(
     ({ id, addressData }) => updateShippingAddress(id, addressData),
     {
@@ -87,7 +78,6 @@ const ProfilePage = () => {
     }
   );
   
-  // Set initial form values
   useEffect(() => {
     if (profileData) {
       setFirstName(profileData.firstName || '');
@@ -97,7 +87,6 @@ const ProfilePage = () => {
     }
   }, [profileData]);
   
-  // Reset address form
   const resetAddressForm = () => {
     setAddress('');
     setCity('');
@@ -109,7 +98,6 @@ const ProfilePage = () => {
     setShowAddressForm(false);
   };
   
-  // Handle edit address
   const handleEditAddress = (addressItem) => {
     setAddress(addressItem.address);
     setCity(addressItem.city);
@@ -121,7 +109,6 @@ const ProfilePage = () => {
     setShowAddressForm(true);
   };
   
-  // Handle profile submit
   const handleProfileSubmit = (e) => {
     e.preventDefault();
     setErrorMsg('');
@@ -145,7 +132,6 @@ const ProfilePage = () => {
     updateProfileMutation.mutate(userData);
   };
   
-  // Handle address submit
   const handleAddressSubmit = (e) => {
     e.preventDefault();
     
@@ -171,7 +157,6 @@ const ProfilePage = () => {
         <h1 className="mobile-title font-semibold mb-4 sm:mb-6 dark:text-white">My Account</h1>
         
         <div className="card overflow-hidden">
-          {/* Mobile Tabs */}
           <div className="flex border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
             <button
               onClick={() => setActiveTab('profile')}
@@ -206,7 +191,6 @@ const ProfilePage = () => {
           </div>
           
           <div className="mobile-spacing">
-            {/* Profile Tab */}
             {activeTab === 'profile' && (
               <div>
                 <h2 className="mobile-title font-semibold mb-4 dark:text-white">My Profile</h2>
@@ -303,7 +287,6 @@ const ProfilePage = () => {
               </div>
             )}
             
-            {/* Orders Tab - Mobile Optimized */}
             {activeTab === 'orders' && (
               <div>
                 <h2 className="mobile-title font-semibold mb-4 dark:text-white">My Orders</h2>
@@ -316,7 +299,6 @@ const ProfilePage = () => {
                   </Message>
                 ) : (
                   <div>
-                    {/* Mobile Order Cards */}
                     <div className="block sm:hidden space-y-4">
                       {ordersData?.orders.map((order) => (
                         <div key={order._id} className="mobile-order-card">
@@ -373,7 +355,6 @@ const ProfilePage = () => {
                       ))}
                     </div>
                     
-                    {/* Desktop Table */}
                     <div className="hidden sm:block overflow-x-auto">
                       <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead className="bg-gray-50 dark:bg-dark-bg">
@@ -445,7 +426,6 @@ const ProfilePage = () => {
                         </tbody>
                       </table>
                       
-                      {/* Pagination - implement if needed */}
                       {ordersData?.pages > 1 && (
                         <div className="flex justify-center mt-6">
                           <p className="text-gray-500 dark:text-gray-400">Pagination will be implemented here</p>
@@ -457,7 +437,6 @@ const ProfilePage = () => {
               </div>
             )}
             
-            {/* Addresses Tab */}
             {activeTab === 'addresses' && (
               <div>
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
@@ -613,7 +592,6 @@ const ProfilePage = () => {
                           >
                             Edit
                           </button>
-                          {/* Delete functionality can be added later */}
                         </div>
                       </div>
                     ))}

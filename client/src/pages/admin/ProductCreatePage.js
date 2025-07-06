@@ -1,4 +1,3 @@
-//Component/pages/admin/ProductCreatePage to create new products
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation } from 'react-query';
@@ -10,13 +9,12 @@ import Loader from '../../components/common/Loader';
 const ProductCreatePage = () => {
   const navigate = useNavigate();
   
-  // Form State
   const [name, setName] = useState('');
   const [price, setPrice] = useState(0);
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
-  const [designStyle, setDesignStyle] = useState(''); // Added design style
-  const [convictionMessage, setConvictionMessage] = useState(''); // Added conviction message
+  const [designStyle, setDesignStyle] = useState('');
+  const [convictionMessage, setConvictionMessage] = useState('');
   const [countInStock, setCountInStock] = useState(0);
   const [material, setMaterial] = useState('Cotton');
   const [images, setImages] = useState([]);
@@ -25,7 +23,6 @@ const ProductCreatePage = () => {
   const [isSale, setIsSale] = useState(false);
   const [salePrice, setSalePrice] = useState(0);
   
-  // Size and Color State
   const [sizes, setSizes] = useState([
     { name: 'S', inStock: true },
     { name: 'M', inStock: true },
@@ -35,11 +32,9 @@ const ProductCreatePage = () => {
   const [newSize, setNewSize] = useState({ name: '', inStock: true });
   const [newColor, setNewColor] = useState({ name: '', colorCode: '#000000', inStock: true });
   
-  // Image Upload State
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
   
-  // Create product mutation
   const createProductMutation = useMutation(createProduct, {
     onSuccess: (data) => {
       toast.success('Product created successfully');
@@ -50,7 +45,6 @@ const ProductCreatePage = () => {
     },
   });
   
-  // Handle form submit
   const handleSubmit = (e) => {
     e.preventDefault();
     
@@ -69,13 +63,11 @@ const ProductCreatePage = () => {
       return;
     }
     
-    // Validate design style for Wear Your Conviction
     if (category === 'Wear Your Conviction' && !designStyle) {
       toast.error('Please select a design style for "Wear Your Conviction" products');
       return;
     }
     
-    // Validate conviction message for Wear Your Conviction
     if (category === 'Wear Your Conviction' && !convictionMessage.trim()) {
       toast.error('Please enter a conviction message for "Wear Your Conviction" products');
       return;
@@ -125,7 +117,6 @@ const ProductCreatePage = () => {
     });
   };
   
-  // Handle image upload
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -149,7 +140,6 @@ const ProductCreatePage = () => {
     }
   };
   
-  // Handle image delete
   const handleImageDelete = async (publicId, index) => {
     if (window.confirm('Are you sure you want to delete this image?')) {
       try {
@@ -168,14 +158,12 @@ const ProductCreatePage = () => {
     }
   };
   
-  // Handle add size
   const handleAddSize = () => {
     if (!newSize.name) {
       toast.error('Please enter a size name');
       return;
     }
     
-    // Check if size already exists
     if (sizes.some((size) => size.name === newSize.name)) {
       toast.error('Size already exists');
       return;
@@ -185,21 +173,18 @@ const ProductCreatePage = () => {
     setNewSize({ name: '', inStock: true });
   };
   
-  // Handle remove size
   const handleRemoveSize = (index) => {
     const updatedSizes = [...sizes];
     updatedSizes.splice(index, 1);
     setSizes(updatedSizes);
   };
   
-  // Handle add color
   const handleAddColor = () => {
     if (!newColor.name || !newColor.colorCode) {
       toast.error('Please enter color name and select a color code');
       return;
     }
     
-    // Check if color already exists
     if (colors.some((color) => color.name === newColor.name)) {
       toast.error('Color already exists');
       return;
@@ -209,7 +194,6 @@ const ProductCreatePage = () => {
     setNewColor({ name: '', colorCode: '#000000', inStock: true });
   };
   
-  // Handle remove color
   const handleRemoveColor = (index) => {
     const updatedColors = [...colors];
     updatedColors.splice(index, 1);
@@ -235,7 +219,6 @@ const ProductCreatePage = () => {
         
         <form onSubmit={handleSubmit} className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Basic Information */}
             <div>
               <h2 className="text-lg font-medium mb-4 dark:text-white">Basic Information</h2>
               
@@ -252,7 +235,6 @@ const ProductCreatePage = () => {
                 />
               </div>
               
-              {/* Design Style - Only for Wear Your Conviction */}
               {category === 'Wear Your Conviction' && (
                 <div className="mb-4">
                   <label htmlFor="designStyle" className="form-label">Design Style *</label>
@@ -270,7 +252,6 @@ const ProductCreatePage = () => {
                 </div>
               )}
               
-              {/* Conviction Message - Only for Wear Your Conviction */}
               {category === 'Wear Your Conviction' && (
                 <div className="mb-4">
                   <label htmlFor="convictionMessage" className="form-label">Conviction Message *</label>
@@ -312,9 +293,7 @@ const ProductCreatePage = () => {
                   value={category}
                   onChange={(e) => {
                     setCategory(e.target.value);
-                    // Auto-set allowCustomization based on category
                     setAllowCustomization(e.target.value === 'Customize Your Prints');
-                    // Reset design style and conviction message when category changes
                     setDesignStyle('');
                     setConvictionMessage('');
                   }}
@@ -372,11 +351,9 @@ const ProductCreatePage = () => {
               </div>
             </div>
             
-            {/* Options & Features */}
             <div>
               <h2 className="text-lg font-medium mb-4 dark:text-white">Options & Features</h2>
               
-              {/* Sale Settings */}
               <div className="mb-4 p-4 bg-gray-50 dark:bg-dark-bg rounded-lg">
                 <div className="flex items-center mb-2">
                   <input
@@ -414,7 +391,6 @@ const ProductCreatePage = () => {
                 )}
               </div>
               
-              {/* Other Features */}
               <div className="mb-4 space-y-2">
                 <div className="flex items-center">
                   <input
@@ -447,7 +423,6 @@ const ProductCreatePage = () => {
                 </div>
               </div>
               
-              {/* Images */}
               <div className="mb-6">
                 <h3 className="text-sm font-medium mb-2 dark:text-white">Product Images *</h3>
                 
@@ -494,7 +469,6 @@ const ProductCreatePage = () => {
                 </p>
               </div>
               
-              {/* Sizes */}
               <div className="mb-6">
                 <h3 className="text-sm font-medium mb-2 dark:text-white">Sizes *</h3>
                 
@@ -555,7 +529,6 @@ const ProductCreatePage = () => {
                 </div>
               </div>
               
-              {/* Colors */}
               <div className="mb-6">
                 <h3 className="text-sm font-medium mb-2 dark:text-white">Colors *</h3>
                 

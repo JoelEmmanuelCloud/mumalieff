@@ -1,5 +1,3 @@
-// CartPage.js - Mobile Optimized
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
@@ -15,20 +13,18 @@ const CartPage = () => {
   const [promoInput, setPromoInput] = useState('');
   const [promoError, setPromoError] = useState('');
   
-  // Handle promo code application
   const handleApplyPromo = () => {
     if (!promoInput.trim()) {
       setPromoError('Please enter a promo code');
       return;
     }
     
-    // Simple promo code implementation - in a real app you'd validate from backend
     if (promoInput.toUpperCase() === 'MUMALIEFF10') {
-      const discountAmount = itemsPrice * 0.1; // 10% discount
+      const discountAmount = itemsPrice * 0.1; 
       applyPromoCode(promoInput.toUpperCase(), discountAmount);
       setPromoError('');
     } else if (promoInput.toUpperCase() === 'WELCOME20') {
-      const discountAmount = itemsPrice * 0.2; // 20% discount
+      const discountAmount = itemsPrice * 0.2; 
       applyPromoCode(promoInput.toUpperCase(), discountAmount);
       setPromoError('');
     } else {
@@ -38,7 +34,6 @@ const CartPage = () => {
     setPromoInput('');
   };
   
-  // Handle checkout
   const handleCheckout = () => {
     if (isAuthenticated) {
       navigate('/shipping');
@@ -47,7 +42,6 @@ const CartPage = () => {
     }
   };
 
-  // Check if quick checkout is available (user has shipping & payment method set)
   const canQuickCheckout = isAuthenticated && shippingAddress?.address && paymentMethod;
   
   return (
@@ -61,14 +55,14 @@ const CartPage = () => {
           </Message>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-            {/* Cart Items - Mobile Optimized */}
+         
             <div className="lg:col-span-2">
               <div className="bg-white dark:bg-dark-card rounded-lg shadow-sm overflow-hidden">
                 <ul className="divide-y divide-gray-200 dark:divide-gray-700">
                   {cartItems.map((item) => (
                     <li key={`${item.product}-${item.size}-${item.color}`} className="p-3 sm:p-4 lg:p-6">
                       <div className="flex gap-3 sm:gap-4">
-                        {/* Product Image - Much Smaller on Mobile */}
+                       
                         <div className="flex-shrink-0">
                           <Link to={`/product/${item.product}`}>
                             <img
@@ -79,7 +73,6 @@ const CartPage = () => {
                           </Link>
                         </div>
                         
-                        {/* Product Info - Optimized Layout */}
                         <div className="flex-1 min-w-0">
                           <div className="flex flex-col sm:flex-row sm:justify-between gap-2">
                             <div className="min-w-0 flex-1">
@@ -108,9 +101,8 @@ const CartPage = () => {
                             </div>
                           </div>
                           
-                          {/* Mobile-First Quantity and Remove Controls */}
                           <div className="mt-3 flex items-center justify-between">
-                            {/* Quantity Controls - Compact Mobile Design */}
+                            
                             <div className="flex items-center border border-gray-300 dark:border-gray-600 rounded-md overflow-hidden">
                               <button
                                 onClick={() => updateCartItem(item.product, Math.max(1, item.qty - 1), item.size, item.color)}
@@ -128,7 +120,7 @@ const CartPage = () => {
                                 min="1"
                                 max={item.countInStock}
                                 className="w-12 sm:w-14 h-8 sm:h-9 border-0 bg-white dark:bg-dark-card text-center text-sm font-medium text-gray-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-primary"
-                                style={{ fontSize: '16px' }} // Prevent zoom on iOS
+                                style={{ fontSize: '16px' }} 
                               />
                               <button
                                 onClick={() => updateCartItem(item.product, Math.min(item.countInStock, item.qty + 1), item.size, item.color)}
@@ -141,7 +133,6 @@ const CartPage = () => {
                               </button>
                             </div>
                             
-                            {/* Remove Button - Touch Friendly */}
                             <button
                               onClick={() => removeFromCart(item.product, item.size, item.color)}
                               className="p-2 text-error hover:text-error-dark dark:text-error-light hover:bg-error-light/10 rounded-md transition-colors mobile-touch-target"
@@ -160,7 +151,6 @@ const CartPage = () => {
               </div>
             </div>
             
-            {/* Order Summary - Mobile Optimized */}
             <div>
               <div className="bg-white dark:bg-dark-card rounded-lg shadow-sm p-4 sm:p-6 sticky top-4">
                 <h2 className="text-lg font-semibold mb-4 dark:text-white">Order Summary</h2>
@@ -194,8 +184,7 @@ const CartPage = () => {
                     </div>
                   </div>
                 </div>
-                
-                {/* Promo Code - Mobile Optimized */}
+
                 <div className="mt-4 sm:mt-6">
                   <label htmlFor="promo-code" className="form-label">Promo Code</label>
                   <div className="flex rounded-md overflow-hidden">
@@ -206,7 +195,7 @@ const CartPage = () => {
                       onChange={(e) => setPromoInput(e.target.value)}
                       className="flex-1 form-input rounded-none border-r-0 text-sm"
                       placeholder="Enter code"
-                      style={{ fontSize: '16px' }} // Prevent zoom on iOS
+                      style={{ fontSize: '16px' }}
                     />
                     <button
                       onClick={handleApplyPromo}
@@ -231,14 +220,12 @@ const CartPage = () => {
                   )}
                 </div>
                 
-                {/* Checkout Buttons - Mobile Optimized */}
                 <div className="mt-4 sm:mt-6 space-y-3">
-                  {/* Quick Checkout Option (if available) */}
+                
                   {canQuickCheckout && (
                     <>
                       <QuickCheckoutButton disabled={cartItems.length === 0} />
                       
-                      {/* Divider */}
                       <div className="flex items-center">
                         <div className="flex-1 border-t border-gray-300 dark:border-gray-600"></div>
                         <span className="px-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400">or</span>
@@ -247,7 +234,6 @@ const CartPage = () => {
                     </>
                   )}
                   
-                  {/* Regular Checkout Button */}
                   <button
                     onClick={handleCheckout}
                     className="btn btn-primary w-full py-3 text-sm sm:text-base font-medium mobile-touch-target"
@@ -257,7 +243,6 @@ const CartPage = () => {
                   </button>
                 </div>
                 
-                {/* Info Messages - Mobile Optimized */}
                 {!isAuthenticated && (
                   <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
                     <p className="text-xs sm:text-sm text-blue-700 dark:text-blue-300">
@@ -274,7 +259,6 @@ const CartPage = () => {
                   </div>
                 )}
                 
-                {/* Continue Shopping Link */}
                 <div className="mt-4 text-center">
                   <Link to="/products" className="text-sm text-primary hover:text-primary-light dark:text-accent-blue-light dark:hover:text-accent-blue">
                     Continue Shopping

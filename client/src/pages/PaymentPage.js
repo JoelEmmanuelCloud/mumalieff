@@ -7,17 +7,14 @@ const PaymentPage = () => {
   const navigate = useNavigate();
   const { shippingAddress, savePaymentMethod } = useCart();
   
-  // State
   const [paymentMethod, setPaymentMethod] = useState('paystack-card');
   
-  // Redirect to shipping if no shipping address
   useEffect(() => {
     if (!shippingAddress.address) {
       navigate('/shipping');
     }
   }, [shippingAddress, navigate]);
   
-  // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
     savePaymentMethod(paymentMethod);
@@ -28,7 +25,6 @@ const PaymentPage = () => {
     <div className="bg-gray-50 dark:bg-dark-bg py-8">
       <div className="container-custom">
         <div className="max-w-2xl mx-auto">
-          {/* Checkout Steps */}
           <div className="flex justify-between mb-8">
             <div className="w-1/3 text-center">
               <div className="relative">

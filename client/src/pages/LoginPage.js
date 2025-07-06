@@ -1,4 +1,3 @@
-// src/pages/LoginPageOTP.js
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -13,7 +12,7 @@ const LoginPage = () => {
     password: '',
   });
   
-  const [step, setStep] = useState(1); // 1: login form, 2: OTP verification
+  const [step, setStep] = useState(1); 
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
@@ -80,7 +79,6 @@ const LoginPage = () => {
       setUser(userData);
       localStorage.setItem('user', JSON.stringify(userData));
       
-      // Handle admin password change requirement
       if (userData.isAdmin && userData.requirePasswordChange) {
         navigate('/admin/change-password');
       } else if (userData.isAdmin) {

@@ -5,7 +5,6 @@ import { HelmetProvider } from 'react-helmet-async';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import 'react-toastify/dist/ReactToastify.css';
 
-// Components
 import Loader from './components/common/Loader';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
@@ -15,13 +14,10 @@ import MobileNavigation from './components/layout/MobileNavigation';
 import ErrorBoundary from './components/common/ErrorBoundary';
 import PerformanceMonitor from './components/common/PerformanceMonitor';
 
-// SEO Components - FIXED IMPORTS
 import { OrganizationSchema, WebsiteSchema } from './components/SEO/SEOHelmet';
 
-// Analytics
 import { trackPerformance, trackPageView, initializeAnalytics } from './utils/analytics';
 
-// Optimized lazy loading with preloading
 const HomePage = lazy(() => 
   import(/* webpackChunkName: "home" */ './pages/HomePage')
 );
@@ -71,7 +67,6 @@ const NotFoundPage = lazy(() =>
   import(/* webpackChunkName: "error" */ './pages/NotFoundPage')
 );
 
-// Admin Pages - Separate chunk
 const AdminDashboardPage = lazy(() => 
   import(/* webpackChunkName: "admin" */ './pages/admin/DashboardPage')
 );
@@ -94,14 +89,12 @@ const AdminPasswordChangePage = lazy(() =>
   import(/* webpackChunkName: "admin" */ './pages/admin/AdminPasswordChangePage')
 );
 
-// Optimized React Query configuration
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      cacheTime: 10 * 60 * 1000, // 10 minutes
+      staleTime: 5 * 60 * 1000,
+      cacheTime: 10 * 60 * 1000,
       retry: (failureCount, error) => {
-        // Don't retry on 404s
         if (error?.response?.status === 404) return false;
         return failureCount < 3;
       },
@@ -115,20 +108,17 @@ const queryClient = new QueryClient({
   },
 });
 
-// Preload critical routes
 const preloadRoutes = () => {
-  // Preload commonly visited pages
   const routes = [
     () => import('./pages/ProductListPage'),
     () => import('./pages/CartPage'),
   ];
   
   routes.forEach(route => {
-    setTimeout(() => route().catch(() => {}), 2000); // Preload after 2 seconds
+    setTimeout(() => route().catch(() => {}), 2000);
   });
 };
 
-// Enhanced loading component with skeleton
 const PageLoader = ({ isAdminPage = false }) => (
   <div className={`${isAdminPage ? 'min-h-screen' : ''} flex items-center justify-center ${isAdminPage ? 'bg-gray-50 dark:bg-dark-bg' : ''}`}>
     <div className="flex flex-col items-center space-y-4">
@@ -143,37 +133,29 @@ const PageLoader = ({ isAdminPage = false }) => (
 function App() {
   const location = useLocation();
 
-  // Initialize analytics on app start
   useEffect(() => {
     initializeAnalytics();
   }, []);
 
-  // Track page views
   useEffect(() => {
     trackPageView(document.title, window.location.href);
   }, [location.pathname]);
 
-  // Scroll to top on route change - optimized
   useEffect(() => {
     if (!location.pathname.startsWith('/admin')) {
-      // Use requestAnimationFrame for smooth scrolling
       requestAnimationFrame(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
       });
     }
   }, [location.pathname]);
 
-  // Preload routes after initial load
   useEffect(() => {
     preloadRoutes();
   }, []);
 
-  // Determine if current page is admin page
   const isAdminPage = location.pathname.startsWith('/admin');
 
-  // Performance monitoring
   useEffect(() => {
-    // Monitor page load performance
     if ('performance' in window) {
       const observer = new PerformanceObserver((list) => {
         const entries = list.getEntries();
@@ -189,7 +171,6 @@ function App() {
         observer.observe({ entryTypes: ['navigation'] });
         return () => observer.disconnect();
       } catch (error) {
-        console.warn('Performance observer not supported');
       }
     }
   }, []);
@@ -199,16 +180,12 @@ function App() {
       <HelmetProvider>
         <QueryClientProvider client={queryClient}>
           <div className="antialiased">
-            {/* Global Schema Markup - FIXED: Render as JSX components */}
             <OrganizationSchema />
             <WebsiteSchema />
             
-            {/* Performance Monitor */}
             <PerformanceMonitor />
             
-            {/* Main App Container */}
             <div className={`${isAdminPage ? '' : 'flex flex-col min-h-screen bg-gray-50 dark:bg-dark-bg'}`}>
-              {/* Don't show header on admin pages */}
               {!isAdminPage && <Header />}
               
               <main className={isAdminPage ? '' : 'flex-grow'} role="main">
@@ -216,7 +193,6 @@ function App() {
                   fallback={<PageLoader isAdminPage={isAdminPage} />}
                 >
                   <Routes>
-                    {/* Public Routes */}
                     <Route path="/" element={<HomePage />} />
                     <Route path="/products" element={<ProductListPage />} />
                     <Route path="/products/category/:category" element={<ProductListPage />} />
@@ -228,7 +204,6 @@ function App() {
                     <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                     <Route path="/custom-design" element={<CustomDesignPage />} />
                     
-                    {/* Protected Routes */}
                     <Route element={<ProtectedRoute />}>
                       <Route path="/profile" element={<ProfilePage />} />
                       <Route path="/shipping" element={<ShippingPage />} />
@@ -239,7 +214,6 @@ function App() {
                       <Route path="/wishlist" element={<WishlistPage />} />
                     </Route>
                     
-                    {/* Special Admin Password Change Route */}
                     <Route 
                       path="/admin/change-password" 
                       element={
@@ -251,7 +225,6 @@ function App() {
                       } 
                     />
                     
-                    {/* Admin Routes */}
                     <Route element={<AdminRoute />}>
                       <Route path="/admin" element={<AdminDashboardPage />} />
                       <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
@@ -262,7 +235,6 @@ function App() {
                       <Route path="/admin/users" element={<AdminUserListPage />} />
                     </Route>
                     
-                    {/* 404 Page */}
                     <Route 
                       path="*" 
                       element={
@@ -291,7 +263,6 @@ function App() {
                 </>
               )}
               
-              {/* Optimized Toast Container */}
               <ToastContainer 
                 position="top-right" 
                 autoClose={4000}
@@ -304,7 +275,7 @@ function App() {
                 pauseOnHover
                 theme={isAdminPage ? "light" : "colored"}
                 className={isAdminPage ? "mt-16" : ""}
-                limit={3} // Limit number of toasts
+                limit={3}
                 toastClassName="text-sm"
               />
             </div>

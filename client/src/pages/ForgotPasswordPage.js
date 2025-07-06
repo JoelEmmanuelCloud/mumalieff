@@ -1,4 +1,3 @@
-// src/pages/ForgotPasswordPage.js
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { sendForgotPasswordOTP, verifyForgotPasswordOTP, resetPassword, resendOTP } from '../services/otpService';
@@ -7,7 +6,7 @@ import Loader from '../components/common/Loader';
 import Message from '../components/common/Message';
 
 const ForgotPasswordPage = () => {
-  const [step, setStep] = useState(1); // 1: email, 2: OTP, 3: new password
+  const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     email: '',
     otp: '',
@@ -40,7 +39,6 @@ const ForgotPasswordPage = () => {
     }));
   };
   
-  // Step 1: Send OTP to email
   const handleEmailSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -65,7 +63,6 @@ const ForgotPasswordPage = () => {
     }
   };
   
-  // Step 2: Verify OTP
   const handleOTPVerification = async (otp) => {
     setError('');
     setOtpError(false);
@@ -84,7 +81,6 @@ const ForgotPasswordPage = () => {
     }
   };
   
-  // Step 3: Reset password
   const handlePasswordReset = async (e) => {
     e.preventDefault();
     setError('');
@@ -110,7 +106,6 @@ const ForgotPasswordPage = () => {
       await resetPassword(formData.email, formData.otp, formData.newPassword);
       setSuccess('Password reset successful! You can now sign in with your new password.');
       
-      // Redirect to login after 3 seconds
       setTimeout(() => {
         navigate('/login');
       }, 3000);
@@ -155,7 +150,6 @@ const ForgotPasswordPage = () => {
         <div className="max-w-md mx-auto bg-white dark:bg-dark-card rounded-lg shadow-sm p-8">
           
           {step === 1 && (
-            // Step 1: Email Input
             <>
               <h1 className="text-2xl font-semibold mb-2 dark:text-white">Reset Password</h1>
               <p className="text-gray-600 dark:text-gray-300 mb-6">
@@ -192,7 +186,6 @@ const ForgotPasswordPage = () => {
           )}
           
           {step === 2 && (
-            // Step 2: OTP Verification
             <>
               <div className="text-center mb-6">
                 <h1 className="text-2xl font-semibold mb-2 dark:text-white">Enter Verification Code</h1>
@@ -255,7 +248,6 @@ const ForgotPasswordPage = () => {
           )}
           
           {step === 3 && (
-            // Step 3: New Password
             <>
               <h1 className="text-2xl font-semibold mb-2 dark:text-white">Set New Password</h1>
               <p className="text-gray-600 dark:text-gray-300 mb-6">

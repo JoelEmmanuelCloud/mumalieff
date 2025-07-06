@@ -1,4 +1,3 @@
-// src/index.js - Production-ready Mumalieff App
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
@@ -12,7 +11,6 @@ import { CartProvider } from './context/CartContext';
 import './styles/index.css';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 
-// Analytics
 import { 
   trackException, 
   trackPerformance, 
@@ -22,7 +20,6 @@ import {
   isAnalyticsAvailable 
 } from './utils/analytics';
 
-// Optimized React Query configuration for production
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -34,8 +31,8 @@ const queryClient = new QueryClient({
         return failureCount < 2;
       },
       retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      cacheTime: 10 * 60 * 1000, // 10 minutes
+      staleTime: 5 * 60 * 1000,
+      cacheTime: 10 * 60 * 1000,
     },
     mutations: {
       retry: false,
@@ -43,7 +40,6 @@ const queryClient = new QueryClient({
   },
 });
 
-// Production error boundary
 class AppErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
@@ -55,8 +51,6 @@ class AppErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
- 
-    // Send to analytics if available
     trackException(error?.message || 'App error', true);
   }
 
@@ -86,17 +80,14 @@ class AppErrorBoundary extends React.Component {
   }
 }
 
-// Service Worker configuration for production
 const swConfig = {
   onSuccess: () => {
-    // App is cached and ready for offline use
     if (isAnalyticsAvailable()) {
       trackPerformance('pwa_ready', 1, 'PWA');
     }
   },
   
   onUpdate: (registration) => {
-    // New version available - auto-update after 5 seconds
     setTimeout(() => {
       if (registration.waiting) {
         registration.waiting.postMessage({ type: 'SKIP_WAITING' });
@@ -108,10 +99,8 @@ const swConfig = {
   }
 };
 
-// Initialize Web Vitals monitoring for production
 const initPerformanceMonitoring = () => {
   if (process.env.NODE_ENV === 'production' && typeof window !== 'undefined') {
-    // Dynamically import web-vitals to avoid affecting initial bundle
     import('web-vitals').then(({ getCLS, getFID, getLCP }) => {
       getCLS((metric) => {
         trackPerformance('CLS', metric.value * 1000, 'Web Vitals');
@@ -125,18 +114,14 @@ const initPerformanceMonitoring = () => {
         trackPerformance('LCP', metric.value, 'Web Vitals');
       });
     }).catch(() => {
-      // Silently fail if web-vitals is not available
     });
   }
 };
 
-// Initialize performance monitoring
 initPerformanceMonitoring();
 
-// Create React root
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
-// Render the application
 root.render(
   <React.StrictMode>
     <AppErrorBoundary>
@@ -165,7 +150,6 @@ root.render(
   </React.StrictMode>
 );
 
-// Service Worker Registration
 const enablePWA = process.env.REACT_APP_ENABLE_PWA !== 'false';
 
 if (enablePWA) {
@@ -174,7 +158,6 @@ if (enablePWA) {
   serviceWorkerRegistration.unregister();
 }
 
-// PWA Install Prompt (for production)
 let deferredPrompt;
 
 window.addEventListener('beforeinstallprompt', (e) => {
@@ -188,7 +171,6 @@ window.addEventListener('appinstalled', () => {
   trackPWAInstalled();
 });
 
-// Global PWA install function
 window.installPWA = async () => {
   if (deferredPrompt) {
     deferredPrompt.prompt();
@@ -199,7 +181,6 @@ window.installPWA = async () => {
   return false;
 };
 
-// Production performance monitoring
 if (process.env.NODE_ENV === 'production') {
   window.addEventListener('load', () => {
     const perfData = performance.getEntriesByType('navigation')[0];
@@ -210,7 +191,6 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
-// Network status monitoring
 window.addEventListener('online', () => {
   trackNetworkStatus('online');
   if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
@@ -222,7 +202,6 @@ window.addEventListener('offline', () => {
   trackNetworkStatus('offline');
 });
 
-// Prevent iOS zoom on input focus
 if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
   document.addEventListener('touchstart', () => {}, { passive: true });
 }

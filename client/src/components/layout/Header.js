@@ -24,17 +24,14 @@ const Header = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
   
-
   useEffect(() => {
     const handleClickOutside = (e) => {
-     
       if (isMenuOpen && 
           !e.target.closest('#mobile-nav') && 
           !e.target.closest('#mobile-menu-button')) {
         setIsMenuOpen(false);
       }
       
-    
       if (isUserMenuOpen && 
           !e.target.closest('#user-menu') && 
           !e.target.closest('#user-menu-button')) {
@@ -46,7 +43,6 @@ const Header = () => {
     return () => document.removeEventListener('click', handleClickOutside);
   }, [isMenuOpen, isUserMenuOpen]);
   
-
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 768) {
@@ -58,7 +54,6 @@ const Header = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
   
-
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     if (searchKeyword.trim()) {
@@ -83,9 +78,7 @@ const Header = () => {
         isScrolled ? 'shadow-md' : ''
       }`}>
         <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
-          {/* Main Header Row */}
           <div className="flex items-center justify-between h-12 sm:h-14 md:h-16 w-full">
-            {/* Logo - Optimized for mobile */}
             <Link to="/" className="flex items-center flex-shrink-0 min-w-0">
               <div className="h-5 w-auto sm:h-6 md:h-7 lg:h-8 flex-shrink-0">
                 {theme === 'dark' ? (
@@ -104,7 +97,6 @@ const Header = () => {
               </div>
             </Link>
             
-            {/* Desktop Navigation - Hidden on mobile and tablet */}
             <nav className="hidden lg:flex items-center space-x-4 xl:space-x-6 flex-shrink-0">
               <Link to="/products" className="font-medium text-gray-700 hover:text-primary dark:text-gray-300 dark:hover:text-white transition-colors text-sm xl:text-base whitespace-nowrap">
                 All Products
@@ -117,9 +109,7 @@ const Header = () => {
               </Link>
             </nav>
             
-            {/* Right Side Icons */}
             <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
-              {/* Desktop Search Form - Hidden on mobile and tablet */}
               <form onSubmit={handleSearchSubmit} className="hidden lg:flex items-center relative flex-shrink-0">
                 <input
                   type="text"
@@ -139,7 +129,6 @@ const Header = () => {
                 </button>
               </form>
               
-              {/* Theme Toggle */}
               <button
                 onClick={toggleTheme}
                 className="p-1.5 text-gray-700 hover:text-primary dark:text-gray-300 dark:hover:text-white transition-colors rounded-md hover:bg-gray-100 dark:hover:bg-dark-bg flex-shrink-0"
@@ -156,7 +145,6 @@ const Header = () => {
                 )}
               </button>
               
-              {/* Wishlist - Hidden on mobile, visible on tablet+ */}
               <Link 
                 to="/wishlist" 
                 className="hidden sm:block p-1.5 text-gray-700 hover:text-primary dark:text-gray-300 dark:hover:text-white transition-colors rounded-md hover:bg-gray-100 dark:hover:bg-dark-bg flex-shrink-0"
@@ -167,7 +155,6 @@ const Header = () => {
                 </svg>
               </Link>
               
-              {/* Cart */}
               <Link 
                 to="/cart"
                 className="p-1.5 text-gray-700 hover:text-primary dark:text-gray-300 dark:hover:text-white relative transition-colors rounded-md hover:bg-gray-100 dark:hover:bg-dark-bg flex-shrink-0"
@@ -183,7 +170,6 @@ const Header = () => {
                 )}
               </Link>
               
-              {/* User Menu - Desktop */}
               <div className="hidden md:block relative flex-shrink-0">
                 <button
                   id="user-menu-button"
@@ -200,7 +186,6 @@ const Header = () => {
                   </span>
                 </button>
                 
-                {/* User Dropdown Menu */}
                 {isUserMenuOpen && (
                   <div
                     id="user-menu"
@@ -269,7 +254,6 @@ const Header = () => {
                 )}
               </div>
               
-              {/* Mobile menu button */}
               <button
                 id="mobile-menu-button"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -295,7 +279,6 @@ const Header = () => {
             </div>
           </div>
           
-          {/* Mobile/Tablet Search Bar - Only shown when menu is closed */}
           {!isMenuOpen && (
             <div className="lg:hidden px-1 pb-2 sm:pb-3 w-full">
               <form onSubmit={handleSearchSubmit} className="flex items-center relative w-full">
@@ -321,22 +304,18 @@ const Header = () => {
         </div>
       </header>
 
-      {/* Mobile Navigation Overlay Menu */}
       {isMenuOpen && (
         <>
-          {/* Backdrop */}
           <div 
             className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
             onClick={() => setIsMenuOpen(false)}
           />
           
-          {/* Mobile Menu */}
           <nav 
             id="mobile-nav"
             className="fixed top-0 left-0 right-0 bg-white dark:bg-dark-card shadow-lg z-50 md:hidden transform transition-transform duration-300 ease-in-out w-full overflow-x-hidden"
-            style={{ marginTop: isScrolled ? '48px' : '48px' }} // Adjust based on header height
+            style={{ marginTop: isScrolled ? '48px' : '48px' }}
           >
-            {/* Search Bar in Mobile Menu */}
             <div className="px-3 py-3 border-b border-gray-200 dark:border-gray-700 w-full">
               <form onSubmit={handleSearchSubmit} className="flex items-center relative w-full">
                 <input
@@ -359,7 +338,6 @@ const Header = () => {
             </div>
 
             <div className="px-3 py-2 space-y-1 max-h-[calc(100vh-120px)] overflow-y-auto w-full">
-              {/* Navigation Links */}
               <Link 
                 to="/products" 
                 className="block py-3 px-3 font-medium text-gray-700 hover:text-primary hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-dark-bg rounded-md transition-colors text-sm"
@@ -389,7 +367,6 @@ const Header = () => {
                 Wishlist
               </Link>
               
-              {/* User Menu Items for Mobile */}
               <div className="pt-2 border-t border-gray-200 dark:border-gray-700 mt-2">
                 {isAuthenticated ? (
                   <>

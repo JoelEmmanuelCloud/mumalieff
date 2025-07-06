@@ -1,12 +1,5 @@
-// src/services/cartService.js
-
 import api from './apiConfig';
 
-/**
- * Save cart for abandoned cart tracking
- * @param {Object} cartData - Cart data including items and total
- * @returns {Promise} API response
- */
 export const saveAbandonedCart = async (cartData) => {
   try {
     const response = await api.post('/cart/save', {
@@ -15,47 +8,32 @@ export const saveAbandonedCart = async (cartData) => {
     });
     return response.data;
   } catch (error) {
-    // Don't throw error for abandoned cart saving - it's not critical
-    console.error('Failed to save abandoned cart:', error.response?.data?.message || error.message);
+    
     return { success: false, message: 'Failed to save cart' };
   }
 };
 
-/**
- * Clear abandoned cart tracking
- * @returns {Promise} API response
- */
 export const clearAbandonedCart = async () => {
   try {
     const response = await api.delete('/cart/clear');
     return response.data;
   } catch (error) {
-    // Don't throw error for clearing abandoned cart - it's not critical
-    console.error('Failed to clear abandoned cart:', error.response?.data?.message || error.message);
+  
     return { success: false, message: 'Failed to clear cart' };
   }
 };
 
-/**
- * Handle order completion - clears abandoned cart and performs cleanup
- * @returns {Promise} API response
- */
 export const handleOrderCompletion = async () => {
   try {
     const result = await clearAbandonedCart();
-    console.log('Order completion handled - abandoned cart cleared');
+
     return result;
   } catch (error) {
-    console.error('Error handling order completion:', error);
+
     return { success: false, message: 'Failed to handle order completion' };
   }
 };
 
-/**
- * Validate cart items before checkout
- * @param {Array} cartItems - Array of cart items to validate
- * @returns {Promise} Validation result
- */
 export const validateCartItems = async (cartItems) => {
   try {
     const response = await api.post('/cart/validate', {
@@ -72,13 +50,6 @@ export const validateCartItems = async (cartItems) => {
   }
 };
 
-/**
- * Apply promo code to cart
- * @param {string} promoCode - Promo code to apply
- * @param {number} orderTotal - Current order total
- * @param {Array} cartItems - Cart items for validation
- * @returns {Promise} Promo code application result
- */
 export const applyPromoCode = async (promoCode, orderTotal, cartItems) => {
   try {
     const response = await api.post('/cart/apply-promo', {
@@ -92,12 +63,6 @@ export const applyPromoCode = async (promoCode, orderTotal, cartItems) => {
   }
 };
 
-/**
- * Calculate shipping cost based on cart items and address
- * @param {Array} cartItems - Cart items
- * @param {Object} shippingAddress - Shipping address
- * @returns {Promise} Shipping calculation result
- */
 export const calculateShipping = async (cartItems, shippingAddress) => {
   try {
     const response = await api.post('/cart/calculate-shipping', {
@@ -110,12 +75,6 @@ export const calculateShipping = async (cartItems, shippingAddress) => {
   }
 };
 
-/**
- * Get estimated delivery date for cart items
- * @param {Array} cartItems - Cart items
- * @param {Object} shippingAddress - Shipping address
- * @returns {Promise} Delivery estimation result
- */
 export const getEstimatedDelivery = async (cartItems, shippingAddress) => {
   try {
     const response = await api.post('/cart/estimate-delivery', {
@@ -128,12 +87,6 @@ export const getEstimatedDelivery = async (cartItems, shippingAddress) => {
   }
 };
 
-/**
- * Save cart to user's saved carts (for later)
- * @param {Object} cartData - Cart data to save
- * @param {string} cartName - Name for the saved cart
- * @returns {Promise} Save result
- */
 export const saveCartForLater = async (cartData, cartName) => {
   try {
     const response = await api.post('/cart/save-for-later', {
@@ -147,10 +100,6 @@ export const saveCartForLater = async (cartData, cartName) => {
   }
 };
 
-/**
- * Get user's saved carts
- * @returns {Promise} Saved carts list
- */
 export const getSavedCarts = async () => {
   try {
     const response = await api.get('/cart/saved-carts');
@@ -160,11 +109,7 @@ export const getSavedCarts = async () => {
   }
 };
 
-/**
- * Load a saved cart
- * @param {string} cartId - ID of the saved cart to load
- * @returns {Promise} Saved cart data
- */
+
 export const loadSavedCart = async (cartId) => {
   try {
     const response = await api.get(`/cart/saved-carts/${cartId}`);
@@ -174,11 +119,7 @@ export const loadSavedCart = async (cartId) => {
   }
 };
 
-/**
- * Delete a saved cart
- * @param {string} cartId - ID of the saved cart to delete
- * @returns {Promise} Delete result
- */
+
 export const deleteSavedCart = async (cartId) => {
   try {
     const response = await api.delete(`/cart/saved-carts/${cartId}`);
@@ -188,11 +129,6 @@ export const deleteSavedCart = async (cartId) => {
   }
 };
 
-/**
- * Get cart recommendations based on current cart items
- * @param {Array} cartItems - Current cart items
- * @returns {Promise} Recommendations
- */
 export const getCartRecommendations = async (cartItems) => {
   try {
     const response = await api.post('/cart/recommendations', {
@@ -204,11 +140,7 @@ export const getCartRecommendations = async (cartItems) => {
   }
 };
 
-/**
- * Sync cart with server (useful for multi-device sync)
- * @param {Object} localCart - Local cart state
- * @returns {Promise} Synced cart data
- */
+
 export const syncCart = async (localCart) => {
   try {
     const response = await api.post('/cart/sync', {
@@ -222,11 +154,7 @@ export const syncCart = async (localCart) => {
   }
 };
 
-/**
- * Check product availability in cart
- * @param {Array} cartItems - Cart items to check
- * @returns {Promise} Availability check result
- */
+
 export const checkProductAvailability = async (cartItems) => {
   try {
     const response = await api.post('/cart/check-availability', {
@@ -238,10 +166,7 @@ export const checkProductAvailability = async (cartItems) => {
   }
 };
 
-/**
- * Get cart analytics for user (order history, preferences, etc.)
- * @returns {Promise} Cart analytics data
- */
+
 export const getCartAnalytics = async () => {
   try {
     const response = await api.get('/cart/analytics');
@@ -251,12 +176,7 @@ export const getCartAnalytics = async () => {
   }
 };
 
-/**
- * Share cart with others (generates shareable link)
- * @param {Object} cartData - Cart data to share
- * @param {Object} shareOptions - Share options (expiry, permissions, etc.)
- * @returns {Promise} Share result with link
- */
+
 export const shareCart = async (cartData, shareOptions = {}) => {
   try {
     const response = await api.post('/cart/share', {
@@ -274,11 +194,6 @@ export const shareCart = async (cartData, shareOptions = {}) => {
   }
 };
 
-/**
- * Load shared cart from link
- * @param {string} shareToken - Share token from URL
- * @returns {Promise} Shared cart data
- */
 export const loadSharedCart = async (shareToken) => {
   try {
     const response = await api.get(`/cart/shared/${shareToken}`);
@@ -288,16 +203,6 @@ export const loadSharedCart = async (shareToken) => {
   }
 };
 
-/**
- * Utility functions for cart manipulation
- */
-
-/**
- * Calculate cart totals locally (for immediate UI updates)
- * @param {Array} cartItems - Cart items
- * @param {Object} options - Calculation options
- * @returns {Object} Calculated totals
- */
 export const calculateCartTotals = (cartItems, options = {}) => {
   const itemsPrice = cartItems.reduce((acc, item) => acc + (item.price * item.qty), 0);
   const shippingPrice = options.shippingPrice || (itemsPrice > 50000 ? 0 : 2500);
@@ -318,11 +223,7 @@ export const calculateCartTotals = (cartItems, options = {}) => {
   };
 };
 
-/**
- * Format cart item for API submission
- * @param {Object} item - Cart item
- * @returns {Object} Formatted item
- */
+
 export const formatCartItemForAPI = (item) => {
   return {
     product: item.product,
@@ -336,11 +237,6 @@ export const formatCartItemForAPI = (item) => {
   };
 };
 
-/**
- * Validate cart item data
- * @param {Object} item - Cart item to validate
- * @returns {Object} Validation result
- */
 export const validateCartItem = (item) => {
   const errors = [];
 
@@ -357,12 +253,7 @@ export const validateCartItem = (item) => {
   };
 };
 
-/**
- * Check if cart items have changed (for optimistic updates)
- * @param {Array} oldItems - Previous cart items
- * @param {Array} newItems - New cart items
- * @returns {boolean} Whether items have changed
- */
+
 export const cartItemsChanged = (oldItems, newItems) => {
   if (oldItems.length !== newItems.length) return true;
   
@@ -378,12 +269,7 @@ export const cartItemsChanged = (oldItems, newItems) => {
   });
 };
 
-/**
- * Debounce function for cart updates
- * @param {Function} func - Function to debounce
- * @param {number} delay - Delay in milliseconds
- * @returns {Function} Debounced function
- */
+
 export const debounce = (func, delay) => {
   let timeoutId;
   return (...args) => {
@@ -392,7 +278,6 @@ export const debounce = (func, delay) => {
   };
 };
 
-// Export all functions as default object for easier importing
 export default {
   saveAbandonedCart,
   clearAbandonedCart,

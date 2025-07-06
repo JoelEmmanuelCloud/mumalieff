@@ -1,4 +1,3 @@
-// components/product/ProductCard.js - Optimized with lazy loading and performance improvements
 import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -7,7 +6,6 @@ import { useMutation } from 'react-query';
 import { addToWishlist, removeFromWishlist } from '../../services/authService';
 import { toast } from 'react-toastify';
 
-// Optimized image component with lazy loading
 const LazyImage = ({ src, alt, className, placeholder = '/images/placeholder.jpg' }) => {
   const [imageSrc, setImageSrc] = useState(placeholder);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -43,11 +41,9 @@ const LazyImage = ({ src, alt, className, placeholder = '/images/placeholder.jpg
     setImageSrc(placeholder);
   };
 
-  // Generate optimized Cloudinary URL
   const getOptimizedImageUrl = (url) => {
     if (!url || !url.includes('cloudinary')) return url;
     
-    // Extract the upload part and add transformations
     const parts = url.split('/upload/');
     if (parts.length === 2) {
       return `${parts[0]}/upload/c_fill,w_400,h_400,q_auto,f_auto/${parts[1]}`;
@@ -83,7 +79,6 @@ const ProductCard = React.memo(({ product, isWishlist = false }) => {
   const { addToCart } = useCart();
   const [isHovered, setIsHovered] = useState(false);
   
-  // Add to wishlist mutation
   const addToWishlistMutation = useMutation(addToWishlist, {
     onSuccess: () => {
       toast.success(`${product.name} added to wishlist`);
@@ -93,7 +88,6 @@ const ProductCard = React.memo(({ product, isWishlist = false }) => {
     },
   });
   
-  // Remove from wishlist mutation
   const removeFromWishlistMutation = useMutation(removeFromWishlist, {
     onSuccess: () => {
       toast.success(`${product.name} removed from wishlist`);
@@ -103,7 +97,6 @@ const ProductCard = React.memo(({ product, isWishlist = false }) => {
     },
   });
   
-  // Handle wishlist toggle
   const handleWishlistToggle = (e) => {
     e.preventDefault();
     
@@ -119,24 +112,20 @@ const ProductCard = React.memo(({ product, isWishlist = false }) => {
     }
   };
   
-  // Handle quick add to cart
   const handleQuickAddToCart = (e) => {
     e.preventDefault();
     
-    // If product has multiple sizes/colors, navigate to product detail
     if (product.sizes.length > 1 || product.colors.length > 1) {
       window.location.href = `/product/${product._id}`;
       return;
     }
     
-    // Otherwise add to cart with default size and color
     const defaultSize = product.sizes[0]?.name || 'M';
     const defaultColor = product.colors[0]?.name || 'Black';
     
     addToCart(product, 1, defaultSize, defaultColor);
   };
 
-  // Preload next image on hover for better UX
   const preloadNextImage = () => {
     if (product.images[1]?.url) {
       const img = new Image();
@@ -156,7 +145,6 @@ const ProductCard = React.memo(({ product, isWishlist = false }) => {
       itemType="https://schema.org/Product"
     >
       <div className="relative overflow-hidden">
-        {/* Product Image with proper aspect ratio */}
         <Link to={`/product/${product._id}`} aria-label={`View ${product.name} details`}>
           <div className="mobile-product-image bg-gray-100">
             <LazyImage
@@ -166,21 +154,18 @@ const ProductCard = React.memo(({ product, isWishlist = false }) => {
             />
           </div>
           
-          {/* Sale Badge */}
           {product.isSale && (
             <div className="mobile-badge bg-red-500 text-white" role="text" aria-label="On sale">
               Sale {Math.round(((product.price - product.salePrice) / product.price) * 100)}% Off
             </div>
           )}
           
-          {/* Featured Badge */}
           {product.featured && !product.isSale && (
             <div className="mobile-badge bg-blue-600 text-white" role="text" aria-label="Featured product">
               Featured
             </div>
           )}
           
-          {/* Wishlist Button */}
           <button
             onClick={handleWishlistToggle}
             className="mobile-wishlist-btn"
@@ -199,7 +184,6 @@ const ProductCard = React.memo(({ product, isWishlist = false }) => {
             </svg>
           </button>
           
-          {/* Quick add to cart - shown on hover */}
           <div 
             className={`mobile-quick-add-overlay ${
               isHovered ? 'translate-y-0' : 'translate-y-full'
@@ -219,7 +203,6 @@ const ProductCard = React.memo(({ product, isWishlist = false }) => {
         </Link>
       </div>
       
-      {/* Product Info with Schema.org markup */}
       <div className="mobile-card-content">
         <Link to={`/product/${product._id}`} className="block">
           <h3 className="mobile-product-title" itemProp="name">
@@ -227,7 +210,6 @@ const ProductCard = React.memo(({ product, isWishlist = false }) => {
           </h3>
           
           <div className="flex items-center mb-2">
-            {/* Star Rating with Schema.org markup */}
             <div 
               className="flex mr-2" 
               aria-label={`Rated ${product.rating} out of 5 stars`}
@@ -263,7 +245,6 @@ const ProductCard = React.memo(({ product, isWishlist = false }) => {
           </div>
           
           <div className="flex items-center justify-between">
-            {/* Price with Schema.org markup */}
             <div itemProp="offers" itemScope itemType="https://schema.org/Offer">
               <meta itemProp="priceCurrency" content="NGN" />
               <meta itemProp="availability" content={product.countInStock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"} />
@@ -284,7 +265,6 @@ const ProductCard = React.memo(({ product, isWishlist = false }) => {
               )}
             </div>
             
-            {/* Stock Indicator */}
             {product.countInStock > 0 ? (
               <span className="mobile-stock-indicator text-green-600" aria-label="Product in stock">
                 In Stock

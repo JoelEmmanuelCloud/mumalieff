@@ -29,7 +29,6 @@ const AdminLayout = ({ children }) => {
   
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-dark-bg">
-      {/* Fixed Admin Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-primary text-white dark:bg-dark-card shadow-lg">
         <div className="flex items-center justify-between px-4 py-3 h-16">
           <div className="flex items-center">
@@ -92,7 +91,6 @@ const AdminLayout = ({ children }) => {
         </div>
       </header>
       
-      {/* Sidebar */}
       <aside 
         className={`fixed top-16 left-0 z-40 h-full bg-white dark:bg-dark-card shadow-lg border-r border-gray-200 dark:border-gray-700 transition-all duration-300 ease-in-out ${
           isSidebarOpen ? 'w-64 translate-x-0' : 'w-0 -translate-x-full overflow-hidden'
@@ -157,7 +155,6 @@ const AdminLayout = ({ children }) => {
             </Link>
           </div>
           
-          {/* Logout Button at Bottom */}
           <div className="p-3 border-t border-gray-200 dark:border-gray-700">
             <button
               onClick={handleLogout}
@@ -172,7 +169,6 @@ const AdminLayout = ({ children }) => {
         </nav>
       </aside>
       
-      {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
         <div
           className="fixed inset-0 z-30 bg-gray-600 bg-opacity-50 lg:hidden"
@@ -180,7 +176,6 @@ const AdminLayout = ({ children }) => {
         ></div>
       )}
       
-      {/* Main Content */}
       <main 
         className={`transition-all duration-300 ease-in-out ${
           isSidebarOpen ? 'lg:ml-64' : 'ml-0'

@@ -8,22 +8,17 @@ const SalesChart = ({ orderStats, getDailySalesData }) => {
   const [chartLoading, setChartLoading] = useState(false);
   const [chartError, setChartError] = useState(null);
 
-  // Fetch data when time range changes
   useEffect(() => {
     const fetchData = async () => {
       if (getDailySalesData) {
         setChartLoading(true);
         setChartError(null);
         try {
-          console.log(`Fetching sales data for ${timeRange} days`);
           const data = await getDailySalesData(parseInt(timeRange));
-          console.log('Received sales data:', data);
           
-          // Ensure data is an array
           const validData = Array.isArray(data) ? data : [];
           setChartData(validData);
         } catch (err) {
-          console.error('Error fetching sales data:', err);
           const errorMessage = err.response?.data?.message || err.message || 'Failed to load sales data';
           setChartError(errorMessage);
           setChartData([]);
@@ -31,7 +26,6 @@ const SalesChart = ({ orderStats, getDailySalesData }) => {
           setChartLoading(false);
         }
       } else {
-        // If no getDailySalesData function, show placeholder data
         setChartData([]);
         setChartError('Sales data service not available');
       }
@@ -40,7 +34,6 @@ const SalesChart = ({ orderStats, getDailySalesData }) => {
     fetchData();
   }, [timeRange, getDailySalesData]);
 
-  // Use the fetched chart data
   const data = chartData;
 
   const formatCurrency = (value) => {
@@ -73,13 +66,11 @@ const SalesChart = ({ orderStats, getDailySalesData }) => {
     return null;
   };
 
-  // Safe calculations with default values
   const totalSales = data.length > 0 ? data.reduce((sum, item) => sum + (Number(item.sales) || 0), 0) : 0;
   const totalOrders = data.length > 0 ? data.reduce((sum, item) => sum + (Number(item.orders) || 0), 0) : 0;
   const avgDailySales = data.length > 0 ? totalSales / data.length : 0;
 
   const handleRetry = () => {
-    // Force refetch by changing time range to current value
     const currentRange = timeRange;
     setTimeRange('');
     setTimeout(() => setTimeRange(currentRange), 100);
@@ -142,7 +133,6 @@ const SalesChart = ({ orderStats, getDailySalesData }) => {
         </div>
       </div>
 
-      {/* Chart Statistics */}
       <div className="grid grid-cols-3 gap-4 mb-6">
         <div className="text-center">
           <p className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -164,7 +154,6 @@ const SalesChart = ({ orderStats, getDailySalesData }) => {
         </div>
       </div>
 
-      {/* Chart Container */}
       <div className="h-80">
         {chartLoading ? (
           <div className="flex items-center justify-center h-full">
@@ -254,7 +243,6 @@ const SalesChart = ({ orderStats, getDailySalesData }) => {
         )}
       </div>
 
-      {/* Performance Indicators */}
       <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between text-sm">
           <div className="flex items-center space-x-4">

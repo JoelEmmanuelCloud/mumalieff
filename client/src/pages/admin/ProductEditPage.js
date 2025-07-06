@@ -1,4 +1,3 @@
-//Component/page/admin/ProductEditPage to edit product details in an e-commerce application
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from 'react-query';
@@ -12,7 +11,6 @@ const ProductEditPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   
-  // Form State
   const [name, setName] = useState('');
   const [price, setPrice] = useState(0);
   const [description, setDescription] = useState('');
@@ -25,17 +23,14 @@ const ProductEditPage = () => {
   const [isSale, setIsSale] = useState(false);
   const [salePrice, setSalePrice] = useState(0);
   
-  // Size and Color State
   const [sizes, setSizes] = useState([]);
   const [colors, setColors] = useState([]);
   const [newSize, setNewSize] = useState({ name: '', inStock: true });
   const [newColor, setNewColor] = useState({ name: '', colorCode: '#000000', inStock: true });
   
-  // Image Upload State
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
   
-  // Fetch product
   const { data: product, isLoading, error } = useQuery(
     ['product', id],
     () => getProductById(id),
@@ -58,7 +53,6 @@ const ProductEditPage = () => {
     }
   );
   
-  // Update product mutation
   const updateProductMutation = useMutation(
     (productData) => updateProduct(id, productData),
     {
@@ -72,7 +66,6 @@ const ProductEditPage = () => {
     }
   );
   
-  // Handle form submit
   const handleSubmit = (e) => {
     e.preventDefault();
     
@@ -113,7 +106,6 @@ const ProductEditPage = () => {
     });
   };
   
-  // Handle image upload
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -137,7 +129,6 @@ const ProductEditPage = () => {
     }
   };
   
-  // Handle image delete
   const handleImageDelete = async (publicId, index) => {
     if (window.confirm('Are you sure you want to delete this image?')) {
       try {
@@ -156,14 +147,12 @@ const ProductEditPage = () => {
     }
   };
   
-  // Handle add size
   const handleAddSize = () => {
     if (!newSize.name) {
       toast.error('Please enter a size name');
       return;
     }
     
-    // Check if size already exists
     if (sizes.some((size) => size.name === newSize.name)) {
       toast.error('Size already exists');
       return;
@@ -173,21 +162,18 @@ const ProductEditPage = () => {
     setNewSize({ name: '', inStock: true });
   };
   
-  // Handle remove size
   const handleRemoveSize = (index) => {
     const updatedSizes = [...sizes];
     updatedSizes.splice(index, 1);
     setSizes(updatedSizes);
   };
   
-  // Handle add color
   const handleAddColor = () => {
     if (!newColor.name || !newColor.colorCode) {
       toast.error('Please enter color name and select a color code');
       return;
     }
     
-    // Check if color already exists
     if (colors.some((color) => color.name === newColor.name)) {
       toast.error('Color already exists');
       return;
@@ -197,7 +183,6 @@ const ProductEditPage = () => {
     setNewColor({ name: '', colorCode: '#000000', inStock: true });
   };
   
-  // Handle remove color
   const handleRemoveColor = (index) => {
     const updatedColors = [...colors];
     updatedColors.splice(index, 1);
@@ -227,7 +212,6 @@ const ProductEditPage = () => {
         
         <form onSubmit={handleSubmit} className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Basic Information */}
             <div>
               <h2 className="text-lg font-medium mb-4 dark:text-white">Basic Information</h2>
               
@@ -310,11 +294,9 @@ const ProductEditPage = () => {
               </div>
             </div>
             
-            {/* Options & Features */}
             <div>
               <h2 className="text-lg font-medium mb-4 dark:text-white">Options & Features</h2>
               
-              {/* Sale Settings */}
               <div className="mb-4 p-4 bg-gray-50 dark:bg-dark-bg rounded-lg">
                 <div className="flex items-center mb-2">
                   <input
@@ -351,7 +333,6 @@ const ProductEditPage = () => {
                 )}
               </div>
               
-              {/* Other Features */}
               <div className="mb-4 space-y-2">
                 <div className="flex items-center">
                   <input
@@ -380,7 +361,6 @@ const ProductEditPage = () => {
                 </div>
               </div>
               
-              {/* Images */}
               <div className="mb-6">
                 <h3 className="text-sm font-medium mb-2 dark:text-white">Product Images</h3>
                 
@@ -427,7 +407,6 @@ const ProductEditPage = () => {
                 </p>
               </div>
               
-              {/* Sizes */}
               <div className="mb-6">
                 <h3 className="text-sm font-medium mb-2 dark:text-white">Sizes</h3>
                 
@@ -481,7 +460,6 @@ const ProductEditPage = () => {
                 </div>
               </div>
               
-              {/* Colors */}
               <div className="mb-6">
                 <h3 className="text-sm font-medium mb-2 dark:text-white">Colors</h3>
                 

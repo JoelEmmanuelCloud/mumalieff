@@ -8,7 +8,6 @@ const Footer = () => {
     <footer className="bg-primary text-white dark:bg-dark-card mt-auto pt-8 sm:pt-12 pb-4 sm:pb-6">
       <div className="container-custom">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-          {/* Brand & About */}
           <div className="text-center sm:text-left">
             <h4 className="mobile-title font-semibold mb-3 sm:mb-4">MUMALIEFF</h4>
             <p className="mobile-text text-gray-300 mb-4 leading-relaxed">
@@ -51,7 +50,6 @@ const Footer = () => {
             </div>
           </div>
           
-          {/* Quick Links */}
           <div>
             <h4 className="mobile-title font-semibold mb-3 sm:mb-4">Quick Links</h4>
             <ul className="space-y-2 text-gray-300">
@@ -78,7 +76,6 @@ const Footer = () => {
             </ul>
           </div>
           
-          {/* Customer Service */}
           <div>
             <h4 className="mobile-title font-semibold mb-3 sm:mb-4">Customer Service</h4>
             <ul className="space-y-2 text-gray-300">
@@ -110,7 +107,6 @@ const Footer = () => {
             </ul>
           </div>
           
-          {/* Newsletter */}
           <div className="col-span-1 sm:col-span-2 lg:col-span-1">
             <h4 className="mobile-title font-semibold mb-3 sm:mb-4">Newsletter</h4>
             <p className="mobile-text text-gray-300 mb-4 leading-relaxed">

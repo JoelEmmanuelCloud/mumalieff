@@ -10,10 +10,8 @@ import Message from '../components/common/Message';
 const WishlistPage = () => {
   const queryClient = useQueryClient();
   
-  // Fetch wishlist
   const { data: wishlist, isLoading, error } = useQuery('wishlist', getWishlist);
   
-  // Remove from wishlist mutation
   const removeFromWishlistMutation = useMutation(removeFromWishlist, {
     onSuccess: () => {
       queryClient.invalidateQueries('wishlist');

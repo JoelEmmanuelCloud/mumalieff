@@ -27,7 +27,6 @@ const QuickCheckoutButton = ({ className = "", disabled = false }) => {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [createdOrder, setCreatedOrder] = useState(null);
 
-  // Create order mutation
   const createOrderMutation = useMutation(createOrder, {
     onSuccess: (data) => {
       setCreatedOrder(data);
@@ -38,14 +37,12 @@ const QuickCheckoutButton = ({ className = "", disabled = false }) => {
     }
   });
 
-  // Handle quick checkout
   const handleQuickCheckout = () => {
     if (!isAuthenticated) {
       navigate('/login?redirect=checkout');
       return;
     }
 
-    // Check if we have shipping address and payment method
     if (!shippingAddress.address) {
       navigate('/shipping');
       return;
@@ -56,7 +53,6 @@ const QuickCheckoutButton = ({ className = "", disabled = false }) => {
       return;
     }
 
-    // Create order and show payment
     createOrderMutation.mutate({
       orderItems: cartItems,
       shippingAddress,
@@ -70,7 +66,6 @@ const QuickCheckoutButton = ({ className = "", disabled = false }) => {
     });
   };
 
-  // Handle payment success
   const handlePaymentSuccess = (paymentData) => {
     resetCart();
     setShowPaymentModal(false);
@@ -80,7 +75,6 @@ const QuickCheckoutButton = ({ className = "", disabled = false }) => {
     });
   };
 
-  // Handle payment error
   const handlePaymentError = (error) => {
     setShowPaymentModal(false);
     toast.error(error.message || 'Payment failed');
@@ -116,7 +110,6 @@ const QuickCheckoutButton = ({ className = "", disabled = false }) => {
         )}
       </button>
 
-      {/* Payment Modal */}
       {showPaymentModal && createdOrder && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-dark-card rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">

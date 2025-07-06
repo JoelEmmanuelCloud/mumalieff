@@ -1,5 +1,3 @@
-// OrderPage.js
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
@@ -27,7 +25,6 @@ const OrderPage = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   
-  // State
   const [showPaymentHandler, setShowPaymentHandler] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showIssueModal, setShowIssueModal] = useState(false);
@@ -35,7 +32,6 @@ const OrderPage = () => {
   const [issueDescription, setIssueDescription] = useState('');
   const [issueType, setIssueType] = useState('');
 
-  // Fetch order details
   const { 
     data: order, 
     isLoading, 
@@ -51,17 +47,15 @@ const OrderPage = () => {
     }
   );
 
-  // Fetch tracking info for shipped orders
   const { data: trackingInfo } = useQuery(
     ['orderTracking', id],
     () => getOrderTracking(id),
     {
       enabled: !!id && order?.status === 'Shipped',
-      refetchInterval: 30000, // Refetch every 30 seconds for shipped orders
+      refetchInterval: 30000, 
     }
   );
 
-  // Cancel order mutation
   const cancelOrderMutation = useMutation(
     ({ orderId, reason }) => cancelOrder(orderId),
     {
@@ -78,7 +72,6 @@ const OrderPage = () => {
     }
   );
 
-  // Confirm delivery mutation
   const confirmDeliveryMutation = useMutation(
     (orderId) => confirmOrderDelivery(orderId),
     {
@@ -92,7 +85,7 @@ const OrderPage = () => {
     }
   );
 
-  // Report issue mutation
+
   const reportIssueMutation = useMutation(
     ({ orderId, issueData }) => reportOrderIssue(orderId, issueData),
     {
@@ -108,7 +101,6 @@ const OrderPage = () => {
     }
   );
 
-  // Retry payment mutation
   const retryPaymentMutation = useMutation(
     (orderId) => retryPayment(orderId),
     {
@@ -122,7 +114,6 @@ const OrderPage = () => {
     }
   );
 
-  // Handle payment success
   const handlePaymentSuccess = (paymentData) => {
     toast.success('Payment successful!');
     setShowPaymentHandler(false);
@@ -130,13 +121,11 @@ const OrderPage = () => {
     queryClient.invalidateQueries(['orders']);
   };
 
-  // Handle payment error
   const handlePaymentError = (error) => {
     toast.error(error.message || 'Payment failed');
     setShowPaymentHandler(false);
   };
 
-  // Handle cancel order
   const handleCancelOrder = () => {
     if (!cancelReason.trim()) {
       toast.error('Please provide a reason for cancellation');
@@ -145,7 +134,6 @@ const OrderPage = () => {
     cancelOrderMutation.mutate({ orderId: id, reason: cancelReason });
   };
 
-  // Handle report issue
   const handleReportIssue = () => {
     if (!issueType || !issueDescription.trim()) {
       toast.error('Please fill in all fields');
@@ -161,7 +149,6 @@ const OrderPage = () => {
     });
   };
 
-  // Get order status color
   const getStatusColor = (status) => {
     const colors = {
       'Pending': 'text-yellow-600 bg-yellow-100',
@@ -173,12 +160,10 @@ const OrderPage = () => {
     return colors[status] || 'text-gray-600 bg-gray-100';
   };
 
-  // Check if order can be cancelled
   const canCancelOrder = () => {
     return ['Pending', 'Processing'].includes(order?.status) && !cancelOrderMutation.isLoading;
   };
 
-  // Check if payment can be retried
   const canRetryPayment = () => {
     return !order?.isPaid && ['Pending', 'Processing'].includes(order?.status);
   };
@@ -228,7 +213,7 @@ const OrderPage = () => {
   return (
     <div className="bg-gray-50 dark:bg-dark-bg py-8">
       <div className="container-custom">
-        {/* Header */}
+    
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
           <div>
             <h1 className="text-3xl font-semibold dark:text-white">
@@ -260,7 +245,6 @@ const OrderPage = () => {
               </span>
             )}
 
-            {/* Add delivery confirmation badge */}
             {order.status === 'Delivered' && order.deliveryConfirmedByCustomer && (
               <span className="px-3 py-1 rounded-full text-sm font-medium text-green-600 bg-green-100">
                 Delivery Confirmed
@@ -269,7 +253,6 @@ const OrderPage = () => {
           </div>
         </div>
 
-        {/* Payment Handler Modal */}
         {showPaymentHandler && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white dark:bg-dark-card rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -297,9 +280,7 @@ const OrderPage = () => {
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Order Details */}
           <div className="lg:col-span-2">
-            {/* Payment Status Alert */}
             {!order.isPaid && (
               <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-6">
                 <div className="flex items-center">
@@ -326,7 +307,6 @@ const OrderPage = () => {
               </div>
             )}
 
-            {/* Order Items */}
             <div className="bg-white dark:bg-dark-card rounded-lg shadow-sm overflow-hidden mb-6">
               <div className="p-6 border-b border-gray-200 dark:border-gray-700">
                 <h2 className="text-xl font-semibold dark:text-white">Order Items</h2>
@@ -378,7 +358,6 @@ const OrderPage = () => {
               </div>
             </div>
 
-            {/* Shipping Information */}
             <div className="bg-white dark:bg-dark-card rounded-lg shadow-sm p-6 mb-6">
               <h2 className="text-xl font-semibold mb-4 dark:text-white">Shipping Information</h2>
               <div className="space-y-2 text-gray-700 dark:text-gray-300">
@@ -407,7 +386,6 @@ const OrderPage = () => {
               )}
             </div>
 
-            {/* Order Actions */}
             <div className="bg-white dark:bg-dark-card rounded-lg shadow-sm p-6">
               <h2 className="text-xl font-semibold mb-4 dark:text-white">Order Actions</h2>
               
@@ -422,7 +400,6 @@ const OrderPage = () => {
                   </button>
                 )}
                 
-                {/* Delivery confirmation logic */}
                 {order.status === 'Delivered' && !order.deliveryConfirmedByCustomer && (
                   <button
                     onClick={() => confirmDeliveryMutation.mutate(id)}
@@ -469,7 +446,6 @@ const OrderPage = () => {
             </div>
           </div>
 
-          {/* Order Summary */}
           <div>
             <div className="bg-white dark:bg-dark-card rounded-lg shadow-sm p-6 sticky top-4">
               <h2 className="text-xl font-semibold mb-6 dark:text-white">Order Summary</h2>
@@ -487,9 +463,7 @@ const OrderPage = () => {
                   <span className="font-medium dark:text-white">
                     {order.shippingPrice > 0 ? `₦${order.shippingPrice.toLocaleString()}` : 'Free'}
                   </span>
-                </div>
-                
-                {/* VAT line removed completely */}
+                </div>               
                 
                 {order.discount > 0 && (
                   <div className="flex justify-between text-base">
@@ -510,7 +484,6 @@ const OrderPage = () => {
                 </div>
               </div>
               
-              {/* Payment Information */}
               <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
                 <h3 className="text-lg font-medium mb-3 dark:text-white">Payment Details</h3>
                 <div className="space-y-2 text-sm">
@@ -543,7 +516,6 @@ const OrderPage = () => {
                 </div>
               </div>
               
-              {/* Estimated Delivery */}
               {order.estimatedDeliveryDate && (
                 <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                   <h4 className="font-medium text-blue-900 dark:text-blue-200 text-sm">
@@ -563,7 +535,6 @@ const OrderPage = () => {
           </div>
         </div>
 
-        {/* Cancel Order Modal */}
         {showCancelModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white dark:bg-dark-card rounded-lg max-w-md w-full">
@@ -610,7 +581,6 @@ const OrderPage = () => {
           </div>
         )}
 
-        {/* Report Issue Modal */}
         {showIssueModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white dark:bg-dark-card rounded-lg max-w-md w-full">

@@ -1,9 +1,3 @@
-// src/utils/analytics.js
-/**
- * Analytics utility functions for safe gtag usage
- */
-
-// Check if gtag is available
 export const isAnalyticsAvailable = () => {
   return typeof window !== 'undefined' && 
          typeof window.gtag === 'function' && 
@@ -11,7 +5,6 @@ export const isAnalyticsAvailable = () => {
          process.env.NODE_ENV === 'production';
 };
 
-// Safe gtag wrapper
 export const trackEvent = (action, parameters = {}) => {
   if (isAnalyticsAvailable()) {
     try {
@@ -20,17 +13,16 @@ export const trackEvent = (action, parameters = {}) => {
         send_to: process.env.REACT_APP_GA_MEASUREMENT_ID || 'GA_MEASUREMENT_ID'
       });
     } catch (error) {
-      console.warn('Analytics tracking failed:', error);
+      
     }
   } else {
-    // Development logging
+ 
     if (process.env.NODE_ENV === 'development') {
-      console.log('Analytics Event:', action, parameters);
     }
   }
 };
 
-// Track page views
+
 export const trackPageView = (page_title, page_location) => {
   if (isAnalyticsAvailable()) {
     try {
@@ -40,17 +32,16 @@ export const trackPageView = (page_title, page_location) => {
         send_page_view: true
       });
     } catch (error) {
-      console.warn('Page view tracking failed:', error);
+     
     }
   } else {
-    // Development logging
+ 
     if (process.env.NODE_ENV === 'development') {
-      console.log('Page View:', page_title, page_location);
+ 
     }
   }
 };
 
-// Track exceptions/errors
 export const trackException = (description, fatal = false) => {
   trackEvent('exception', {
     description: description || 'Unknown error',
@@ -59,10 +50,9 @@ export const trackException = (description, fatal = false) => {
   });
 };
 
-// Track performance metrics
 export const trackPerformance = (name, value, category = 'Performance') => {
   if (typeof value !== 'number' || isNaN(value)) {
-    console.warn('Invalid performance value:', value);
+   
     return;
   }
 
@@ -73,7 +63,6 @@ export const trackPerformance = (name, value, category = 'Performance') => {
   });
 };
 
-// Track user interactions
 export const trackUserInteraction = (action, category = 'User Interaction', label = '') => {
   trackEvent(action, {
     event_category: category,
@@ -81,7 +70,6 @@ export const trackUserInteraction = (action, category = 'User Interaction', labe
   });
 };
 
-// Track e-commerce events
 export const trackPurchase = (transaction_id, value, currency = 'NGN', items = []) => {
   trackEvent('purchase', {
     transaction_id,
@@ -115,7 +103,7 @@ export const trackBeginCheckout = (currency = 'NGN', value, items = []) => {
   });
 };
 
-// PWA events
+
 export const trackPWAInstall = () => {
   trackEvent('pwa_install_prompt', {
     event_category: 'PWA'
@@ -128,7 +116,7 @@ export const trackPWAInstalled = () => {
   });
 };
 
-// Network events
+
 export const trackNetworkStatus = (status) => {
   trackEvent('network_status', {
     event_category: 'Network',
@@ -136,7 +124,7 @@ export const trackNetworkStatus = (status) => {
   });
 };
 
-// Custom events for Mumalieff
+
 export const trackCustomDesign = (design_type) => {
   trackEvent('custom_design_created', {
     event_category: 'Custom Design',
@@ -183,37 +171,37 @@ export const trackNewsletterSignup = (source = 'unknown') => {
   });
 };
 
-// Initialize analytics
+
 export const initializeAnalytics = () => {
   if (typeof window !== 'undefined' && 
       process.env.REACT_APP_ENABLE_ANALYTICS === 'true' && 
       process.env.REACT_APP_GA_MEASUREMENT_ID) {
     
-    // Check if gtag script is already loaded
+    
     if (!window.gtag) {
-      // Load Google Analytics script
+ 
       const script = document.createElement('script');
       script.async = true;
       script.src = `https://www.googletagmanager.com/gtag/js?id=${process.env.REACT_APP_GA_MEASUREMENT_ID}`;
       document.head.appendChild(script);
 
-      // Initialize gtag
+   
       window.dataLayer = window.dataLayer || [];
       function gtag(){window.dataLayer.push(arguments);}
       window.gtag = gtag;
       gtag('js', new Date());
       gtag('config', process.env.REACT_APP_GA_MEASUREMENT_ID, {
-        send_page_view: false // We'll manually track page views
+        send_page_view: false 
       });
     }
   }
 };
 
-// Error boundary tracking
+
 export const trackErrorBoundary = (error, errorInfo) => {
   trackException(`ErrorBoundary: ${error.message}`, true);
   
-  // Additional error details
+
   trackEvent('error_boundary', {
     event_category: 'Error',
     error_message: error.message,
@@ -222,7 +210,7 @@ export const trackErrorBoundary = (error, errorInfo) => {
   });
 };
 
-// FIXED: Proper default export - assign to variable first
+
 const analyticsUtils = {
   isAnalyticsAvailable,
   trackEvent,

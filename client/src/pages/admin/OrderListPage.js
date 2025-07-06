@@ -1,4 +1,3 @@
-//Component/pages/admin/OrderListPage
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
@@ -18,7 +17,6 @@ const OrderListPage = () => {
     endDate: '',
   });
   
-  // Fetch orders with pagination and filters
   const { data, isLoading, error } = useQuery(
     ['adminOrders', currentPage, filters],
     () => getOrders({
@@ -30,7 +28,6 @@ const OrderListPage = () => {
     }
   );
   
-  // Update order status mutation
   const updateStatusMutation = useMutation(
     ({ id, statusData }) => updateOrderStatus(id, statusData),
     {
@@ -44,25 +41,21 @@ const OrderListPage = () => {
     }
   );
   
-  // Handle page change
   const handlePageChange = (page) => {
     setCurrentPage(page);
     window.scrollTo(0, 0);
   };
   
-  // Handle filter change
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
     setFilters({ ...filters, [name]: value });
   };
   
-  // Handle filter submit
   const handleFilterSubmit = (e) => {
     e.preventDefault();
     setCurrentPage(1);
   };
   
-  // Handle filter reset
   const handleFilterReset = () => {
     setFilters({
       status: '',
@@ -74,7 +67,6 @@ const OrderListPage = () => {
     setCurrentPage(1);
   };
   
-  // Handle status update
   const handleStatusUpdate = (id, status) => {
     updateStatusMutation.mutate({
       id,
@@ -82,7 +74,6 @@ const OrderListPage = () => {
     });
   };
   
-  // Get status badge classes
   const getStatusBadgeClasses = (status) => {
     const baseClasses = "px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full";
     switch (status) {
@@ -101,7 +92,6 @@ const OrderListPage = () => {
   
   return (
     <div className="p-4 sm:p-6 lg:p-8">
-      {/* Header */}
       <div className="mb-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -118,7 +108,6 @@ const OrderListPage = () => {
         </div>
       </div>
       
-      {/* Filters */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-8">
         <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Filter Orders</h3>
         <form onSubmit={handleFilterSubmit}>
@@ -219,7 +208,6 @@ const OrderListPage = () => {
         </Message>
       ) : (
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-          {/* Mobile view */}
           <div className="block lg:hidden">
             <div className="divide-y divide-gray-200 dark:divide-gray-700">
               {data?.orders?.map((order) => (
@@ -267,7 +255,6 @@ const OrderListPage = () => {
             </div>
           </div>
 
-          {/* Desktop view */}
           <div className="hidden lg:block overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
               <thead className="bg-gray-50 dark:bg-gray-900">
@@ -349,7 +336,6 @@ const OrderListPage = () => {
             </table>
           </div>
           
-          {/* Empty State */}
           {data?.orders?.length === 0 && (
             <div className="text-center py-12">
               <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
@@ -367,7 +353,6 @@ const OrderListPage = () => {
             </div>
           )}
           
-          {/* Pagination */}
           {data && data.pages > 1 && (
             <div className="bg-white dark:bg-gray-800 px-4 py-3 border-t border-gray-200 dark:border-gray-700 sm:px-6">
               <div className="flex items-center justify-between">

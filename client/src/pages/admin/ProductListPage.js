@@ -1,4 +1,3 @@
-//Component/pages/admin/ProductListPage to manage product listings in an admin dashboard
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
@@ -18,7 +17,6 @@ const ProductListPage = () => {
     inStock: '',
   });
   
-  // Fetch products with pagination
   const { data, isLoading, error } = useQuery(
     ['adminProducts', currentPage, searchKeyword, filters],
     () => getProducts({
@@ -31,7 +29,6 @@ const ProductListPage = () => {
     }
   );
   
-  // Create product mutation
   const createProductMutation = useMutation(createProduct, {
     onSuccess: (data) => {
       toast.success('Product created successfully');
@@ -43,7 +40,6 @@ const ProductListPage = () => {
     },
   });
   
-  // Delete product mutation
   const deleteProductMutation = useMutation(deleteProduct, {
     onSuccess: () => {
       toast.success('Product deleted successfully');
@@ -54,26 +50,22 @@ const ProductListPage = () => {
     },
   });
   
-  // Handle page change
   const handlePageChange = (page) => {
     setCurrentPage(page);
     window.scrollTo(0, 0);
   };
   
-  // Handle search submit
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     setCurrentPage(1);
   };
   
-  // Handle filter change
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
     setFilters({ ...filters, [name]: value });
     setCurrentPage(1);
   };
   
-  // Handle filter reset
   const handleFilterReset = () => {
     setSearchKeyword('');
     setFilters({
@@ -84,20 +76,16 @@ const ProductListPage = () => {
     setCurrentPage(1);
   };
   
-  // Handle create product
- const handleCreateProduct = () => {
-  // Navigate to the create product page instead of trying to create immediately
-  navigate('/admin/product/create');
-};
+  const handleCreateProduct = () => {
+    navigate('/admin/product/create');
+  };
   
-  // Handle delete product
   const handleDeleteProduct = (id, productName) => {
     if (window.confirm(`Are you sure you want to delete "${productName}"? This action cannot be undone.`)) {
       deleteProductMutation.mutate(id);
     }
   };
   
-  // Get stock status classes
   const getStockStatusClasses = (countInStock) => {
     if (countInStock > 10) {
       return "px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-400";
@@ -110,7 +98,6 @@ const ProductListPage = () => {
   
   return (
     <div className="p-4 sm:p-6 lg:p-8">
-      {/* Header */}
       <div className="mb-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -141,10 +128,8 @@ const ProductListPage = () => {
         </div>
       </div>
       
-      {/* Search & Filters */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-8">
         <div className="space-y-4">
-          {/* Search */}
           <form onSubmit={handleSearchSubmit}>
             <div className="flex gap-4">
               <div className="flex-1">
@@ -165,7 +150,6 @@ const ProductListPage = () => {
             </div>
           </form>
           
-          {/* Filters */}
           <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             <div>
               <label htmlFor="category" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -242,7 +226,6 @@ const ProductListPage = () => {
         </Message>
       ) : (
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-          {/* Mobile view */}
           <div className="block lg:hidden">
             <div className="divide-y divide-gray-200 dark:divide-gray-700">
               {data?.products?.map((product) => (
@@ -306,7 +289,6 @@ const ProductListPage = () => {
             </div>
           </div>
 
-          {/* Desktop view */}
           <div className="hidden lg:block overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
               <thead className="bg-gray-50 dark:bg-gray-900">
@@ -418,7 +400,6 @@ const ProductListPage = () => {
             </table>
           </div>
           
-          {/* Empty State */}
           {data?.products?.length === 0 && (
             <div className="text-center py-12">
               <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
@@ -448,7 +429,6 @@ const ProductListPage = () => {
             </div>
           )}
           
-          {/* Pagination */}
           {data && data.pages > 1 && (
             <div className="bg-white dark:bg-gray-800 px-4 py-3 border-t border-gray-200 dark:border-gray-700 sm:px-6">
               <div className="flex items-center justify-between">

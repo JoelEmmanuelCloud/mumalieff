@@ -3,10 +3,9 @@ import { useQuery } from 'react-query';
 import { getOrderStats, getDailySales } from '../../services/orderService';
 import { getUsers } from '../../services/authService';
 import { getProducts } from '../../services/productService';
-import SalesChart from './SalesChart'; // Make sure this import path is correct
+import SalesChart from './SalesChart';
 
 const DashboardPage = () => {
-  // Fetch order statistics with better error handling
   const { 
     data: orderStats, 
     isLoading: statsLoading, 
@@ -18,11 +17,10 @@ const DashboardPage = () => {
     {
       retry: 3,
       retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
-      staleTime: 5 * 60 * 1000, // 5 minutes
+      staleTime: 5 * 60 * 1000,
     }
   );
   
-  // Fetch user statistics
   const { 
     data: users, 
     isLoading: usersLoading, 
@@ -36,7 +34,6 @@ const DashboardPage = () => {
     }
   );
   
-  // Fetch product statistics
   const { 
     data: products, 
     isLoading: productsLoading, 
@@ -53,7 +50,6 @@ const DashboardPage = () => {
   const isLoading = statsLoading || usersLoading || productsLoading;
   const hasError = statsError || usersError || productsError;
   
-  // Safe data access with defaults
   const safeOrderStats = orderStats || {
     totalSales: 0,
     totalOrders: 0,
@@ -62,7 +58,6 @@ const DashboardPage = () => {
   
   return (
     <div className="mobile-container p-3 sm:p-4 lg:p-8">
-      {/* Header */}
       <div className="mb-6 sm:mb-8">
         <h1 className="mobile-title font-bold text-gray-900 dark:text-white">Dashboard</h1>
         <p className="mt-2 mobile-text-sm text-gray-600 dark:text-gray-400">
@@ -105,9 +100,7 @@ const DashboardPage = () => {
         </div>
       ) : (
         <>
-          {/* Summary Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mobile-gap mb-6 sm:mb-8">
-            {/* Total Sales Card */}
             <div className="card hover:shadow-md transition-shadow">
               <div className="mobile-spacing">
                 <div className="flex items-center">
@@ -129,7 +122,6 @@ const DashboardPage = () => {
               </div>
             </div>
             
-            {/* Total Orders Card */}
             <div className="card hover:shadow-md transition-shadow">
               <div className="mobile-spacing">
                 <div className="flex items-center">
@@ -151,7 +143,6 @@ const DashboardPage = () => {
               </div>
             </div>
             
-            {/* Total Products Card */}
             <div className="card hover:shadow-md transition-shadow">
               <div className="mobile-spacing">
                 <div className="flex items-center">
@@ -173,7 +164,6 @@ const DashboardPage = () => {
               </div>
             </div>
             
-            {/* Total Users Card */}
             <div className="card hover:shadow-md transition-shadow">
               <div className="mobile-spacing">
                 <div className="flex items-center">
@@ -196,15 +186,12 @@ const DashboardPage = () => {
             </div>
           </div>
           
-          {/* Charts and Analytics */}
           <div className="grid grid-cols-1 lg:grid-cols-2 mobile-gap mb-6 sm:mb-8">
-            {/* Sales Chart */}
             <SalesChart 
               orderStats={safeOrderStats} 
               getDailySalesData={getDailySales}
             />
             
-            {/* Orders by Status */}
             <div className="card">
               <div className="mobile-spacing">
                 <h2 className="mobile-title font-semibold mb-4 sm:mb-6 text-gray-900 dark:text-white">Orders by Status</h2>
@@ -253,7 +240,6 @@ const DashboardPage = () => {
             </div>
           </div>
           
-          {/* Recent Orders - Mobile Optimized */}
           <div className="card overflow-hidden">
             <div className="flex justify-between items-center mobile-spacing border-b border-gray-200 dark:border-gray-700">
               <h2 className="mobile-title font-semibold text-gray-900 dark:text-white">Recent Orders</h2>
@@ -265,9 +251,7 @@ const DashboardPage = () => {
               </a>
             </div>
             
-            {/* Mobile Table - Using card layout on small screens */}
             <div className="block sm:hidden">
-              {/* Mobile Order Cards */}
               <div className="space-y-0">
                 <div className="mobile-order-card">
                   <div className="mobile-order-header">
@@ -309,7 +293,6 @@ const DashboardPage = () => {
               </div>
             </div>
             
-            {/* Desktop Table */}
             <div className="hidden sm:block overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead className="bg-gray-50 dark:bg-gray-900">

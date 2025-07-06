@@ -8,17 +8,15 @@ import Message from '../components/common/Message';
 import ProductCard from '../components/product/ProductCard';
 
 const HomePage = () => {
-  // Get featured products with stale time to reduce API calls
   const { 
     data: featuredProducts, 
     isLoading: featuredLoading, 
     error: featuredError 
   } = useQuery('featuredProducts', () => getFeaturedProducts(6), {
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 5 * 60 * 1000,
+    cacheTime: 10 * 60 * 1000,
   });
   
-  // Get top rated products
   const { 
     data: topProducts, 
     isLoading: topLoading, 
@@ -28,7 +26,6 @@ const HomePage = () => {
     cacheTime: 10 * 60 * 1000,
   });
   
-  // Get sale products
   const { 
     data: saleProducts, 
     isLoading: saleLoading, 
@@ -39,11 +36,9 @@ const HomePage = () => {
   });
   
   useEffect(() => {
-    // Scroll to top on component mount
     window.scrollTo(0, 0);
   }, []);
 
-  // Generate JSON-LD structured data
   const generateStructuredData = () => {
     const organizationData = {
       "@context": "https://schema.org",
@@ -105,7 +100,6 @@ const HomePage = () => {
           content="t-shirts Nigeria, custom t-shirts, premium clothing, faith-based apparel, custom prints, Nigerian fashion, online clothing store" 
         />
         
-        {/* Open Graph / Facebook */}
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://mumalieff.com/" />
         <meta property="og:title" content="Mumalieff | Premium T-shirts & Custom Prints Nigeria" />
@@ -114,14 +108,12 @@ const HomePage = () => {
         <meta property="og:site_name" content="Mumalieff" />
         <meta property="og:locale" content="en_NG" />
 
-        {/* Twitter */}
         <meta property="twitter:card" content="summary_large_image" />
         <meta property="twitter:url" content="https://mumalieff.com/" />
         <meta property="twitter:title" content="Mumalieff | Premium T-shirts & Custom Prints Nigeria" />
         <meta property="twitter:description" content="Shop premium quality t-shirts and create custom designs. Express your faith with our meaningful collections." />
         <meta property="twitter:image" content="https://mumalieff.com/images/twitter-image.jpg" />
 
-        {/* Additional SEO meta tags */}
         <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
         <meta name="googlebot" content="index, follow" />
         <link rel="canonical" href="https://mumalieff.com/" />
@@ -130,21 +122,18 @@ const HomePage = () => {
         <meta name="language" content="English" />
         <meta name="revisit-after" content="7 days" />
 
-        {/* Structured Data */}
         {generateStructuredData().map((data, index) => (
           <script key={index} type="application/ld+json">
             {JSON.stringify(data)}
           </script>
         ))}
 
-        {/* Preload critical resources */}
         <link rel="preload" href="/images/hero-bg.webp" as="image" type="image/webp" />
         <link rel="preconnect" href="https://res.cloudinary.com" />
         <link rel="dns-prefetch" href="https://res.cloudinary.com" />
       </Helmet>
 
       <div className="bg-gray-50 dark:bg-dark-bg mobile-safe">
-        {/* Hero Section */}
         <section className="mobile-full-width">
           <div className="bg-gradient-to-r from-primary to-black text-white mobile-p-6 relative overflow-hidden">
             <div className="container-custom relative z-10">
@@ -174,12 +163,10 @@ const HomePage = () => {
               </div>
             </div>
             
-            {/* Background pattern - Hidden on mobile */}
             <div className="absolute top-0 right-0 w-1/2 h-full bg-accent-gold/10 transform skew-x-12 translate-x-1/3 hidden lg:block" aria-hidden="true"></div>
           </div>
         </section>
         
-        {/* Featured Products */}
         <section className="mobile-p-6" aria-labelledby="featured-products-heading">
           <div className="container-custom">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 mobile-gap">
@@ -213,7 +200,6 @@ const HomePage = () => {
           </div>
         </section>
         
-        {/* Categories Section */}
         <section className="mobile-p-6 bg-gray-100 dark:bg-dark-card" aria-labelledby="categories-heading">
           <div className="container-custom">
             <h2 id="categories-heading" className="section-heading mb-8">
@@ -221,7 +207,6 @@ const HomePage = () => {
             </h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 mobile-gap max-w-4xl mx-auto">
-              {/* Wear Your Conviction Category */}
               <Link 
                 to="/products/category/Wear Your Conviction"
                 className="group block card hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border-2 border-transparent hover:border-primary/20"
@@ -255,7 +240,6 @@ const HomePage = () => {
                 </article>
               </Link>
               
-              {/* Customize Your Prints Category */}
               <Link 
                 to="/products/category/Customize Your Prints"
                 className="group block card hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border-2 border-transparent hover:border-accent-gold/20"
@@ -292,7 +276,6 @@ const HomePage = () => {
           </div>
         </section>
         
-        {/* Sale Products */}
         {saleProducts?.length > 0 && (
           <section className="mobile-p-6" aria-labelledby="sale-products-heading">
             <div className="container-custom">
@@ -328,7 +311,6 @@ const HomePage = () => {
           </section>
         )}
         
-        {/* Top Rated Products */}
         <section className="mobile-p-6 bg-gray-100 dark:bg-dark-card" aria-labelledby="top-products-heading">
           <div className="container-custom">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-8 mobile-gap">
@@ -362,7 +344,6 @@ const HomePage = () => {
           </div>
         </section>
         
-        {/* Features Section */}
         <section className="mobile-p-6" aria-labelledby="features-heading">
           <div className="container-custom">
             <h2 id="features-heading" className="sr-only">Why Choose Mumalieff</h2>

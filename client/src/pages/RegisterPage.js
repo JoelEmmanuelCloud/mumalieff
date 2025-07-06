@@ -7,7 +7,6 @@ import Loader from '../components/common/Loader';
 import Message from '../components/common/Message';
 
 const RegisterPage = () => {
-  // Form data state
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -17,8 +16,7 @@ const RegisterPage = () => {
     confirmPassword: '',
   });
   
-  // UI state
-  const [step, setStep] = useState(1); // 1: form, 2: OTP verification
+  const [step, setStep] = useState(1);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
@@ -29,19 +27,16 @@ const RegisterPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Get redirect URL from query params - FIXED
   const redirect = location.search && location.search.includes('=') 
     ? location.search.split('=')[1] 
     : '/';
   
-  // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
       navigate(redirect);
     }
   }, [isAuthenticated, navigate, redirect]);
   
-  // Countdown timer for resend OTP
   useEffect(() => {
     let timer;
     if (countdown > 0) {
@@ -50,7 +45,6 @@ const RegisterPage = () => {
     return () => clearTimeout(timer);
   }, [countdown]);
   
-  // Handle form input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -59,12 +53,10 @@ const RegisterPage = () => {
     }));
   };
   
-  // Handle form submission (step 1)
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     setError('');
     
-    // Validate form
     const { firstName, lastName, email, password, confirmPassword, phone } = formData;
     
     if (!firstName || !lastName || !email || !password || !confirmPassword) {
@@ -94,7 +86,7 @@ const RegisterPage = () => {
       });
       
       setStep(2);
-      setCountdown(60); // 60 seconds before allowing resend
+      setCountdown(60);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to send verification code. Please try again.');
     } finally {
@@ -102,7 +94,6 @@ const RegisterPage = () => {
     }
   };
   
-  // Handle OTP verification (step 2)
   const handleOTPVerification = async (otp) => {
     setError('');
     setOtpError(false);
@@ -111,11 +102,8 @@ const RegisterPage = () => {
     try {
       const userData = await verifyRegistrationOTP(formData.email, otp);
       
-      // Update auth context
       setUser(userData);
       localStorage.setItem('user', JSON.stringify(userData));
-      
-      // Redirect will happen automatically due to useEffect
     } catch (err) {
       setError(err.response?.data?.message || 'Invalid verification code. Please try again.');
       setOtpError(true);
@@ -124,7 +112,6 @@ const RegisterPage = () => {
     }
   };
   
-  // Handle resend OTP
   const handleResendOTP = async () => {
     setResendLoading(true);
     setError('');
@@ -140,7 +127,6 @@ const RegisterPage = () => {
     }
   };
   
-  // Handle back to form
   const handleBackToForm = () => {
     setStep(1);
     setError('');
@@ -152,7 +138,6 @@ const RegisterPage = () => {
       <div className="container-custom">
         <div className="max-w-md mx-auto bg-white dark:bg-dark-card rounded-lg shadow-sm p-8">
           {step === 1 ? (
-            // Step 1: Registration Form
             <>
               <h1 className="text-2xl font-semibold mb-6 dark:text-white">Create Account</h1>
               
@@ -256,7 +241,6 @@ const RegisterPage = () => {
               </form>
             </>
           ) : (
-            // Step 2: OTP Verification
             <>
               <div className="text-center mb-6">
                 <h1 className="text-2xl font-semibold mb-2 dark:text-white">Verify Your Email</h1>

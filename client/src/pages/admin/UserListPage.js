@@ -17,7 +17,6 @@ const UserListPage = () => {
     status: '',
   });
   
-  // Fetch users with pagination and search
   const { data, isLoading, error } = useQuery(
     ['adminUsers', currentPage, searchKeyword, filters],
     () => getUsers(currentPage, searchKeyword, filters),
@@ -26,7 +25,6 @@ const UserListPage = () => {
     }
   );
   
-  // Update user mutation (for role and status changes)
   const updateUserMutation = useMutation(
     ({ id, userData }) => updateUser(id, userData),
     {
@@ -40,7 +38,6 @@ const UserListPage = () => {
     }
   );
   
-  // Get user details mutation
   const getUserDetailsMutation = useMutation(getUserById, {
     onSuccess: (userData) => {
       setSelectedUser(userData);
@@ -51,7 +48,6 @@ const UserListPage = () => {
     },
   });
 
-  // Delete user mutation
   const deleteUserMutation = useMutation(deleteUser, {
     onSuccess: () => {
       toast.success('User deleted successfully');
@@ -62,26 +58,24 @@ const UserListPage = () => {
     },
   });
   
-  // Handle page change
+
   const handlePageChange = (page) => {
     setCurrentPage(page);
     window.scrollTo(0, 0);
   };
   
-  // Handle search submit
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     setCurrentPage(1);
   };
   
-  // Handle filter change
+ 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
     setFilters({ ...filters, [name]: value });
     setCurrentPage(1);
   };
   
-  // Handle filter reset
   const handleFilterReset = () => {
     setSearchKeyword('');
     setFilters({
@@ -91,7 +85,6 @@ const UserListPage = () => {
     setCurrentPage(1);
   };
   
-  // Handle toggle user role
   const handleToggleRole = (userId, currentRole) => {
     const newRole = !currentRole;
     const action = newRole ? 'promote to admin' : 'demote to customer';
@@ -104,7 +97,6 @@ const UserListPage = () => {
     }
   };
   
-  // Handle toggle user status
   const handleToggleStatus = (userId, currentStatus) => {
     const newStatus = !currentStatus;
     const action = newStatus ? 'activate' : 'deactivate';
@@ -117,25 +109,23 @@ const UserListPage = () => {
     }
   };
   
-  // Handle view user details
   const handleViewUser = (userId) => {
     getUserDetailsMutation.mutate(userId);
   };
   
-  // Handle close modal
+
   const handleCloseModal = () => {
     setShowUserModal(false);
     setSelectedUser(null);
   };
   
-  // Handle delete user
+ 
   const handleDeleteUser = (id, userName) => {
     if (window.confirm(`Are you sure you want to delete user "${userName}"? This action cannot be undone.`)) {
       deleteUserMutation.mutate(id);
     }
   };
 
-  // Format date
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -144,7 +134,6 @@ const UserListPage = () => {
     });
   };
   
-  // Get user initials
   const getUserInitials = (user) => {
     if (user.firstName && user.lastName) {
       return (user.firstName[0] + user.lastName[0]).toUpperCase();
@@ -154,7 +143,6 @@ const UserListPage = () => {
     return 'U';
   };
 
-  // Get user display name
   const getUserDisplayName = (user) => {
     if (user.fullName) {
       return user.fullName;
@@ -164,7 +152,7 @@ const UserListPage = () => {
   
   return (
     <div className="p-4 sm:p-6 lg:p-8">
-      {/* Header */}
+  
       <div className="mb-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -181,10 +169,9 @@ const UserListPage = () => {
         </div>
       </div>
       
-      {/* Search & Filters */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-8">
         <div className="space-y-4">
-          {/* Search */}
+      
           <form onSubmit={handleSearchSubmit}>
             <div className="flex gap-4">
               <div className="flex-1">
@@ -205,7 +192,6 @@ const UserListPage = () => {
             </div>
           </form>
           
-          {/* Filters */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div>
               <label htmlFor="role" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -264,7 +250,7 @@ const UserListPage = () => {
         </Message>
       ) : (
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-          {/* Mobile view */}
+        
           <div className="block lg:hidden">
             <div className="divide-y divide-gray-200 dark:divide-gray-700">
               {data?.users?.map((user) => (
@@ -349,7 +335,6 @@ const UserListPage = () => {
             </div>
           </div>
 
-          {/* Desktop view */}
           <div className="hidden lg:block overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
               <thead className="bg-gray-50 dark:bg-gray-900">
@@ -496,7 +481,6 @@ const UserListPage = () => {
             </div>
           )}
           
-          {/* Pagination */}
           {data && data.pages > 1 && (
             <div className="bg-white dark:bg-gray-800 px-4 py-3 border-t border-gray-200 dark:border-gray-700 sm:px-6">
               <div className="flex items-center justify-between">
@@ -593,7 +577,6 @@ const UserListPage = () => {
         </div>
       )}
       
-      {/* User Details Modal */}
       {showUserModal && selectedUser && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50" onClick={handleCloseModal}>
           <div className="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-xl bg-white dark:bg-gray-800" onClick={(e) => e.stopPropagation()}>

@@ -9,7 +9,6 @@ const OrderHistoryPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
   
-  // Track screen size changes
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 640);
@@ -19,7 +18,6 @@ const OrderHistoryPage = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
   
-  // Fetch orders with pagination
   const { data, isLoading, error } = useQuery(
     ['myOrders', currentPage],
     () => getMyOrders(currentPage),
@@ -28,18 +26,15 @@ const OrderHistoryPage = () => {
     }
   );
   
-  // Handle page change
   const handlePageChange = (page) => {
     setCurrentPage(page);
     window.scrollTo(0, 0);
   };
   
-  // Format order ID for mobile display
   const formatOrderId = (id) => {
     return isMobile ? id.substring(0, 8) : id.substring(0, 12);
   };
   
-  // Get status color classes using your design system
   const getStatusClass = (status) => {
     switch (status) {
       case 'Delivered':
@@ -51,15 +46,12 @@ const OrderHistoryPage = () => {
     }
   };
 
-  // Get payment status classes
   const getPaymentStatusClass = (isPaid) => {
     return isPaid ? 'mobile-alert-success' : 'mobile-alert-error';
   };
 
-  // Mobile Order Card Component - Fully optimized
   const MobileOrderCard = ({ order }) => (
     <div className="mobile-order-card">
-      {/* Header with Order ID and Total */}
       <div className="mobile-order-header">
         <div className="flex-1 min-w-0">
           <div className="mobile-order-id">Order ID</div>
@@ -71,7 +63,6 @@ const OrderHistoryPage = () => {
         </div>
       </div>
       
-      {/* Meta information */}
       <div className="mobile-order-meta">
         <div className="mobile-order-date">
           {new Date(order.createdAt).toLocaleDateString('en-US', {
@@ -85,7 +76,6 @@ const OrderHistoryPage = () => {
         </span>
       </div>
       
-      {/* Actions and Payment Status */}
       <div className="mobile-order-actions">
         <span className={`mobile-payment-status ${getPaymentStatusClass(order.isPaid)}`}>
           {order.isPaid ? '✓ Paid' : '✗ Unpaid'}
@@ -100,7 +90,6 @@ const OrderHistoryPage = () => {
     </div>
   );
 
-  // Desktop Table Alternative - Mobile-friendly table cards
   const DesktopOrderCard = ({ order }) => (
     <div className="mobile-table-card">
       <div className="mobile-table-row">
@@ -152,7 +141,6 @@ const OrderHistoryPage = () => {
     </div>
   );
 
-  // Traditional Desktop Table (for large screens only)
   const DesktopTable = ({ orders }) => (
     <div className="hidden xl:block card overflow-hidden">
       <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -224,7 +212,6 @@ const OrderHistoryPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-dark-bg mobile-p-4 mobile-safe-area">
       <div className="container-custom">
-        {/* Header */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mobile-spacing mobile-gap">
           <h1 className="mobile-title font-bold text-gray-900 dark:text-white">
             My Orders
@@ -237,7 +224,6 @@ const OrderHistoryPage = () => {
           </Link>
         </div>
         
-        {/* Content */}
         {isLoading ? (
           <div className="flex justify-center items-center mobile-p-6">
             <Loader />
@@ -264,24 +250,21 @@ const OrderHistoryPage = () => {
           </div>
         ) : (
           <>
-            {/* Mobile View (xs to sm) */}
+    
             <div className="block sm:hidden space-y-3">
               {data?.orders.map((order) => (
                 <MobileOrderCard key={order._id} order={order} />
               ))}
             </div>
 
-            {/* Tablet View (sm to xl) - Card-based table */}
             <div className="hidden sm:block xl:hidden space-y-4">
               {data?.orders.map((order) => (
                 <DesktopOrderCard key={order._id} order={order} />
               ))}
             </div>
 
-            {/* Desktop View (xl+) - Traditional table */}
             <DesktopTable orders={data?.orders || []} />
             
-            {/* Pagination */}
             {data && data.pages > 1 && (
               <div className="mt-6 flex justify-center">
                 <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
@@ -300,7 +283,6 @@ const OrderHistoryPage = () => {
                     </svg>
                   </button>
                   
-                  {/* Page numbers - simplified for mobile */}
                   {isMobile ? (
                     <span className="relative inline-flex items-center mobile-p-4 border border-gray-300 bg-white dark:bg-dark-card dark:border-gray-600 mobile-text-sm font-medium text-gray-700 dark:text-gray-300">
                       {currentPage} of {data.pages}

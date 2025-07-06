@@ -19,7 +19,7 @@ const PlaceOrderPage = () => {
     paymentMethod, 
     itemsPrice, 
     shippingPrice, 
-    totalPrice, // taxPrice removed
+    totalPrice,
     discount, 
     promoCode, 
     resetCart 
@@ -29,18 +29,17 @@ const PlaceOrderPage = () => {
   // State
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [createdOrder, setCreatedOrder] = useState(null);
-  const [paymentOption, setPaymentOption] = useState('pay_now'); // 'pay_now' or 'pay_later'
+  const [paymentOption, setPaymentOption] = useState('pay_now');
 
-  // Create order mutation
   const createOrderMutation = useMutation(createOrder, {
     onSuccess: (data) => {
       setCreatedOrder(data);
       
       if (paymentOption === 'pay_now') {
-        // Show payment modal immediately
+ 
         setShowPaymentModal(true);
       } else {
-        // Navigate to order page for later payment
+      
         resetCart();
         navigate(`/order/${data._id}`);
       }
@@ -50,7 +49,6 @@ const PlaceOrderPage = () => {
     }
   });
 
-  // Redirect if cart is empty or missing required data
   useEffect(() => {
     if (cartItems.length === 0) {
       navigate('/cart');
@@ -61,7 +59,6 @@ const PlaceOrderPage = () => {
     }
   }, [cartItems, shippingAddress, paymentMethod, navigate]);
 
-  // Handle place order with immediate payment
   const handlePlaceAndPayOrder = () => {
     setPaymentOption('pay_now');
     createOrderMutation.mutate({
@@ -70,14 +67,13 @@ const PlaceOrderPage = () => {
       paymentMethod,
       itemsPrice,
       shippingPrice,
-      taxPrice: 0, // No VAT
+      taxPrice: 0, 
       totalPrice,
       discount,
       promoCode,
     });
   };
 
-  // Handle place order for later payment
   const handlePlaceOrderLater = () => {
     setPaymentOption('pay_later');
     createOrderMutation.mutate({
@@ -86,14 +82,13 @@ const PlaceOrderPage = () => {
       paymentMethod,
       itemsPrice,
       shippingPrice,
-      taxPrice: 0, // No VAT
+      taxPrice: 0, 
       totalPrice,
       discount,
       promoCode,
     });
   };
 
-  // Handle payment success
   const handlePaymentSuccess = (paymentData) => {
     resetCart();
     setShowPaymentModal(false);
@@ -102,10 +97,8 @@ const PlaceOrderPage = () => {
     });
   };
 
-  // Handle payment error
   const handlePaymentError = (error) => {
     setShowPaymentModal(false);
-    // Navigate to order page where user can retry payment
     navigate(`/order/${createdOrder._id}`, { 
       state: { paymentError: error.message } 
     });
@@ -114,7 +107,6 @@ const PlaceOrderPage = () => {
   return (
     <div className="bg-gray-50 dark:bg-dark-bg py-8">
       <div className="container-custom">
-        {/* Checkout Steps */}
         <div className="max-w-2xl mx-auto mb-8">
           <div className="flex justify-between">
             <div className="w-1/3 text-center">
@@ -145,7 +137,6 @@ const PlaceOrderPage = () => {
         </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Order Details */}
           <div className="lg:col-span-2">
             <div className="bg-white dark:bg-dark-card rounded-lg shadow-sm overflow-hidden mb-6">
               <div className="p-6 border-b border-gray-200 dark:border-gray-700">
@@ -209,7 +200,6 @@ const PlaceOrderPage = () => {
               </div>
             </div>
 
-            {/* Payment Options */}
             <div className="bg-white dark:bg-dark-card rounded-lg shadow-sm p-6">
               <h2 className="text-xl font-semibold mb-4 dark:text-white">Choose Payment Option</h2>
               
@@ -253,7 +243,6 @@ const PlaceOrderPage = () => {
             </div>
           </div>
           
-          {/* Order Summary */}
           <div>
             <div className="bg-white dark:bg-dark-card rounded-lg shadow-sm p-6 sticky top-4">
               <h2 className="text-xl font-semibold mb-6 dark:text-white">Order Summary</h2>
@@ -270,8 +259,6 @@ const PlaceOrderPage = () => {
                     {shippingPrice > 0 ? `₦${shippingPrice.toLocaleString()}` : 'Free'}
                   </span>
                 </div>
-                
-                {/* VAT line removed completely */}
                 
                 {discount > 0 && (
                   <div className="flex justify-between text-base">
@@ -294,7 +281,6 @@ const PlaceOrderPage = () => {
                 </Message>
               )}
               
-              {/* Action Buttons */}
               <div className="mt-6 space-y-3">
                 {paymentOption === 'pay_now' ? (
                   <button
@@ -336,7 +322,6 @@ const PlaceOrderPage = () => {
                   </button>
                 )}
                 
-                {/* Back to Payment Button */}
                 <button
                   type="button"
                   onClick={() => navigate('/payment')}
@@ -347,7 +332,6 @@ const PlaceOrderPage = () => {
                 </button>
               </div>
 
-              {/* Security Notice */}
               <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
                 <div className="flex items-start">
                   <svg className="w-4 h-4 text-blue-500 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -367,7 +351,6 @@ const PlaceOrderPage = () => {
           </div>
         </div>
 
-        {/* Payment Modal */}
         {showPaymentModal && createdOrder && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white dark:bg-dark-card rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">

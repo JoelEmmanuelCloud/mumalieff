@@ -20,21 +20,17 @@ const PaymentHandler = ({ order, onPaymentSuccess, onPaymentError }) => {
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
   
-  // State
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState('idle');
   const [error, setError] = useState(null);
   const [retryCount, setRetryCount] = useState(0);
   
-  // Verify payment mutation with enhanced error handling
   const verifyPaymentMutation = useMutation(
     ({ reference, orderId }) => {
-      console.log('Starting payment verification...', { reference, orderId });
       return verifyPaymentAndUpdateOrder(reference, orderId);
     },
     {
       onSuccess: (data) => {
-        console.log('Payment verification successful:', data);
         setPaymentStatus('success');
         setIsProcessing(false);
         toast.success('Payment verified successfully!');
@@ -42,7 +38,6 @@ const PaymentHandler = ({ order, onPaymentSuccess, onPaymentError }) => {
         if (onPaymentSuccess) {
           onPaymentSuccess(data);
         } else {
-          // Small delay to show success message
           setTimeout(() => {
             navigate(`/order/${order._id}`, { 
               state: { paymentSuccess: true } 
@@ -51,7 +46,6 @@ const PaymentHandler = ({ order, onPaymentSuccess, onPaymentError }) => {
         }
       },
       onError: (error) => {
-        console.error('Payment verification failed:', error);
         setPaymentStatus('failed');
         setIsProcessing(false);
         const errorInfo = handlePaymentError(error);
@@ -65,18 +59,15 @@ const PaymentHandler = ({ order, onPaymentSuccess, onPaymentError }) => {
     }
   );
   
-  // Retry payment mutation
   const retryPaymentMutation = useMutation(
     (orderId) => retryPayment(orderId),
     {
       onSuccess: (paymentData) => {
-        console.log('Payment retry successful:', paymentData);
         toast.success('Payment retry initiated');
         setRetryCount(prev => prev + 1);
         handlePaystackPayment(paymentData);
       },
       onError: (error) => {
-        console.error('Payment retry failed:', error);
         const errorInfo = handlePaymentError(error);
         toast.error(errorInfo.message);
         setError(errorInfo);
@@ -84,16 +75,12 @@ const PaymentHandler = ({ order, onPaymentSuccess, onPaymentError }) => {
     }
   );
   
-  // Check for payment reference in URL (redirect from Paystack)
   useEffect(() => {
     const reference = searchParams.get('reference') || searchParams.get('trxref');
     const status = searchParams.get('status');
     
-    console.log('URL params:', { reference, status });
-    
     if (reference && order?._id) {
       if (status === 'success' || status === 'successful') {
-        console.log('Payment success detected from URL, verifying...');
         setPaymentStatus('verifying');
         verifyPaymentMutation.mutate({ reference, orderId: order._id });
       } else if (status === 'cancelled' || status === 'failed') {
@@ -104,13 +91,11 @@ const PaymentHandler = ({ order, onPaymentSuccess, onPaymentError }) => {
         });
       }
       
-      // Clean up URL
       const newUrl = window.location.pathname;
       window.history.replaceState({}, '', newUrl);
     }
   }, [searchParams, order, verifyPaymentMutation]);
   
-  // FIXED: Enhanced Paystack payment handler
   const handlePaystackPayment = async (paymentData = null) => {
     if (!order) {
       toast.error('Order information is missing');
@@ -122,7 +107,6 @@ const PaymentHandler = ({ order, onPaymentSuccess, onPaymentError }) => {
       return;
     }
     
-    // Validate payment amount
     const validation = validatePaymentAmount(order.totalPrice);
     if (!validation.isValid) {
       toast.error(validation.error);
@@ -141,16 +125,10 @@ const PaymentHandler = ({ order, onPaymentSuccess, onPaymentError }) => {
         callbackUrl: `${window.location.origin}/order/${order._id}?payment=success`
       };
       
-      console.log('Processing payment with data:', paymentInfo);
-      
       const response = await processPaystackPayment(paymentInfo);
       
-      console.log('Paystack payment response:', response);
-      
-      // Payment was successful on Paystack side, now verify
       setPaymentStatus('verifying');
       
-      // Add a small delay to allow webhook processing
       setTimeout(() => {
         verifyPaymentMutation.mutate({ 
           reference: response.reference, 
@@ -159,7 +137,6 @@ const PaymentHandler = ({ order, onPaymentSuccess, onPaymentError }) => {
       }, 3000);
       
     } catch (error) {
-      console.error('Payment processing error:', error);
       setIsProcessing(false);
       setPaymentStatus('failed');
       const errorInfo = handlePaymentError(error);
@@ -172,7 +149,6 @@ const PaymentHandler = ({ order, onPaymentSuccess, onPaymentError }) => {
     }
   };
   
-  // Handle retry payment
   const handleRetryPayment = () => {
     if (!order?._id) return;
     
@@ -186,7 +162,6 @@ const PaymentHandler = ({ order, onPaymentSuccess, onPaymentError }) => {
     retryPaymentMutation.mutate(order._id);
   };
   
-  // Handle manual payment verification (for debugging)
   const handleManualVerification = () => {
     const reference = prompt('Enter payment reference to verify:');
     if (reference && order?._id) {
@@ -195,7 +170,6 @@ const PaymentHandler = ({ order, onPaymentSuccess, onPaymentError }) => {
     }
   };
   
-  // Render payment status
   const renderPaymentStatus = () => {
     switch (paymentStatus) {
       case 'processing':
@@ -350,7 +324,6 @@ const PaymentHandler = ({ order, onPaymentSuccess, onPaymentError }) => {
     }
   };
   
-  // Don't render if order is already paid
   if (order?.isPaid) {
     return (
       <div className="text-center py-8">
@@ -369,7 +342,6 @@ const PaymentHandler = ({ order, onPaymentSuccess, onPaymentError }) => {
     );
   }
   
-  // Don't render if order is cancelled
   if (order?.status === 'Cancelled') {
     return (
       <div className="text-center py-8">
@@ -396,7 +368,6 @@ const PaymentHandler = ({ order, onPaymentSuccess, onPaymentError }) => {
         </div>
       ) : (
         <div className="payment-section space-y-6">
-          {/* Payment Summary */}
           <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
             <h3 className="text-lg font-semibold mb-4 dark:text-white flex items-center">
               <svg className="w-5 h-5 mr-2 text-green-600" fill="currentColor" viewBox="0 0 20 20">
@@ -443,7 +414,6 @@ const PaymentHandler = ({ order, onPaymentSuccess, onPaymentError }) => {
             </div>
           </div>
           
-          {/* Payment Methods */}
           <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
             <h3 className="text-lg font-semibold mb-4 dark:text-white flex items-center">
               <svg className="w-5 h-5 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
@@ -471,7 +441,6 @@ const PaymentHandler = ({ order, onPaymentSuccess, onPaymentError }) => {
             </div>
           </div>
           
-          {/* Error Display */}
           {error && (
             <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
               <div className="flex">
@@ -497,7 +466,6 @@ const PaymentHandler = ({ order, onPaymentSuccess, onPaymentError }) => {
             </div>
           )}
           
-          {/* Pay Now Button */}
           <button
             onClick={() => handlePaystackPayment()}
             disabled={isProcessing || !order || !user}
@@ -523,7 +491,6 @@ const PaymentHandler = ({ order, onPaymentSuccess, onPaymentError }) => {
             )}
           </button>
           
-          {/* Security Notice */}
           <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
             <div className="flex">
               <div className="flex-shrink-0">
@@ -542,7 +509,6 @@ const PaymentHandler = ({ order, onPaymentSuccess, onPaymentError }) => {
             </div>
           </div>
           
-          {/* Support Link */}
           <div className="text-center">
             <p className="text-sm text-gray-500 dark:text-gray-400">
               Having trouble with payment?{' '}
