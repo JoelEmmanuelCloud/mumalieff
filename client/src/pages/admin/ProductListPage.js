@@ -226,7 +226,6 @@ const ProductListPage = () => {
         </Message>
       ) : (
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-          {/* Mobile View */}
           <div className="block lg:hidden">
             <div className="divide-y divide-gray-200 dark:divide-gray-700">
               {data?.products?.map((product) => (
@@ -290,27 +289,26 @@ const ProductListPage = () => {
             </div>
           </div>
 
-          {/* Desktop Table View - FIXED */}
           <div className="hidden lg:block overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
               <thead className="bg-gray-50 dark:bg-gray-900">
                 <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400 w-80">
                     Product
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400 w-48">
                     Category
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400 w-32">
                     Price
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400 w-32">
                     Stock
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400 w-32">
                     Status
                   </th>
-                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400 w-24">
                     Actions
                   </th>
                 </tr>
@@ -318,89 +316,84 @@ const ProductListPage = () => {
               <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
                 {data?.products?.map((product) => (
                   <tr key={product._id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                    {/* Product Column - Only show product info here */}
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 h-12 w-12">
+                    <td className="px-6 py-4">
+                      <div className="flex items-start space-x-4">
+                        <div className="flex-shrink-0">
                           <img
                             src={product.images[0]?.url || '/images/placeholder.jpg'}
                             alt={product.name}
                             className="h-12 w-12 rounded-lg object-cover"
                           />
                         </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900 dark:text-white mb-1">
-                            {product.name}
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <div className="text-sm text-gray-500 dark:text-gray-400">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start flex-col space-y-1">
+                            <div className="flex items-center space-x-2">
+                              <div className="text-sm font-medium text-gray-900 dark:text-white line-clamp-2">
+                                {product.name}
+                              </div>
+                              {product.featured && (
+                                <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-400 whitespace-nowrap">
+                                  Featured
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-xs text-gray-500 dark:text-gray-400">
                               ID: {product._id.substring(0, 8)}...
                             </div>
-                            {product.featured && (
-                              <span className="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-400">
-                                Featured
-                              </span>
-                            )}
                           </div>
                         </div>
                       </div>
                     </td>
-                    
-                    {/* Category Column - Separate column for category */}
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                      {product.category}
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-gray-900 dark:text-gray-300 break-words">
+                        {product.category}
+                      </div>
                     </td>
-                    
-                    {/* Price Column */}
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      {product.isSale ? (
-                        <div className="flex flex-col">
-                          <span className="text-red-600 dark:text-red-400 font-medium">₦{product.salePrice.toLocaleString()}</span>
-                          <span className="text-xs line-through text-gray-500">₦{product.price.toLocaleString()}</span>
-                          <span className="text-xs text-green-600 dark:text-green-400">
-                            {Math.round(((product.price - product.salePrice) / product.price) * 100)}% off
-                          </span>
-                        </div>
-                      ) : (
-                        <span className="font-medium">₦{product.price.toLocaleString()}</span>
-                      )}
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-gray-900 dark:text-white">
+                        {product.isSale ? (
+                          <div className="flex flex-col space-y-1">
+                            <span className="text-red-600 dark:text-red-400 font-medium">₦{product.salePrice.toLocaleString()}</span>
+                            <span className="text-xs line-through text-gray-500">₦{product.price.toLocaleString()}</span>
+                            <span className="text-xs text-green-600 dark:text-green-400">
+                              {Math.round(((product.price - product.salePrice) / product.price) * 100)}% off
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="font-medium">₦{product.price.toLocaleString()}</span>
+                        )}
+                      </div>
                     </td>
-                    
-                    {/* Stock Column */}
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-6 py-4">
                       <div className={getStockStatusClasses(product.countInStock)}>
                         {product.countInStock > 0 ? `${product.countInStock} in stock` : 'Out of stock'}
                       </div>
                     </td>
-                    
-                    {/* Status Column */}
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-6 py-4">
                       <div className="flex flex-col space-y-1">
                         {product.isSale && (
-                          <span className="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-400">
+                          <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-400 w-fit">
                             On Sale
                           </span>
                         )}
                         {product.allowCustomization && (
-                          <span className="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-400">
+                          <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-400 w-fit">
                             Customizable
                           </span>
                         )}
                       </div>
                     </td>
-                    
-                    {/* Actions Column */}
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end space-x-3">
                         <Link
                           to={`/admin/product/${product._id}/edit`}
-                          className="text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
+                          className="text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium"
                         >
                           Edit
                         </Link>
                         <button
                           onClick={() => handleDeleteProduct(product._id, product.name)}
-                          className="text-red-600 hover:text-red-500 dark:text-red-400 dark:hover:text-red-300"
+                          className="text-red-600 hover:text-red-500 dark:text-red-400 dark:hover:text-red-300 text-sm font-medium"
                           disabled={deleteProductMutation.isLoading}
                         >
                           {deleteProductMutation.isLoading ? 'Deleting...' : 'Delete'}
@@ -413,7 +406,6 @@ const ProductListPage = () => {
             </table>
           </div>
           
-          {/* Empty State */}
           {data?.products?.length === 0 && (
             <div className="text-center py-12">
               <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
@@ -443,7 +435,6 @@ const ProductListPage = () => {
             </div>
           )}
           
-          {/* Pagination */}
           {data && data.pages > 1 && (
             <div className="bg-white dark:bg-gray-800 px-4 py-3 border-t border-gray-200 dark:border-gray-700 sm:px-6">
               <div className="flex items-center justify-between">
