@@ -226,6 +226,7 @@ const ProductListPage = () => {
         </Message>
       ) : (
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+          {/* Mobile View */}
           <div className="block lg:hidden">
             <div className="divide-y divide-gray-200 dark:divide-gray-700">
               {data?.products?.map((product) => (
@@ -289,6 +290,7 @@ const ProductListPage = () => {
             </div>
           </div>
 
+          {/* Desktop Table View - FIXED */}
           <div className="hidden lg:block overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
               <thead className="bg-gray-50 dark:bg-gray-900">
@@ -316,6 +318,7 @@ const ProductListPage = () => {
               <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
                 {data?.products?.map((product) => (
                   <tr key={product._id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                    {/* Product Column - Only show product info here */}
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-12 w-12">
@@ -326,25 +329,29 @@ const ProductListPage = () => {
                           />
                         </div>
                         <div className="ml-4">
-                          <div className="flex items-center">
-                            <div className="text-sm font-medium text-gray-900 dark:text-white">
-                              {product.name}
+                          <div className="text-sm font-medium text-gray-900 dark:text-white mb-1">
+                            {product.name}
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <div className="text-sm text-gray-500 dark:text-gray-400">
+                              ID: {product._id.substring(0, 8)}...
                             </div>
                             {product.featured && (
-                              <span className="ml-2 px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-400">
+                              <span className="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-400">
                                 Featured
                               </span>
                             )}
                           </div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">
-                            ID: {product._id.substring(0, 8)}...
-                          </div>
                         </div>
                       </div>
                     </td>
+                    
+                    {/* Category Column - Separate column for category */}
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                       {product.category}
                     </td>
+                    
+                    {/* Price Column */}
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                       {product.isSale ? (
                         <div className="flex flex-col">
@@ -358,11 +365,15 @@ const ProductListPage = () => {
                         <span className="font-medium">₦{product.price.toLocaleString()}</span>
                       )}
                     </td>
+                    
+                    {/* Stock Column */}
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className={getStockStatusClasses(product.countInStock)}>
                         {product.countInStock > 0 ? `${product.countInStock} in stock` : 'Out of stock'}
                       </div>
                     </td>
+                    
+                    {/* Status Column */}
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex flex-col space-y-1">
                         {product.isSale && (
@@ -377,6 +388,8 @@ const ProductListPage = () => {
                         )}
                       </div>
                     </td>
+                    
+                    {/* Actions Column */}
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex items-center justify-end space-x-3">
                         <Link
@@ -400,6 +413,7 @@ const ProductListPage = () => {
             </table>
           </div>
           
+          {/* Empty State */}
           {data?.products?.length === 0 && (
             <div className="text-center py-12">
               <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
@@ -429,6 +443,7 @@ const ProductListPage = () => {
             </div>
           )}
           
+          {/* Pagination */}
           {data && data.pages > 1 && (
             <div className="bg-white dark:bg-gray-800 px-4 py-3 border-t border-gray-200 dark:border-gray-700 sm:px-6">
               <div className="flex items-center justify-between">
