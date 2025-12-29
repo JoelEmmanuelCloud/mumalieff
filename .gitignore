@@ -6,8 +6,13 @@ node_modules
 # testing
 /coverage
 
+# next.js
+/.next/
+/out/
+
 # production
 /client/build
+/build
 
 # misc
 .DS_Store
@@ -43,3 +48,12 @@ pids
 # Logs
 logs
 *.log
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# old directories (for backup during migration)
+# Uncomment after successful migration:
+# /client
+# /server
