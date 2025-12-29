@@ -11,7 +11,6 @@ node_modules
 /out/
 
 # production
-/client/build
 /build
 
 # misc
@@ -52,8 +51,3 @@ logs
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-
-# old directories (for backup during migration)
-# Uncomment after successful migration:
-# /client
-# /server
